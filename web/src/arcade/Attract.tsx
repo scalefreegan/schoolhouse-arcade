@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { AVATARS } from "../../shared/avatars.ts";
+import { CHARACTERS } from "../../shared/avatars.ts";
 import { go } from "../router.ts";
 import { sfx } from "../sound.ts";
 import { AvatarSprite } from "../sprites/Sprite.tsx";
@@ -42,11 +42,11 @@ export function Attract() {
       </h1>
 
       <div className="mt-14 w-full max-w-2xl">
-        {/* The cast shrinks to fit a phone rather than push the screen wider. */}
-        <div className="flex items-end justify-between gap-1 px-4">
-          {AVATARS.map((a, i) => (
-            <span key={a.id} className="hop min-w-0" style={{ animationDelay: `${(i % 4) * 0.15}s` }}>
-              <AvatarSprite avatar={a.id} size={56} className="h-auto max-w-full" />
+        {/* The whole cast, in their own colours: one line, or two on a phone. */}
+        <div className="grid grid-cols-6 items-end justify-items-center gap-x-1 gap-y-3 px-4 sm:grid-cols-12">
+          {CHARACTERS.map((c, i) => (
+            <span key={c.id} className="hop min-w-0" style={{ animationDelay: `${(i % 4) * 0.15}s` }}>
+              <AvatarSprite avatar={c.id} colour={null} size={48} className="h-auto max-w-full" />
             </span>
           ))}
         </div>

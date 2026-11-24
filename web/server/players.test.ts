@@ -28,7 +28,7 @@ test("a new player joins and is on the picker, oldest first", async (t) => {
   assert.deepEqual((await request<PlayersReply>(players, "GET", "/", undefined, APP)).body, { players: [] });
   const made = await request<Player>(players, "POST", "/", { name: "  Em ", avatar: "rex" }, APP);
   assert.equal(made.status, 201);
-  assert.deepEqual([made.body.name, made.body.avatar], ["Em", "rex"]);
+  assert.deepEqual([made.body.name, made.body.avatar, made.body.colour], ["Em", "rex", null]);
   await request(players, "POST", "/", { name: "Dad", avatar: "bolt" }, APP);
   const list = (await request<PlayersReply>(players, "GET", "/", undefined, APP)).body.players;
   assert.deepEqual(list.map((p) => p.name), ["Em", "Dad"]);
@@ -36,7 +36,7 @@ test("a new player joins and is on the picker, oldest first", async (t) => {
 
 test("a player with no name, a long name or an unknown character is refused, and nothing is stored", async (t) => {
   const { query } = await withDb(t);
-  for (const body of [{ avatar: "rex" }, { name: "   ", avatar: "rex" }, { name: "x".repeat(11), avatar: "rex" }, { name: "Em" }, { name: "Em", avatar: "dragon" }, { name: 7, avatar: "rex" }]) {
+  for (const body of [{ avatar: "rex" }, { name: "   ", avatar: "rex" }, { name: "x".repeat(11), avatar: "rex" }, { name: "Em" }, { name: "Em", avatar: "smaug" }, { name: 7, avatar: "rex" }, { name: "Em", avatar: "rex", colour: "silver" }, { name: "Em", avatar: "rex", colour: 7 }, { name: "Em", avatar: "nova", colour: "pink" }]) {
     const sent = await request<ErrorReply>(players, "POST", "/", body, APP);
     assert.equal(sent.status, 400, JSON.stringify(body));
     assert.ok(sent.body.error);
@@ -51,7 +51,43 @@ test("a player can change name or character; the other is kept", async (t) => {
   assert.deepEqual([renamed.status, renamed.body.name, renamed.body.avatar], [200, "Emmy", "rex"]);
   const redrawn = await request<Player>(players, "PATCH", `/${em.id}`, { avatar: "fuzz" }, APP);
   assert.deepEqual([redrawn.body.name, redrawn.body.avatar], ["Emmy", "fuzz"]);
-  assert.equal((await request(players, "PATCH", `/${em.id}`, { avatar: "dragon" }, APP)).status, 400);
+  assert.equal((await request(players, "PATCH", `/${em.id}`, { avatar: "smaug" }, APP)).status, 400);
+});
+
+test("a character comes in a colour: stored, listed, and checked against that character", async (t) => {
+  const { query } = await withDb(t);
+  const made = await request<Player>(players, "POST", "/", { name: "Em", avatar: "toast", colour: "teal" }, APP);
+  assert.deepEqual([made.status, made.body.avatar, made.body.colour], [201, "toast", "teal"]);
+  assert.deepEqual((await request<PlayersReply>(players, "GET", "/", undefined, APP)).body.players.map((p) => [p.avatar, p.colour]), [["toast", "teal"]]);
+  // Silver is a robot's colour, not a dragon's: refused, and nothing changes.
+  const wrong = await request<ErrorReply>(players, "PATCH", `/${made.body.id}`, { avatar: "toast", colour: "silver" }, APP);
+  assert.equal(wrong.status, 400);
+  assert.match(wrong.body.error, /colour/);
+  // A colour on its own is refused: it belongs to a character.
+  assert.equal((await request(players, "PATCH", `/${made.body.id}`, { colour: "red" }, APP)).status, 400);
+  assert.deepEqual(await query("select avatar, colour from players"), [{ avatar: "toast", colour: "teal" }]);
+  const recoloured = await request<Player>(players, "PATCH", `/${made.body.id}`, { avatar: "mitts", colour: "grey" }, APP);
+  assert.deepEqual([recoloured.status, recoloured.body.avatar, recoloured.body.colour], [200, "mitts", "grey"]);
+  // A rename keeps the colour; a new character without one is that character's own look.
+  assert.equal((await request<Player>(players, "PATCH", `/${made.body.id}`, { name: "Emmy" }, APP)).body.colour, "grey");
+  assert.equal((await request<Player>(players, "PATCH", `/${made.body.id}`, { avatar: "crumb" }, APP)).body.colour, null);
+  assert.deepEqual(await query("select avatar, colour from players"), [{ avatar: "crumb", colour: null }]);
+});
+
+test("a player with an id from before colours keeps it through a rename, and can become any character", async (t) => {
+  const { query } = await withDb(t);
+  const [{ id }] = await query("insert into players (name, avatar) values ('Old', 'gizmo') returning id");
+  assert.deepEqual((await request<PlayersReply>(players, "GET", "/", undefined, APP)).body.players.map((p) => [p.avatar, p.colour]), [["gizmo", null]]);
+  assert.equal((await request<Player>(players, "PATCH", `/${id}`, { name: "Older" }, APP)).body.avatar, "gizmo");
+  // A tablet still showing the page from before colours sends the old id on every save, and may join with one.
+  for (const old of ["nova", "dash", "gizmo", "blip"]) {
+    const kept = await request<Player>(players, "PATCH", `/${id}`, { name: "Older", avatar: old }, APP);
+    assert.deepEqual([kept.status, kept.body.avatar, kept.body.colour], [200, old, null], old);
+  }
+  const joined = await request<Player>(players, "POST", "/", { name: "Late", avatar: "nova" }, APP);
+  assert.deepEqual([joined.status, joined.body.avatar, joined.body.colour], [201, "nova", null]);
+  const moved = await request<Player>(players, "PATCH", `/${id}`, { avatar: "bolt", colour: "gold" }, APP);
+  assert.deepEqual([moved.status, moved.body.avatar, moved.body.colour], [200, "bolt", "gold"]);
 });
 
 test("an unknown, malformed or retired player id is a 404, not a crash", async (t) => {

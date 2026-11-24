@@ -30,7 +30,7 @@ async function arcade(t: { after: (fn: () => unknown) => void }) {
     setDb(null);
     await fresh.close();
   });
-  const join = async (name: string) => (await request<Player>(players, "POST", "/", { name, avatar: "rex" }, APP)).body.id;
+  const join = async (name: string, look: { avatar: string; colour?: string } = { avatar: "rex" }) => (await request<Player>(players, "POST", "/", { name, ...look }, APP)).body.id;
   const play = async (playerId: string, config: { level?: string; mode?: string; skill?: string }, answers: AnswerInput[]) => {
     const roundId = randomUUID();
     return request<PlayReply & ErrorReply>(plays, "POST", "/", { playerId, gameId: "comet-cards", roundId, clock: await playedClock(playerId, roundId, answers), level: "add-5", mode: "blitz", skill: "arcade", ...config, answers }, APP);
@@ -109,7 +109,7 @@ test("a retired player cannot play", async (t) => {
 test("the Blitz table ranks by score, high first; a tie goes to whoever got there first; each set-up has its own table", async (t) => {
   const { join, play } = await arcade(t);
   const em = await join("Em");
-  const dad = await join("Dad");
+  const dad = await join("Dad", { avatar: "toast", colour: "teal" });
   const a = await play(em, {}, many(3, () => right("1+1")));
   assert.deepEqual([a.body.rank, a.body.personalBest], [1, false], "a first play is not a 'new best'");
   const b = await play(dad, {}, many(5, () => right("1+1")));
@@ -119,6 +119,8 @@ test("the Blitz table ranks by score, high first; a tie goes to whoever got ther
   const d = await play(em, {}, many(8, () => right("1+1")));
   assert.deepEqual([d.body.rank, d.body.personalBest], [1, true]);
   assert.deepEqual(d.body.board.rows.map((r) => [r.name, r.right]), [["Em", 8], ["Dad", 5], ["Em", 3], ["Em", 3]]);
+  // A line of the table draws each player as they look: character and colour.
+  assert.deepEqual(d.body.board.rows.slice(0, 2).map((r) => [r.avatar, r.colour]), [["rex", null], ["toast", "teal"]]);
   assert.equal(d.body.board.kind, "score");
   const other = await request<BoardReply>(plays, "GET", "/board?game=comet-cards&level=add-5&mode=blitz&skill=easy", undefined, APP);
   assert.deepEqual(other.body, { kind: "score", rows: [] });

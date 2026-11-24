@@ -12,7 +12,7 @@ game, the schema or the artwork.
 ## Layout
 ```
 web/shared/games.ts      the cabinets on the floor (id, title, status)
-web/shared/avatars.ts    the characters a player can be, and what a legal name is
+web/shared/avatars.ts    the characters a player can be, their colours, the old ids, and what a legal name is
 web/shared/wire.ts       request and reply types shared by server and client
 web/shared/play.ts       what every game shares: a play, GameRules, Settled, openLevels()
 web/shared/roundid.ts    newRoundId(): the id a round keeps through every try at saving it
@@ -110,8 +110,8 @@ macos/                   the Dock app (build-app.sh, the launcher, the server he
 - The real database holds tickets a child has earned. Tests never touch a
   Postgres server: `freshDb()`. A worktree never uses the real database
   (`scripts/db/config.mjs` refuses to start without a `DATABASE_URL`).
-- Never change a game id, a level id, a badge id or an avatar id once live:
-  rows are keyed on them.
+- Never change a game id, a level id, a badge id, an avatar id or a colour
+  id once live: rows are keyed on them.
 - Each table is read and written by one module under `scripts/db/`, whose
   functions take the player id.
 - Files under `web/shared/` and `scripts/db/*.ts` are run directly by Node

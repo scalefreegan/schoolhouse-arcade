@@ -20,6 +20,7 @@ export interface BoardRow {
   playerId: string;
   name: string;
   avatar: string;
+  colour: string | null;
   score: number;
   timeMs: number;
   right: number;
@@ -110,7 +111,7 @@ const boardOrder = (kind: BoardKind) => (kind === "score" ? [desc(plays.score), 
  *  real cabinet; a retired player keeps theirs. */
 export async function board(db: Db, key: BoardKey, kind: BoardKind, limit = 10): Promise<BoardRow[]> {
   return db
-    .select({ playId: plays.id, playerId: plays.playerId, name: players.name, avatar: players.avatar, score: plays.score, timeMs: plays.timeMs, right: plays.rightCount, at: plays.createdAt })
+    .select({ playId: plays.id, playerId: plays.playerId, name: players.name, avatar: players.avatar, colour: players.colour, score: plays.score, timeMs: plays.timeMs, right: plays.rightCount, at: plays.createdAt })
     .from(plays)
     .innerJoin(players, eq(players.id, plays.playerId))
     .where(onBoard(key))

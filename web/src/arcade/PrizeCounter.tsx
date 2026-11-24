@@ -131,7 +131,7 @@ export function PrizeCounter() {
       void load();
       return null;
     } catch (e) {
-      if (e instanceof ApiError && e.code === "pin_unset") return "Ask a grown-up.";
+      if (e instanceof ApiError && e.code === "pin_unset") return "No PIN yet. A grown-up chooses it on the Mac.";
       return e instanceof ApiError ? e.message : String(e);
     }
   };

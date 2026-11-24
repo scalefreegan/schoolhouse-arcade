@@ -45,12 +45,14 @@ const loopbackName = (name: string): boolean => name === "localhost" || name ===
  * network address, or a Bonjour name (my-mac.local). The same-origin check
  * compares Origin with Host, and a page on another site that resolves its
  * own name to a private address (DNS rebinding) sends a matching pair; its
- * Host is still none of these.
+ * Host is still none of these. `also`: the exact names a grown-up has
+ * added (tailnet.ts: the Mac's name on its Tailscale network), lower-case.
  */
-export function homeHost(host: string | undefined): boolean {
+export function homeHost(host: string | undefined, also: readonly string[] = []): boolean {
   if (!host) return false;
   const name = hostName(host);
   if (loopbackName(name) || privateIpv4(name)) return true;
+  if (also.includes(name)) return true;
   return /^[a-z0-9]([a-z0-9-]*[a-z0-9])?\.local$/.test(name);
 }
 

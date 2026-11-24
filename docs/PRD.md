@@ -217,7 +217,8 @@ out; it is not a safe. A forgotten PIN is reset at the Mac:
 
 - **Served to the home network on purpose**, unlike the sibling apps. Every
   route goes through `wrap()`: the Host must be this machine, a private
-  address or a `.local` name; the Origin must match it; and the request must
+  address, a `.local` name or the one Tailscale name a grown-up set
+  (`ARCADE_TAILNET_HOST`); the Origin must match it; and the request must
   come from the app. `ARCADE_LOCAL_ONLY=1` binds to this machine only.
 - **No personal data beyond a first name and a character.** No accounts, no
   email, nothing leaves the Mac. Nothing personal is committed to the repo.

@@ -15,7 +15,11 @@ web/shared/games.ts      the cabinets on the floor (id, title, status)
 web/shared/avatars.ts    the characters a player can be, and what a legal name is
 web/shared/wire.ts       request and reply types shared by server and client
 web/shared/play.ts       what every game shares: a play, GameRules, Settled, openLevels()
+web/shared/roundid.ts    newRoundId(): the id a round keeps through every try at saving it
 web/shared/rules.ts      each live game's rules, by game id (the server scores with these)
+web/shared/tickets.ts    what a play pays: the arcade's bonuses, the reasons on a ledger row
+web/shared/badges.ts     every badge and the pure test for whether it is earned
+web/shared/prizes.ts     what a prize may be (pictures, limits), what a PIN is
 web/shared/comet/facts.ts    Comet Cards: a fact ("7+5"), the five levels and what each holds
 web/shared/comet/rules.ts    modes, scoring, stars, and settle(): a play scored from its answers
 web/shared/comet/deck.ts     which card comes next (weighted by the player's misses), Easy's four choices
@@ -26,10 +30,14 @@ web/server/http.ts       JSON bodies and replies, HttpError
 web/server/db.ts         the pg pool, the boot check, setDb() for tests
 web/server/players.ts    /api/players
 web/server/plays.ts      /api/plays: post a round, a high score table, a player's progress
+web/server/counter.ts    /api/counter: the Prize Counter as a player sees it (read-only)
+web/server/grownup.ts    /api/grownup: everything behind the PIN
+web/server/pin.ts        the PIN: its hash, the check, the lock after wrong tries
 web/server/testhttp.ts   call a route handler without a socket (tests)
 web/src/App.tsx          the routes: title, players, the floor, a game
 web/src/state.tsx        ArcadeProvider: the players, who is playing, the sound switch
-web/src/arcade/          the shell: Attract (title), Players, Lobby (the floor), Hud
+web/src/arcade/          the shell: Attract (title), Players, Lobby (the floor), Hud,
+                         PrizeCounter, Grownups, PinPad, TicketsWon
 web/src/games/index.ts   each live cabinet's screen, by game id
 web/src/games/comet/     Comet Cards: CometCards (the cabinet), Setup, Round, Results, Scores
 web/src/sprites/art.ts   every drawing, as rows of characters and palettes
@@ -39,6 +47,10 @@ web/src/index.css        the tokens and the pixel-box classes (.panel, .btn, .pi
 scripts/db/schema.ts     the whole schema (Drizzle)
 scripts/db/players.ts    the only code that touches the players table
 scripts/db/plays.ts      plays, answers and stars: record a play, a board, a rank, bests
+scripts/db/tickets.ts    the ticket ledger: a balance, add rows (never change one)
+scripts/db/badges.ts     badges earned
+scripts/db/prizes.ts     the shelf and hand-overs; handOverPrize() spends tickets
+scripts/db/settings.ts   the arcade's own settings (the PIN's hash)
 scripts/db/migrations/   the SQL that reaches a database (generated, committed)
 scripts/tests/testdb.mjs freshDb(): an in-process PGlite with the real migrations
 ```
@@ -66,7 +78,21 @@ scripts/tests/testdb.mjs freshDb(): an in-process PGlite with the real migration
   card's answer is shown and while the pause box is open.
 - **What costs real money is behind the grown-up PIN**, checked on the
   server on every such request: handing over a prize, editing prizes,
-  changing tickets by hand.
+  changing tickets by hand, opening a level, retiring a player. All of it
+  is under `/api/grownup`, whose handler calls `requirePin()` before
+  anything but the two PIN routes; a test calls every route without the
+  PIN. The browser never stores the PIN. The first PIN is taken only at this
+  Mac (`atThisMac()` in `web/server/origin.ts`: Host and socket address both
+  loopback) and never replaces one that exists.
+- **Tickets are a ledger** (`ticket_events`): rows are added, never updated
+  or deleted. Whatever reads a balance and then pays or spends against it
+  does so in one transaction that takes `lockPlayer()` first.
+- **A play is settled all or nothing** (`settlePlay()` in
+  `web/server/plays.ts`): the play, its stars, its badges and its tickets.
+  A game supplies only `pay()`; bonuses and badges are the arcade's. And
+  once: a game makes one round id per round and sends it on every retry; a
+  round id the player has already sent gets the stored play back and writes
+  nothing. `recordPlay()` comes after `playOfRound()`, under the lock.
 - The real database holds tickets a child has earned. Tests never touch a
   Postgres server: `freshDb()`. A worktree never uses the real database
   (`scripts/db/config.mjs` refuses to start without a `DATABASE_URL`).
@@ -98,6 +124,7 @@ npm run dev                 # http://localhost:38900, and the Mac's address on t
 npm test                    # node --test: shared rules, routes, database (PGlite)
 npm run typecheck && npm run lint
 npm run db:generate -- --name <what_changed>   # after editing scripts/db/schema.ts; commit the SQL
+npm run pin:reset           # forget the grown-up PIN
 ```
 `ARCADE_LOCAL_ONLY=1 npm run dev` keeps the server to this machine.
 

@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { randomUUID } from "node:crypto";
 import { test } from "node:test";
 import { answerOf, parseFact } from "../shared/comet/facts.ts";
 import type { AnswerInput } from "../shared/play.ts";
@@ -30,7 +31,7 @@ async function arcade(t: { after: (fn: () => unknown) => void }) {
   });
   const join = async (name: string) => (await request<Player>(players, "POST", "/", { name, avatar: "rex" }, APP)).body.id;
   const play = (playerId: string, config: { level?: string; mode?: string; skill?: string }, answers: AnswerInput[]) =>
-    request<PlayReply & ErrorReply>(plays, "POST", "/", { playerId, gameId: "comet-cards", level: "add-5", mode: "blitz", skill: "arcade", ...config, answers }, APP);
+    request<PlayReply & ErrorReply>(plays, "POST", "/", { playerId, gameId: "comet-cards", roundId: randomUUID(), level: "add-5", mode: "blitz", skill: "arcade", ...config, answers }, APP);
   const progress = async (playerId: string) => (await request<ProgressReply>(plays, "GET", `/progress?player=${playerId}&game=comet-cards`, undefined, APP)).body;
   return { ...fresh, join, play, progress };
 }
@@ -51,7 +52,7 @@ test("the server scores a play from its answers and stores every one", async (t)
 test("a score the browser sends is ignored", async (t) => {
   const { join, query } = await arcade(t);
   const em = await join("Em");
-  const sent = await request<PlayReply>(plays, "POST", "/", { playerId: em, gameId: "comet-cards", level: "add-5", mode: "blitz", skill: "arcade", score: 999999, stars: 3, answers: [right("1+1")] }, APP);
+  const sent = await request<PlayReply>(plays, "POST", "/", { playerId: em, gameId: "comet-cards", roundId: randomUUID(), level: "add-5", mode: "blitz", skill: "arcade", score: 999999, stars: 3, answers: [right("1+1")] }, APP);
   assert.equal(sent.body.score, 100);
   assert.deepEqual(await query("select score, stars from plays"), [{ score: 100, stars: 0 }]);
 });
@@ -89,8 +90,8 @@ test("a play the rules refuse is a 400 with the rule's sentence; an unknown game
   assert.equal((await play(em, { mode: "zen" }, [])).status, 400);
   assert.equal((await play("00000000-0000-4000-8000-000000000000", {}, [])).status, 404);
   assert.equal((await play("nope", {}, [])).status, 404);
-  assert.equal((await request(plays, "POST", "/", { playerId: em, gameId: "pinball", level: "add-5", mode: "blitz", skill: "easy", answers: [] }, APP)).status, 404);
-  assert.equal((await request(plays, "POST", "/", { playerId: em, gameId: "constructor", level: "add-5", mode: "blitz", skill: "easy", answers: [] }, APP)).status, 404);
+  assert.equal((await request(plays, "POST", "/", { playerId: em, gameId: "pinball", roundId: randomUUID(), level: "add-5", mode: "blitz", skill: "easy", answers: [] }, APP)).status, 404);
+  assert.equal((await request(plays, "POST", "/", { playerId: em, gameId: "constructor", roundId: randomUUID(), level: "add-5", mode: "blitz", skill: "easy", answers: [] }, APP)).status, 404);
   assert.equal((await query("select count(*)::int as n from plays"))[0].n, 0);
 });
 

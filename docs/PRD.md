@@ -134,26 +134,63 @@ below 0, never repeated, in random order.
 ## Tickets, badges, prizes
 
 **Tickets per play.** One per right answer on Easy, two on Arcade. Practice
-pays a flat 5 for finishing. A new personal best adds 10; a new star adds 20.
-A badge pays its own bonus once.
+pays a flat 5 for finishing. Beating your own best with a set-up adds 10;
+each new star adds 20. A badge pays its own bonus once. Every line is
+written to a ledger (`ticket_events`); a balance is the sum of its rows,
+and rows are only ever added. A round pays once: sending it again after a
+lost reply shows what it paid the first time.
 
-**Badges** are earned once per player and never taken away. The starting
-set: first game, each level's first star, combos of 10 and 25, 100 and 1000
-right answers, a Sprint with no misses, two stars on every level
-(*Arcade Ace*), three stars on every level (*Comet Champion*).
+**Badges** are earned once per player and never taken away
+(`web/shared/badges.ts`). Whether one is earned is asked after every play,
+from everything the player has done, so a badge added later reaches whoever
+already deserves it the next time they play.
 
-**Prizes** are a list the grown-up edits: a name, a picture, a ticket price,
-and optionally a badge that must be held. The arcade starts with three
-examples to edit or delete: a candy (100 tickets), an ice cream (300), and a
-new video game (2500 tickets and the Arcade Ace badge).
+| Badge | For | Pays |
+|---|---|---|
+| First Game | finishing a game | 10 |
+| *Level* Star (five of them) | a first star on that level | 25 each |
+| Hot Streak | 10 right in a row | 20 |
+| Unstoppable | 25 right in a row | 50 |
+| 100 Club | 100 right answers | 30 |
+| 1000 Club | 1000 right answers | 150 |
+| Clean Sweep | a Sprint with no misses | 40 |
+| Arcade Ace | two stars on every level | 200 |
+| Comet Champion | three stars on every level | 500 |
 
-**Handing over a prize** needs the grown-up PIN at the counter. Tickets are
-taken at that moment, and the hand-over is written down. There is no
-"pending" state: a prize is either still on the shelf or handed over.
+**Prizes** are a list the grown-up edits: a name, one of eight pictures, a
+ticket price, and optionally a badge that must be held. The arcade starts
+with three examples to edit or delete: a candy (100 tickets), an ice cream
+(300), and a new video game (2500 tickets and the Arcade Ace badge).
 
-**The grown-up area** (PIN, four digits, set on first use and stored only as
-a hash) also covers: adding or removing tickets by hand with a note, opening
-a level early, and retiring a player.
+For scale: a good Easy Blitz is about 20 tickets and a good Arcade one about
+50, so a candy is a handful of rounds and an ice cream a week of short
+sessions. The prices are the grown-up's to change.
+
+**The Prize Counter** (`#/prizes`) shows a player their tickets, the shelf
+with a bar filling towards each prize, every badge (unlit until earned,
+with how to earn it) and the prizes they have won.
+
+**Handing over a prize** needs the grown-up PIN at the counter, typed at
+that moment. Tickets are taken then, and the hand-over is written down with
+the name and price of the day. There is no "pending" state: a prize is
+either still on the shelf or handed over. A prize can be won more than
+once.
+
+**The grown-up area** (`#/grownups`) is behind the same PIN and also covers:
+editing the shelf, adding or taking away tickets by hand with a note (a
+balance never goes below nothing), opening a level early, and retiring a
+player.
+
+**The PIN** is four digits, chosen on first use and stored only as a salted
+scrypt hash. The first one is chosen only on the Mac itself, in its own
+browser at `http://localhost:38900`: until there is a PIN, the tablet says
+so and offers no pad, or whoever opened *Grown-ups* first would choose it.
+Once there is one it is changed from any device, with the old PIN. It is
+sent with every request that needs it and checked by the server every time;
+the browser keeps it only while the grown-up screen is open. Five wrong
+tries in a row lock every PIN request for a minute. It keeps a six-year-old
+out; it is not a safe. A forgotten PIN is reset at the Mac:
+`npm run pin:reset`.
 
 ## Adding a cabinet
 

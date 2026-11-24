@@ -5,7 +5,9 @@ import type { AnswerInput, PlayConfig } from "../../../shared/play.ts";
 import type { PlayReply } from "../../../shared/wire.ts";
 import { Hud } from "../../arcade/Hud.tsx";
 import { Stars } from "../../arcade/Stars.tsx";
+import { TicketsWon } from "../../arcade/TicketsWon.tsx";
 import { sfx } from "../../sound.ts";
+import { useArcade } from "../../state.tsx";
 import { fmtScore, fmtStopwatch } from "./format.ts";
 import { ScoreTable } from "./Scores.tsx";
 
@@ -21,19 +23,23 @@ function missedCards(answers: AnswerInput[]): string[] {
 
 /**
  * After a round, in the server's numbers: the score or time, what was right
- * and missed, any star or level it won, and where it landed on the table.
+ * and missed, any star or level it won, the tickets and badges it paid, and
+ * where it landed on the table.
  */
 export function Results({ config, reply, answers, onAgain, onSetup, onExit }: { config: PlayConfig; reply: PlayReply; answers: AnswerInput[]; onAgain: () => void; onSetup: () => void; onExit: () => void }) {
   const mode = MODES.find((m) => m.id === config.mode)!;
   const level = levelById(config.level)!;
   const newStar = reply.starsAfter > reply.starsBefore;
   const opened = reply.opened ? levelById(reply.opened) : null;
-  const cheer = newStar || reply.personalBest || reply.rank === 1;
+  const cheer = newStar || reply.personalBest || reply.rank === 1 || reply.badges.length > 0;
+  const { setTickets } = useArcade();
   const missed = missedCards(answers);
 
   useEffect(() => {
     if (cheer) sfx.fanfare();
   }, [cheer]);
+  // The strip along the top shows the tickets as they now stand.
+  useEffect(() => setTickets(reply.tickets.balance), [setTickets, reply.tickets.balance]);
 
   return (
     <main className="screen">
@@ -91,6 +97,8 @@ export function Results({ config, reply, answers, onAgain, onSetup, onExit }: { 
               </p>
             )}
           </div>
+
+          <TicketsWon tickets={reply.tickets} badges={reply.badges} />
 
           {missed.length > 0 && (
             <div className="panel mx-auto mt-5 max-w-md">

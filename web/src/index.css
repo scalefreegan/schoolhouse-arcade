@@ -140,13 +140,19 @@ body {
 .panel {
   --edge: var(--line);
   background: var(--panel);
-  margin: var(--px);
   padding: calc(var(--px) * 4);
   box-shadow:
     0 calc(var(--px) * -1) 0 0 var(--edge),
     0 var(--px) 0 0 var(--edge),
     calc(var(--px) * -1) 0 0 0 var(--edge),
     var(--px) 0 0 0 var(--edge);
+}
+/* Room for the edge, which is drawn outside the box. In a layer, unlike the
+   rest of this file, so a margin utility on a panel (mx-auto, mt-4) wins. */
+@layer components {
+  .panel {
+    margin: var(--px);
+  }
 }
 .panel-cyan { --edge: var(--cyan); }
 .panel-magenta { --edge: var(--magenta); }
@@ -259,6 +265,16 @@ body {
     var(--px) 0 0 0 var(--cyan);
 }
 .field::placeholder { color: var(--line); }
+/* A field among body text (the grown-up area): the body face, as typed. */
+.field-plain {
+  font-family: var(--font-body);
+  font-size: 1.25rem;
+  text-transform: none;
+}
+select.field {
+  appearance: none;
+  border-radius: 0;
+}
 /* The field already has an edge: light it instead of ringing it. */
 .field:focus-visible {
   outline: none;
@@ -342,6 +358,12 @@ body {
   box-shadow: 0 0 calc(var(--px) * 3) var(--cyan);
 }
 
+/* The same bar filling towards a prize: reward, so yellow. */
+.track-reward .track-fill {
+  background: var(--yellow);
+  box-shadow: 0 0 calc(var(--px) * 3) var(--yellow);
+}
+
 /* Something earned, popping up over the card for a moment. */
 .pop {
   animation: rise 0.5s steps(5) forwards;
@@ -367,6 +389,14 @@ body {
   image-rendering: pixelated;
   shape-rendering: crispEdges;
   filter: drop-shadow(0 0 calc(var(--px) * 2) rgb(255 255 255 / 0.18));
+}
+
+/* Not earned yet: the shape only, unlit. */
+.sprite-off {
+  filter: none;
+}
+.sprite-off rect {
+  fill: var(--line);
 }
 
 @keyframes hop {

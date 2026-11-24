@@ -222,7 +222,7 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
         </div>
 
         {skill === "arcade" ? (
-          <div className="mx-auto grid w-full max-w-sm grid-cols-3" role="group" aria-label="Number pad">
+          <div className="mx-auto grid w-full max-w-sm grid-cols-3 gap-2" role="group" aria-label="Number pad">
             {PAD.map((k) => (
               <button
                 key={k}
@@ -244,7 +244,7 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
             ))}
           </div>
         ) : (
-          <div className="mx-auto grid w-full max-w-md grid-cols-2" role="group" aria-label="Answers">
+          <div className="mx-auto grid w-full max-w-md grid-cols-2 gap-3" role="group" aria-label="Answers">
             {(showCard ? s.choices : [0, 1, 2, 3]).map((n, i) => {
               const judged = showCard && s.last !== null;
               // Once judged: the right answer turns green, a wrong pick red. Not

@@ -51,7 +51,7 @@ export function Setup({ progress, config, onChange, onStart, onExit }: { progres
       </h1>
 
       <h2 className="font-display mt-5 mb-0 text-xs text-dim">Level</h2>
-      <div className="mt-1 grid grid-cols-2 sm:grid-cols-5" role="group" aria-label="Level">
+      <div className="mt-1 grid grid-cols-2 gap-3 sm:grid-cols-5" role="group" aria-label="Level">
         {LEVELS.map((l, i) => {
           const open = progress.open.includes(l.id);
           return (
@@ -82,7 +82,7 @@ export function Setup({ progress, config, onChange, onStart, onExit }: { progres
       <div className="mt-4 grid gap-x-6 gap-y-4 lg:grid-cols-[3fr_2fr]">
         <div>
           <h2 className="font-display m-0 text-xs text-dim">Game</h2>
-          <div className="mt-1 grid grid-cols-2 sm:grid-cols-4" role="group" aria-label="Game">
+          <div className="mt-1 grid grid-cols-2 gap-3 sm:grid-cols-4" role="group" aria-label="Game">
             {MODES.map((m) => (
               <button key={m.id} type="button" className="panel pick flex flex-col items-center gap-1" aria-pressed={config.mode === m.id} onClick={() => pick({ mode: m.id })}>
                 <span className="font-display text-xs text-cyan">{m.title}</span>
@@ -92,7 +92,7 @@ export function Setup({ progress, config, onChange, onStart, onExit }: { progres
           </div>
 
           <h2 className="font-display mt-4 mb-0 text-xs text-dim">Skill</h2>
-          <div className="mt-1 grid grid-cols-2" role="group" aria-label="Skill">
+          <div className="mt-1 grid grid-cols-2 gap-3" role="group" aria-label="Skill">
             {SKILLS.map((s) => (
               <button key={s.id} type="button" className="panel pick flex flex-col items-center gap-1" aria-pressed={config.skill === s.id} onClick={() => pick({ skill: s.id })}>
                 <span className="font-display text-xs text-cyan">{s.title}</span>

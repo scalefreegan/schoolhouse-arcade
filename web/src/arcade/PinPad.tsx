@@ -61,7 +61,7 @@ export function PinPad({ title, hint, onPin, onCancel }: { title: string; hint?:
         <p role="alert" className="mt-3 mb-0 min-h-[1.5em] text-cyan">
           {error}
         </p>
-        <div className="mx-auto mt-2 grid max-w-xs grid-cols-3" role="group" aria-label="Number pad">
+        <div className="mx-auto mt-2 grid max-w-xs grid-cols-3 gap-2" role="group" aria-label="Number pad">
           {KEYS.map((k) => (
             <button key={k} type="button" className={`btn btn-quiet key ${k === "0" ? "col-span-2" : ""}`} aria-label={k === "back" ? "Rub out" : k} disabled={busy} onClick={() => press(k)}>
               {k === "back" ? "<" : k}

@@ -159,7 +159,7 @@ export function PrizeCounter() {
 
       <h2 className="font-display mt-6 mb-0 text-xs text-dim">Prizes</h2>
       {counter.prizes.length ? (
-        <ul className="m-0 mt-1 grid list-none grid-cols-2 p-0 md:grid-cols-3">
+        <ul className="m-0 mt-1 grid list-none grid-cols-2 gap-3 p-0 md:grid-cols-3">
           {counter.prizes.map((p) => (
             <PrizeCase
               key={p.id}
@@ -181,7 +181,7 @@ export function PrizeCounter() {
       <h2 className="font-display mt-6 mb-0 text-xs text-dim">
         Badges {held.length} of {BADGES.length}
       </h2>
-      <ul className="m-0 mt-1 grid list-none grid-cols-2 p-0 sm:grid-cols-3 md:grid-cols-5">
+      <ul className="m-0 mt-1 grid list-none grid-cols-2 gap-3 p-0 sm:grid-cols-3 md:grid-cols-5">
         {BADGES.map((b) => (
           <BadgeTile key={b.id} badge={b} held={held.includes(b.id)} />
         ))}

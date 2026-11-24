@@ -146,7 +146,7 @@ function PrizeForm({ editing, busy, onSave, onCancel }: { editing: Prize | null;
           </select>
         </label>
       </div>
-      <div className="mt-3 grid grid-cols-4 sm:grid-cols-8" role="group" aria-label="Picture">
+      <div className="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-8" role="group" aria-label="Picture">
         {PRIZE_ICONS.map((id) => (
           <button key={id} type="button" className="panel pick flex justify-center" aria-pressed={icon === id} aria-label={id} onClick={() => setIcon(id)}>
             <Picture id={id} size={48} />

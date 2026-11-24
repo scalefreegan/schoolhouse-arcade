@@ -1,6 +1,93 @@
-# Project Instructions for AI Agents
+# Schoolhouse Arcade — agent instructions
 
-This file provides instructions and context for AI coding agents working on this project.
+A retro coin-op arcade of small learning games for a first-grader, played on
+a tablet over home Wi-Fi and served from this Mac. No logins: a player is a
+name and a pixel character. Playing earns tickets and badges that a grown-up
+trades for real prizes. Who plays and what they have earned is in a local
+Postgres 17 database (`schoolhouse_arcade`). Read `docs/PRD.md` first (what
+was decided, and the rules of each game), `docs/DATA.md` (what is stored
+where) and `docs/ART.md` (how the sprites are written) before touching a
+game, the schema or the artwork.
+
+## Layout
+```
+web/shared/games.ts      the cabinets on the floor (id, title, status)
+web/shared/avatars.ts    the characters a player can be, and what a legal name is
+web/shared/wire.ts       request and reply types shared by server and client
+web/server/api.ts        wrap() and the route table (ROUTES)
+web/server/origin.ts     who may call the API: this Mac or the home network, from the app
+web/server/http.ts       JSON bodies and replies, HttpError
+web/server/db.ts         the pg pool, the boot check, setDb() for tests
+web/server/players.ts    /api/players
+web/server/testhttp.ts   call a route handler without a socket (tests)
+web/src/App.tsx          the routes: title, players, the floor, a game
+web/src/state.tsx        ArcadeProvider: the players, who is playing, the sound switch
+web/src/arcade/          the shell: Attract (title), Players, Lobby (the floor), Hud
+web/src/games/index.ts   each live cabinet's screen, by game id
+web/src/sprites/art.ts   every drawing, as rows of characters and palettes
+web/src/sprites/Sprite.tsx  <Sprite> and <AvatarSprite>
+web/src/sound.ts         every sound, synthesised (no audio files)
+web/src/index.css        the tokens and the pixel-box classes (.panel, .btn, .pick, .field)
+scripts/db/schema.ts     the whole schema (Drizzle)
+scripts/db/players.ts    the only code that touches the players table
+scripts/db/migrations/   the SQL that reaches a database (generated, committed)
+scripts/tests/testdb.mjs freshDb(): an in-process PGlite with the real migrations
+```
+
+## Rules that keep it working
+- Port **38900**, `strictPort`, polling watcher (FSEvents is unreliable on
+  this machine). Siblings: Lean Into It 38800, Fret Not 38600, jev-ants
+  38500, Lingo Dojo 38400, Atlas 38300, Wine Guide 38200, Basecamp 38100.
+- **This app is served to the home network on purpose** (`server.host: true`
+  in `web/vite.config.ts`): the tablet plays, the Mac keeps score. That is
+  the opposite of the sibling apps, so the wall matters more, not less.
+  Every API route goes through `wrap()` in `web/server/api.ts`: the Host
+  must be this machine, a private address or a `.local` name; the Origin
+  must match it; and the request must come from the app (the browser says
+  same-origin, or it carries `X-Schoolhouse-Arcade: 1`, which `client.ts`
+  sends). Add a route to `ROUTES`; a test proves every entry is wrapped.
+- **The server keeps score.** A game posts its answers; the server works out
+  the score, tickets and badges from them with the rules in `web/shared/`.
+  Never store a number the browser computed.
+- **What costs real money is behind the grown-up PIN**, checked on the
+  server on every such request: handing over a prize, editing prizes,
+  changing tickets by hand.
+- The real database holds tickets a child has earned. Tests never touch a
+  Postgres server: `freshDb()`. A worktree never uses the real database
+  (`scripts/db/config.mjs` refuses to start without a `DATABASE_URL`).
+- Never change a game id, a level id, a badge id or an avatar id once live:
+  rows are keyed on them.
+- Each table is read and written by one module under `scripts/db/`, whose
+  functions take the player id.
+- Files under `web/shared/` and `scripts/db/*.ts` are run directly by Node
+  (type stripping): explicit `.ts` import extensions, erasable syntax only.
+- **Colours mean one thing each**: cyan is the game talking, magenta is the
+  player, yellow is reward, green and red are right and wrong and appear
+  nowhere else. Colours come from the tokens in `web/src/index.css`;
+  components never write a raw hex (sprite palettes in `art.ts` are the one
+  exception).
+- **Edges and motion are stepped.** No `border-radius`, no eased
+  transitions: boxes use the `.panel` / `.btn` shadows, motion uses
+  `steps()`. Respect `prefers-reduced-motion`.
+- **The player is six.** Words on a game screen are few and short; a number
+  to read is large; a thing to press is at least 56 px tall. A wrong answer
+  shows the right one and never takes away something already earned.
+- All art, names and sounds are original. No characters, music or artwork
+  from an existing game or show.
+
+## Build & test
+```sh
+npm install && npm --prefix web install
+npm run db:setup            # once per machine (Postgres 17 running); idempotent
+npm run dev                 # http://localhost:38900, and the Mac's address on the home network
+npm test                    # node --test: shared rules, routes, database (PGlite)
+npm run typecheck && npm run lint
+npm run db:generate -- --name <what_changed>   # after editing scripts/db/schema.ts; commit the SQL
+```
+`ARCADE_LOCAL_ONLY=1 npm run dev` keeps the server to this machine.
+
+Verify UI in the real app (Playwright or Claude-in-Chrome) before claiming a
+feature works, at a tablet size (1024 × 768) and a phone size (390 × 800).
 
 <!-- BEGIN BEADS INTEGRATION v:1 profile:minimal hash:6cd5cc61 -->
 ## Beads Issue Tracker
@@ -56,22 +143,3 @@ This protocol applies when ending a Beads implementation workflow. It is subordi
 - Do not commit or push without clear authority from the active profile or the current user request.
 - If a required sync or push is blocked, stop and report the exact command and error.
 <!-- END BEADS INTEGRATION -->
-
-
-## Build & Test
-
-_Add your build and test commands here_
-
-```bash
-# Example:
-# npm install
-# npm test
-```
-
-## Architecture Overview
-
-_Add a brief overview of your project architecture_
-
-## Conventions & Patterns
-
-_Add your project-specific conventions here_

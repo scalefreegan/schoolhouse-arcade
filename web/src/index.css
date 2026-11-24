@@ -35,6 +35,8 @@
   --yellow: #ffd23f;
   --good: #7dff5a;
   --bad: #ff5a3c;
+  /* The shadow under the cyan marquee. */
+  --cyan-depth: #0b6b70;
   /* One arcade pixel. Everything stepped is a multiple of this. */
   --px: 4px;
 }
@@ -161,7 +163,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: calc(var(--px) * 3);
-  min-height: calc(var(--px) * 14);
+  min-height: max(56px, calc(var(--px) * 14));
   margin: var(--px) var(--px) calc(var(--px) * 3);
   padding: calc(var(--px) * 3) calc(var(--px) * 5);
   border: 0;
@@ -206,13 +208,14 @@ body {
   color: var(--fg);
 }
 .btn-lg {
-  min-height: calc(var(--px) * 18);
+  min-height: max(56px, calc(var(--px) * 18));
   padding-inline: calc(var(--px) * 8);
   font-size: 1.125rem;
 }
 
 /* A tappable panel (a player, a cabinet): lights up instead of sinking. */
 .pick {
+  min-height: 56px;
   cursor: pointer;
   border: 0;
   color: inherit;
@@ -236,6 +239,7 @@ body {
 
 .field {
   width: 100%;
+  min-height: 56px;
   margin: var(--px);
   padding: calc(var(--px) * 3) calc(var(--px) * 4);
   border: 0;
@@ -303,7 +307,8 @@ body {
     radial-gradient(1px 1px at 100px 20px, var(--dim), transparent),
     radial-gradient(1px 1px at 70px 60px, var(--magenta), transparent);
   background-size: 240px 200px, 240px 200px, 240px 200px, 120px 120px, 120px 120px, 120px 120px;
-  animation: drift 24s linear infinite;
+  /* 120 steps: the layers move 2 px and 1 px at a time. */
+  animation: drift 24s steps(120) infinite;
   opacity: 0.7;
 }
 

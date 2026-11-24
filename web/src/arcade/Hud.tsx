@@ -32,7 +32,7 @@ export function Hud({ children }: { children?: ReactNode }) {
   return (
     <header className="flex items-center justify-between gap-3">
       {player ? (
-        <a href={href("players")} className="flex items-center gap-3 text-magenta no-underline" aria-label={`Playing as ${player.name}. Change player`}>
+        <a href={href("players")} className="flex min-h-14 items-center gap-3 text-magenta no-underline" aria-label={`Playing as ${player.name}. Change player`}>
           <AvatarSprite avatar={player.avatar} size={44} />
           <span className="font-display glow text-sm">{player.name}</span>
         </a>

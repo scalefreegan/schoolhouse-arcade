@@ -133,6 +133,47 @@ export const ART = {
     ],
     palettes: { default: { w: WHITE, y: "#ffd23f", c: "#2ff3e0" } },
   },
+  star: {
+    rows: [
+      "....y....",
+      "....y....",
+      "...yyy...",
+      "yyyyyyyyy",
+      ".yyyyyyy.",
+      "..yyyyy..",
+      "..yyyyy..",
+      ".yyy.yyy.",
+      ".y.....y.",
+    ],
+    palettes: { on: { y: "#ffd23f" }, off: { y: "#3b2b7c" } },
+  },
+  heart: {
+    rows: [
+      ".rr...rr.",
+      "rrrr.rrrr",
+      "rrrrrrrrr",
+      "rrrrrrrrr",
+      ".rrrrrrr.",
+      "..rrrrr..",
+      "...rrr...",
+      "....r....",
+    ],
+    palettes: { on: { r: "#ff2e9a" }, off: { r: "#3b2b7c" } },
+  },
+  lock: {
+    rows: [
+      "..kkkk..",
+      ".k....k.",
+      ".k....k.",
+      "kkkkkkkk",
+      "kkkkkkkk",
+      "kkk..kkk",
+      "kkk..kkk",
+      "kkkkkkkk",
+      "kkkkkkkk",
+    ],
+    palettes: { default: { k: "#a99bdc" } },
+  },
   speaker: {
     rows: [
       ".....w....",

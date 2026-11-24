@@ -11,8 +11,9 @@ web/dist/
 # browser-automation debug artifacts
 .playwright-mcp/
 
-# Claude Code local settings
+# Claude Code local settings, and the worktrees its agents work in
 .claude/settings.local.json
+.claude/worktrees/
 
 # npm run db:backup
 backups/

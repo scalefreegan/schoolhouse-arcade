@@ -5,6 +5,7 @@ import { checkDatabase, setDb, type Db } from "./db.ts";
 import { HttpError, INTERNAL_ERROR, sendJson } from "./http.ts";
 import { fromApp, homeHost, sameOrigin } from "./origin.ts";
 import { handlePlayers } from "./players.ts";
+import { handlePlays } from "./plays.ts";
 
 // The whole "backend": dev-server-only middleware on the Vite server. Same
 // shape as Lean Into It's, with one difference: this server is reachable
@@ -50,6 +51,7 @@ export function wrap(fn: Handler): Handler {
  *  route is behind wrap(). */
 export const ROUTES: [string, Handler][] = [
   ["/api/players", handlePlayers],
+  ["/api/plays", handlePlays],
 ];
 
 export function apiPlugins(opts: { checkDatabase?: boolean; db?: Db } = {}): Plugin {

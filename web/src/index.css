@@ -203,6 +203,7 @@ body {
 .btn-cyan { --btn: var(--cyan); }
 .btn-yellow { --btn: var(--yellow); }
 .btn-good { --btn: var(--good); }
+.btn-bad { --btn: var(--bad); }
 .btn-quiet {
   --btn: var(--raised);
   color: var(--fg);
@@ -227,7 +228,9 @@ body {
   --edge: var(--magenta);
   background: var(--raised);
 }
-.pick[aria-pressed="true"] {
+/* Chosen stays chosen under a hovering pointer. */
+.pick[aria-pressed="true"],
+.pick[aria-pressed="true"]:hover:not(:disabled) {
   --edge: var(--yellow);
   background: var(--raised);
 }
@@ -267,6 +270,96 @@ body {
     0 0 calc(var(--px) * 6) color-mix(in srgb, var(--yellow) 40%, transparent);
 }
 
+/* ---------- the flashcard ---------- */
+
+/* The one loud thing on a game screen. Its type is sized from its own width
+   (cqw), so "10 + 10" fits a phone and fills a tablet. */
+.card {
+  --edge: var(--cyan);
+  container-type: inline-size;
+  margin: calc(var(--px) * 2);
+  padding: calc(var(--px) * 6) calc(var(--px) * 2);
+  background: var(--panel);
+  text-align: center;
+  box-shadow:
+    0 calc(var(--px) * -2) 0 0 var(--edge),
+    0 calc(var(--px) * 2) 0 0 var(--edge),
+    calc(var(--px) * -2) 0 0 0 var(--edge),
+    calc(var(--px) * 2) 0 0 0 var(--edge),
+    0 0 calc(var(--px) * 10) color-mix(in srgb, var(--edge) 45%, transparent);
+}
+.card[data-state="right"] { --edge: var(--good); }
+.card[data-state="wrong"] {
+  --edge: var(--bad);
+  animation: shake 0.32s steps(1);
+}
+.card-line {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  gap: 0.45em;
+  font-family: var(--font-display);
+  font-size: min(12.5cqw, 4.5rem);
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+/* One digit of the answer: a place to type into. */
+.slot {
+  display: inline-block;
+  min-width: 1em;
+  border-bottom: var(--px) solid currentColor;
+  line-height: 1.2;
+}
+
+/* A key on the number pad. Bigger than a button: it is hit without looking. */
+.key {
+  min-height: max(56px, calc(var(--px) * 17));
+  padding-inline: 0;
+  font-size: 1.5rem;
+}
+/* One of Easy's four answers. */
+.choice {
+  min-height: calc(var(--px) * 26);
+  font-size: 2rem;
+}
+
+/* A bar that empties: the clock, a card's countdown. */
+.track {
+  position: relative;
+  height: calc(var(--px) * 3);
+  margin: var(--px);
+  background: var(--raised);
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--line),
+    0 var(--px) 0 0 var(--line),
+    calc(var(--px) * -1) 0 0 0 var(--line),
+    var(--px) 0 0 0 var(--line);
+}
+.track-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--cyan);
+  box-shadow: 0 0 calc(var(--px) * 3) var(--cyan);
+}
+
+/* Something earned, popping up over the card for a moment. */
+.pop {
+  animation: rise 0.5s steps(5) forwards;
+}
+
+.readout {
+  font-family: var(--font-display);
+  font-size: 0.6875rem;
+  line-height: 1.6;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+.readout b {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 400;
+}
+
 /* ---------- sprites and motion ---------- */
 
 .sprite {
@@ -283,6 +376,15 @@ body {
 @keyframes blink {
   0%, 60% { opacity: 1; }
   61%, 100% { opacity: 0; }
+}
+@keyframes shake {
+  0%, 50% { transform: translateX(calc(var(--px) * -2)); }
+  25%, 75% { transform: translateX(calc(var(--px) * 2)); }
+  100% { transform: translateX(0); }
+}
+@keyframes rise {
+  from { transform: translateY(0); opacity: 1; }
+  to { transform: translateY(calc(var(--px) * -10)); opacity: 0; }
 }
 @keyframes drift {
   from { background-position: 0 0, 0 0; }
@@ -320,11 +422,13 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hop, .blink, .starfield { animation: none; }
+  .hop, .blink, .starfield, .card[data-state="wrong"] { animation: none; }
+  .pop { animation: none; opacity: 0; }
   .btn:active:not(:disabled) { transform: none; }
 }
 
 @media (max-width: 30rem) {
   :root { --px: 3px; }
   body { font-size: 1.375rem; }
+  .readout b { font-size: 1rem; }
 }

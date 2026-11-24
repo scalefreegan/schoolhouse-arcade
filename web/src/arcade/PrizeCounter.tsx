@@ -100,8 +100,8 @@ export function PrizeCounter() {
     return (
       <main className="screen">
         <Hud>{back}</Hud>
-        <div role="alert" className="panel panel-bad mx-auto mt-16 max-w-xl text-center">
-          <p className="font-display m-0 text-sm text-bad">No signal</p>
+        <div role="alert" className="panel panel-cyan mx-auto mt-16 max-w-xl text-center">
+          <p className="font-display m-0 text-sm text-cyan">No signal</p>
           <p className="mt-4">{error}</p>
           <button type="button" className="btn btn-cyan mt-4" onClick={() => void load()}>
             Try again

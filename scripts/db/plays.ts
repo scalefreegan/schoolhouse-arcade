@@ -1,12 +1,14 @@
-// Plays, answers and stars: the only code that reads or writes those tables.
+// Plays, answers, stars and hand-opened levels: the only code that reads or
+// writes those tables.
 // Every function says whose rows it means.
 //
 // Erasable TypeScript only, like schema.ts: `node --test` imports it as is.
 
 import { and, asc, desc, eq, gt, lt, or, sql } from "drizzle-orm";
+import type { BadgeFacts } from "../../web/shared/badges.ts";
 import type { BoardKind, PlayConfig, Settled } from "../../web/shared/play.ts";
 import type { Db } from "./players.ts";
-import { answers, levelStars, players, plays } from "./schema.ts";
+import { answers, levelOpens, levelStars, players, plays } from "./schema.ts";
 
 /** Which high score table: a game, and one set-up of it. */
 export interface BoardKey extends PlayConfig {
@@ -121,4 +123,33 @@ export async function recentAnswers(db: Db, playerId: string, gameId: string, li
     .where(and(eq(answers.playerId, playerId), eq(answers.gameId, gameId)))
     .orderBy(desc(answers.id))
     .limit(limit);
+}
+
+/** The levels of a game a grown-up has opened for a player by hand. */
+export async function opensOf(db: Db, playerId: string, gameId: string): Promise<string[]> {
+  const rows = await db.select({ level: levelOpens.level }).from(levelOpens).where(and(eq(levelOpens.playerId, playerId), eq(levelOpens.gameId, gameId)));
+  return rows.map((r) => r.level);
+}
+
+/** Open a level for a player ahead of the star that would open it. Doing it twice changes nothing. */
+export async function openLevel(db: Db, playerId: string, gameId: string, level: string): Promise<void> {
+  await db.insert(levelOpens).values({ playerId, gameId, level }).onConflictDoNothing();
+}
+
+/** What a player has done across every game: what the badges ask about. */
+export async function tallyOf(db: Db, playerId: string): Promise<BadgeFacts> {
+  const [t] = await db
+    .select({
+      plays: sql<number>`(count(*) filter (where ${plays.finished}))::int`,
+      right: sql<number>`coalesce(sum(${plays.rightCount}), 0)::int`,
+      bestCombo: sql<number>`coalesce(max(${plays.bestCombo}), 0)::int`,
+      cleanSprints: sql<number>`(count(*) filter (where ${plays.finished} and ${plays.mode} = 'sprint' and ${plays.wrongCount} = 0))::int`,
+    })
+    .from(plays)
+    .where(eq(plays.playerId, playerId));
+  const stars: BadgeFacts["stars"] = {};
+  for (const r of await db.select({ gameId: levelStars.gameId, level: levelStars.level, stars: levelStars.stars }).from(levelStars).where(eq(levelStars.playerId, playerId))) {
+    (stars[r.gameId] ??= {})[r.level] = r.stars;
+  }
+  return { ...t, stars };
 }

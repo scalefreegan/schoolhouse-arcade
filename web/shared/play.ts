@@ -65,6 +65,8 @@ export interface GameRules {
   skills: Choice[];
   /** Judge and score a play. Throws RuleError for a set-up or an answer that cannot be. */
   settle(config: PlayConfig, answers: AnswerInput[]): Settled;
+  /** The tickets a settled play is worth on its own, before the arcade's bonuses (shared/tickets.ts). */
+  pay(config: PlayConfig, settled: Settled): number;
 }
 
 /** The most stars a level can hold. */

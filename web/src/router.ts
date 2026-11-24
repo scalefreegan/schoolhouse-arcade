@@ -7,6 +7,8 @@ import { useEffect, useState } from "react";
 //   #/players       who is playing?
 //   #/lobby         the arcade floor: pick a cabinet
 //   #/play/<game>   a game (ids in shared/games.ts)
+//   #/prizes        the Prize Counter: tickets, the shelf, badges
+//   #/grownups      behind the PIN: prizes, tickets by hand, players
 
 export interface Route {
   name: string;

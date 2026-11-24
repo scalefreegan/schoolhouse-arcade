@@ -1,5 +1,6 @@
 import type { PlayConfig } from "../../shared/play.ts";
-import type { BoardReply, ErrorReply, PlayReply, PlayRequest, Player, PlayerInput, PlayersReply, ProgressReply } from "../../shared/wire.ts";
+import type { PrizeFields } from "../../shared/prizes.ts";
+import type { AdjustRequest, BoardReply, CounterReply, ErrorReply, GrownupReply, LevelState, OpenLevelRequest, PinState, PlayReply, PlayRequest, Player, PlayerInput, PlayersReply, Prize, ProgressReply, RedeemReply, RedeemRequest } from "../../shared/wire.ts";
 
 // The one fetch. Every call to the server goes through here, so an error is
 // always an ApiError carrying the server's own sentence.
@@ -43,3 +44,22 @@ const q = (params: Record<string, string>) => new URLSearchParams(params).toStri
 export const postPlay = (req: PlayRequest) => api<PlayReply>("/api/plays", req);
 export const getBoard = (gameId: string, c: PlayConfig) => api<BoardReply>(`/api/plays/board?${q({ game: gameId, level: c.level, mode: c.mode, skill: c.skill })}`);
 export const getProgress = (playerId: string, gameId: string) => api<ProgressReply>(`/api/plays/progress?${q({ player: playerId, game: gameId })}`);
+
+/** The Prize Counter as one player sees it: tickets, the shelf, badges, prizes won. */
+export const getCounter = (playerId: string) => api<CounterReply>(`/api/counter?${q({ player: playerId })}`);
+
+// Behind the grown-up PIN. The PIN rides on every request and the server
+// checks it every time; nothing here remembers it.
+const withPin = (pin: string) => ({ "X-Grownup-Pin": pin });
+
+export const getPinState = () => api<PinState>("/api/grownup/pin");
+/** Choose the PIN. Changing it needs the current one. */
+export const choosePin = (pin: string, current?: string) => api<PinState>("/api/grownup/pin", { pin }, "POST", current ? withPin(current) : undefined);
+export const getGrownup = (pin: string) => api<GrownupReply>("/api/grownup", undefined, "GET", withPin(pin));
+export const redeemPrize = (pin: string, req: RedeemRequest) => api<RedeemReply>("/api/grownup/redeem", req, "POST", withPin(pin));
+export const addPrize = (pin: string, prize: PrizeFields) => api<Prize>("/api/grownup/prizes", prize, "POST", withPin(pin));
+export const changePrize = (pin: string, id: string, prize: PrizeFields) => api<Prize>(`/api/grownup/prizes/${id}`, prize, "PATCH", withPin(pin));
+export const removePrize = (pin: string, id: string) => api<{ ok: true }>(`/api/grownup/prizes/${id}`, undefined, "DELETE", withPin(pin));
+export const adjustTickets = (pin: string, req: AdjustRequest) => api<{ tickets: number }>("/api/grownup/tickets", req, "POST", withPin(pin));
+export const openLevelFor = (pin: string, req: OpenLevelRequest) => api<{ levels: LevelState[] }>("/api/grownup/levels", req, "POST", withPin(pin));
+export const retirePlayer = (pin: string, id: string) => api<{ ok: true }>(`/api/grownup/players/${id}`, undefined, "DELETE", withPin(pin));

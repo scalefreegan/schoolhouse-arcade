@@ -1,0 +1,75 @@
+// The badges. Each is earned once per player and never taken away; each
+// pays a ticket bonus the moment it is won. Whether one is earned is a pure
+// question about what the player has done so far (BadgeFacts), so the
+// server can ask it after every play, and a badge added later is handed to
+// everyone who already deserves it the next time they play.
+//
+// An id is stored on a player's row and can gate a prize: never rename one.
+// Pure, and run by Node as is.
+
+import { LEVELS } from "./comet/facts.ts";
+import { MAX_STARS } from "./play.ts";
+
+/** What a player has done, across every game. */
+export interface BadgeFacts {
+  /** Rounds finished. */
+  plays: number;
+  /** Right answers, ever. */
+  right: number;
+  /** The longest run of right answers in one round. */
+  bestCombo: number;
+  /** Finished Sprints without a miss. */
+  cleanSprints: number;
+  /** Stars per game id, per level id. */
+  stars: Record<string, Record<string, number>>;
+}
+
+export interface Badge {
+  id: string;
+  title: string;
+  /** How to earn it, in words a six-year-old can read. */
+  how: string;
+  /** Its bonus, paid once. */
+  tickets: number;
+  /** Its drawing and colours (web/src/sprites/art.ts). */
+  sprite: string;
+  palette: string;
+  earned(f: BadgeFacts): boolean;
+}
+
+const COMET = "comet-cards";
+const cometStars = (f: BadgeFacts, level: string): number => f.stars[COMET]?.[level] ?? 0;
+const everyCometLevel = (f: BadgeFacts, stars: number): boolean => LEVELS.every((l) => cometStars(f, l.id) >= stars);
+
+const MEDALS = ["lime", "cyan", "rose", "violet", "gold"];
+
+export const BADGES: Badge[] = [
+  { id: "first-game", title: "First Game", how: "Finish a game", tickets: 10, sprite: "rocket", palette: "default", earned: (f) => f.plays >= 1 },
+  ...LEVELS.map(
+    (l, i): Badge => ({
+      id: `comet-${l.id}`,
+      title: `${l.title} Star`,
+      how: `Get a star on ${l.title}`,
+      tickets: 25,
+      sprite: "medal",
+      palette: MEDALS[i % MEDALS.length],
+      earned: (f) => cometStars(f, l.id) >= 1,
+    }),
+  ),
+  { id: "combo-10", title: "Hot Streak", how: "10 right in a row", tickets: 20, sprite: "flame", palette: "default", earned: (f) => f.bestCombo >= 10 },
+  { id: "combo-25", title: "Unstoppable", how: "25 right in a row", tickets: 50, sprite: "bolt", palette: "default", earned: (f) => f.bestCombo >= 25 },
+  { id: "right-100", title: "100 Club", how: "100 right answers", tickets: 30, sprite: "gem", palette: "cyan", earned: (f) => f.right >= 100 },
+  { id: "right-1000", title: "1000 Club", how: "1000 right answers", tickets: 150, sprite: "gem", palette: "magenta", earned: (f) => f.right >= 1000 },
+  { id: "clean-sprint", title: "Clean Sweep", how: "A Sprint with no misses", tickets: 40, sprite: "comet", palette: "default", earned: (f) => f.cleanSprints >= 1 },
+  { id: "arcade-ace", title: "Arcade Ace", how: "2 stars on every level", tickets: 200, sprite: "trophy", palette: "default", earned: (f) => everyCometLevel(f, 2) },
+  { id: "comet-champion", title: "Comet Champion", how: "3 stars on every level", tickets: 500, sprite: "crown", palette: "default", earned: (f) => everyCometLevel(f, MAX_STARS) },
+];
+
+export function badgeById(id: string): Badge | undefined {
+  return BADGES.find((b) => b.id === id);
+}
+
+/** The badges a player with these facts deserves and does not hold yet, in list order. */
+export function newBadges(f: BadgeFacts, held: string[]): Badge[] {
+  return BADGES.filter((b) => !held.includes(b.id) && b.earned(f));
+}

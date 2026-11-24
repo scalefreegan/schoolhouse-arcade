@@ -1,10 +1,14 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
+import { newBadges } from "../shared/badges.ts";
 import { factStats } from "../shared/comet/deck.ts";
 import { RuleError, openLevels, type GameRules, type PlayConfig, type Settled } from "../shared/play.ts";
 import { RULES } from "../shared/rules.ts";
+import { ticketLines, totalOf } from "../shared/tickets.ts";
 import type { BoardReply, PlayReply, PlayRequest, ProgressReply, ScoreRow } from "../shared/wire.ts";
-import { findPlayer } from "../../scripts/db/players.ts";
-import { bestsOf, board, rankOf, recentAnswers, recordPlay, starsOf, type BoardKey, type BoardRow } from "../../scripts/db/plays.ts";
+import { awardBadges, badgesOf } from "../../scripts/db/badges.ts";
+import { findPlayer, lockPlayer } from "../../scripts/db/players.ts";
+import { bestsOf, board, opensOf, rankOf, recentAnswers, recordPlay, starsOf, tallyOf, type BoardKey, type BoardRow } from "../../scripts/db/plays.ts";
+import { addTickets, balanceOf } from "../../scripts/db/tickets.ts";
 import { rawDb, type Db } from "./db.ts";
 import { HttpError, isUuid, methodNotAllowed, pathSegments, queryParams, readJsonBody, sendJson } from "./http.ts";
 
@@ -14,7 +18,8 @@ import { HttpError, isUuid, methodNotAllowed, pathSegments, queryParams, readJso
 //   GET  /api/plays/progress?player=&game=            stars, open levels, bests, fact stats
 //
 // The browser sends answers, never a score: every number stored is worked
-// out here with the game's rules (web/shared/rules.ts).
+// out here with the game's rules (web/shared/rules.ts), and so are the
+// tickets and badges a play earns (web/shared/tickets.ts, badges.ts).
 
 function rulesFor(gameId: unknown): GameRules {
   const rules = typeof gameId === "string" && Object.hasOwn(RULES, gameId) ? RULES[gameId] : undefined;
@@ -38,30 +43,54 @@ async function boardReply(db: Db, rules: GameRules, key: BoardKey): Promise<Boar
   return { kind, rows: kind ? (await board(db, key, kind)).map(toScoreRow) : [] };
 }
 
-/** What happens to a settled play beyond storing it. The Prize Counter adds
- *  to this (tickets, badges); a game never does. */
+/**
+ * Everything a settled play sets off, all or nothing: it is stored, its
+ * stars counted, any badge it won handed over, and its tickets written to
+ * the ledger. The game supplies only what the play itself is worth
+ * (rules.pay); the rest is the arcade's and the same on every cabinet.
+ */
 export async function settlePlay(db: Db, rules: GameRules, playerId: string, key: BoardKey, settled: Settled): Promise<PlayReply> {
   const kind = settled.finished ? settled.board : null;
-  // The player's best before this play, to tell a new best from a first try.
-  const before = (await bestsOf(db, playerId, key.gameId)).find((b) => b.level === key.level && b.mode === key.mode && b.skill === key.skill);
-  const openBefore = openLevels(rules.levels, await starsOf(db, playerId, key.gameId));
-  const { playId, starsBefore, starsAfter } = await recordPlay(db, playerId, key, settled);
-  const openAfter = openLevels(rules.levels, await starsOf(db, playerId, key.gameId));
-  const personalBest = !!kind && !!before && (kind === "score" ? settled.score > before.score : settled.timeMs < before.timeMs);
+  const paid = await db.transaction(async (tx) => {
+    // One play at a time per player: badges and tickets are read, then written.
+    if (!(await lockPlayer(tx, playerId))) throw new HttpError(404, "no such player");
+    // The player's best before this play, to tell a new best from a first try.
+    const before = (await bestsOf(tx, playerId, key.gameId)).find((b) => b.level === key.level && b.mode === key.mode && b.skill === key.skill);
+    const opens = await opensOf(tx, playerId, key.gameId);
+    const openBefore = openLevels(rules.levels, await starsOf(tx, playerId, key.gameId), opens);
+    const recorded = await recordPlay(tx, playerId, key, settled);
+    const openAfter = openLevels(rules.levels, await starsOf(tx, playerId, key.gameId), opens);
+    const personalBest = !!kind && !!before && (kind === "score" ? settled.score > before.score : settled.timeMs < before.timeMs);
+
+    const held = (await badgesOf(tx, playerId)).map((b) => b.badgeId);
+    const won = newBadges(await tallyOf(tx, playerId), held);
+    await awardBadges(tx, playerId, won.map((b) => b.id));
+    const lines = ticketLines({ base: rules.pay(key, settled), personalBest, newStars: recorded.starsAfter - recorded.starsBefore, badges: won });
+    await addTickets(tx, playerId, lines.map((l) => ({ delta: l.amount, reason: l.reason, playId: recorded.playId, ...(l.badge ? { note: l.badge } : {}) })));
+    return {
+      ...recorded,
+      personalBest,
+      opened: openAfter.find((id) => !openBefore.includes(id)) ?? null,
+      badges: won.map((b) => b.id),
+      tickets: { lines, total: totalOf(lines), balance: await balanceOf(tx, playerId) },
+    };
+  });
   return {
-    playId,
+    playId: paid.playId,
     score: settled.score,
     right: settled.right,
     wrong: settled.wrong,
     bestCombo: settled.bestCombo,
     timeMs: settled.timeMs,
     finished: settled.finished,
-    starsBefore,
-    starsAfter,
-    opened: openAfter.find((id) => !openBefore.includes(id)) ?? null,
-    personalBest,
-    rank: kind ? await rankOf(db, key, kind, { playId, score: settled.score, timeMs: settled.timeMs }) : null,
+    starsBefore: paid.starsBefore,
+    starsAfter: paid.starsAfter,
+    opened: paid.opened,
+    personalBest: paid.personalBest,
+    rank: kind ? await rankOf(db, key, kind, { playId: paid.playId, score: settled.score, timeMs: settled.timeMs }) : null,
     board: await boardReply(db, rules, key),
+    tickets: paid.tickets,
+    badges: paid.badges,
   };
 }
 
@@ -79,9 +108,10 @@ async function postPlay(req: IncomingMessage, res: ServerResponse): Promise<void
     throw e;
   }
   // A level is played only once it is open: the ladder is the game.
-  const open = openLevels(rules.levels, await starsOf(db, playerId, body.gameId as string));
+  const gameId = body.gameId as string;
+  const open = openLevels(rules.levels, await starsOf(db, playerId, gameId), await opensOf(db, playerId, gameId));
   if (!open.includes(config.level)) throw new HttpError(403, "That level is still locked.");
-  sendJson(res, 201, await settlePlay(db, rules, playerId, { gameId: body.gameId as string, ...config }, settled));
+  sendJson(res, 201, await settlePlay(db, rules, playerId, { gameId, ...config }, settled));
 }
 
 export async function handlePlays(req: IncomingMessage, res: ServerResponse): Promise<void> {
@@ -106,7 +136,7 @@ export async function handlePlays(req: IncomingMessage, res: ServerResponse): Pr
   const stars = await starsOf(db, playerId, gameId);
   sendJson(res, 200, {
     stars,
-    open: openLevels(rules.levels, stars),
+    open: openLevels(rules.levels, stars, await opensOf(db, playerId, gameId)),
     bests: await bestsOf(db, playerId, gameId),
     facts: factStats(await recentAnswers(db, playerId, gameId)),
   } satisfies ProgressReply);

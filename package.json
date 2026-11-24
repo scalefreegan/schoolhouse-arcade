@@ -12,7 +12,8 @@
     "typecheck": "cd web && npx tsc -b",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "node scripts/db/setup.mjs --migrate-only",
-    "db:setup": "node scripts/db/setup.mjs"
+    "db:setup": "node scripts/db/setup.mjs",
+    "pin:reset": "node scripts/db/pin-reset.mjs"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.4",

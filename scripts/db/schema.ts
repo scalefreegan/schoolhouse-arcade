@@ -99,3 +99,102 @@ export const levelStars = pgTable(
   },
   (t) => [primaryKey({ columns: [t.playerId, t.gameId, t.level] })],
 );
+
+/**
+ * Every change to a player's tickets, as a ledger: a balance is the sum of
+ * `delta`. Tickets are worth real prizes, so nothing here is ever updated or
+ * deleted; a mistake is corrected with another row.
+ * `reason` is a TicketReason (web/shared/tickets.ts):
+ *   play    earned by a round (`play_id`)
+ *   best    that round beat the player's own best
+ *   star    that round won a star
+ *   badge   a badge's bonus (`note` is the badge id; `play_id` the round that won it)
+ *   prize   spent on a prize (`redemption_id`), negative
+ *   adjust  a grown-up added or removed them by hand (`note` says why)
+ */
+export const ticketEvents = pgTable(
+  "ticket_events",
+  {
+    id: bigserial("id", { mode: "number" }).primaryKey(),
+    playerId: uuid("player_id")
+      .notNull()
+      .references(() => players.id, { onDelete: "cascade" }),
+    delta: integer("delta").notNull(),
+    reason: text("reason").notNull(),
+    playId: bigint("play_id", { mode: "number" }).references(() => plays.id, { onDelete: "set null" }),
+    redemptionId: bigint("redemption_id", { mode: "number" }),
+    note: text("note"),
+    createdAt: tz("created_at").notNull().defaultNow(),
+  },
+  (t) => [index("ticket_events_player").on(t.playerId, t.id)],
+);
+
+/** The badges a player holds (ids in web/shared/badges.ts). Earned once, never taken away. */
+export const badgesEarned = pgTable(
+  "badges_earned",
+  {
+    playerId: uuid("player_id")
+      .notNull()
+      .references(() => players.id, { onDelete: "cascade" }),
+    badgeId: text("badge_id").notNull(),
+    earnedAt: tz("earned_at").notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.playerId, t.badgeId] })],
+);
+
+/**
+ * What is on the Prize Counter's shelf: a real-world reward a grown-up has
+ * promised. `icon` is a sprite id. `badge`, when set, must be held as well
+ * as the tickets. A removed prize is retired, not deleted: the hand-overs
+ * that point at it stay readable.
+ */
+export const prizes = pgTable("prizes", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  icon: text("icon").notNull(),
+  cost: integer("cost").notNull(),
+  badge: text("badge"),
+  createdAt: tz("created_at").notNull().defaultNow(),
+  retiredAt: tz("retired_at"),
+});
+
+/** A prize handed over: who, what, and what it cost on the day (the prize
+ *  may be repriced or renamed later). */
+export const redemptions = pgTable(
+  "redemptions",
+  {
+    id: bigserial("id", { mode: "number" }).primaryKey(),
+    playerId: uuid("player_id")
+      .notNull()
+      .references(() => players.id, { onDelete: "cascade" }),
+    prizeId: uuid("prize_id")
+      .notNull()
+      .references(() => prizes.id),
+    prizeName: text("prize_name").notNull(),
+    prizeIcon: text("prize_icon").notNull(),
+    cost: integer("cost").notNull(),
+    createdAt: tz("created_at").notNull().defaultNow(),
+  },
+  (t) => [index("redemptions_player").on(t.playerId, t.id)],
+);
+
+/** A level a grown-up opened by hand, ahead of the star that would open it. */
+export const levelOpens = pgTable(
+  "level_opens",
+  {
+    playerId: uuid("player_id")
+      .notNull()
+      .references(() => players.id, { onDelete: "cascade" }),
+    gameId: text("game_id").notNull(),
+    level: text("level").notNull(),
+    openedAt: tz("opened_at").notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.playerId, t.gameId, t.level] })],
+);
+
+/** The arcade's own few settings. Today one: the grown-up PIN's hash (`grownup_pin`). */
+export const settings = pgTable("settings", {
+  key: text("key").primaryKey(),
+  value: text("value").notNull(),
+  updatedAt: tz("updated_at").notNull().defaultNow(),
+});

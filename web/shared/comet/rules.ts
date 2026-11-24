@@ -171,9 +171,22 @@ export function settle(config: PlayConfig, inputs: AnswerInput[]): Settled {
   };
 }
 
+/** Tickets for a right answer, by skill; and for finishing a Practice. */
+export const TICKETS_EASY = 1;
+export const TICKETS_ARCADE = 2;
+export const TICKETS_PRACTICE = 5;
+
+/** What a play is worth in tickets: every right answer pays, typing pays
+ *  double, and Practice pays a flat amount for seeing it through. */
+export function pay(config: PlayConfig, settled: Settled): number {
+  if (config.mode === "practice") return settled.finished ? TICKETS_PRACTICE : 0;
+  return settled.right * (config.skill === "arcade" ? TICKETS_ARCADE : TICKETS_EASY);
+}
+
 export const cometRules: GameRules = {
   levels: LEVELS.map(({ id, title, blurb }) => ({ id, title, blurb })),
   modes: MODES,
   skills: SKILLS,
   settle,
+  pay,
 };

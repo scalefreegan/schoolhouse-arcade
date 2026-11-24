@@ -15,7 +15,7 @@ import type { IncomingMessage } from "node:http";
 import { LOCK_MS, MAX_TRIES, requirePin, resetPinGuard, setFirstPin } from "./pin.ts";
 import { handlePlayers } from "./players.ts";
 import { handlePlays } from "./plays.ts";
-import { request } from "./testhttp.ts";
+import { playedClock, request } from "./testhttp.ts";
 
 // Tickets, badges, prizes and the grown-up PIN: the real routes on an
 // in-process PGlite. These are the rows that stand for real ice creams.
@@ -46,8 +46,8 @@ async function arcade(t: { after: (fn: () => unknown) => void }, opts: { pin?: b
   });
   if (opts.pin !== false) await request(grownup, "POST", "/pin", { pin: PIN }, APP);
   const join = async (name: string) => (await request<Player>(players, "POST", "/", { name, avatar: "rex" }, APP)).body.id;
-  const play = (playerId: string, config: { level?: string; mode?: string; skill?: string }, answers: AnswerInput[], roundId: unknown = randomUUID()) =>
-    request<Reply<PlayReply>>(plays, "POST", "/", { playerId, gameId: "comet-cards", roundId, level: "add-5", mode: "blitz", skill: "easy", ...config, answers }, APP);
+  const play = async (playerId: string, config: { level?: string; mode?: string; skill?: string }, answers: AnswerInput[], roundId: unknown = randomUUID()) =>
+    request<Reply<PlayReply>>(plays, "POST", "/", { playerId, gameId: "comet-cards", roundId, clock: await playedClock(playerId, roundId, answers), level: "add-5", mode: "blitz", skill: "easy", ...config, answers }, APP);
   const at = async (playerId: string) => (await request<CounterReply>(counter, "GET", `/?player=${playerId}`, undefined, APP)).body;
   const give = (playerId: string, delta: number, note?: string) => request<Reply<{ tickets: number }>>(grownup, "POST", "/tickets", { playerId, delta, note }, withPin());
   const prize = async (playerId: string, name: string) => (await at(playerId)).prizes.find((p) => p.name === name)!;

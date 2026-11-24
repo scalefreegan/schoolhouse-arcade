@@ -38,7 +38,23 @@ export interface PlayRequest extends PlayConfig {
   /** This round's id (shared/roundid.ts), the same on every try at saving it:
    *  a round the server already has is answered, not stored or paid again. */
   roundId: string;
+  /** The clock POST /api/plays/start gave for this round, as it came. */
+  clock: string;
   answers: AnswerInput[];
+}
+
+/** POST /api/plays/start: a round is about to begin. */
+export interface RoundStartRequest {
+  playerId: string;
+  gameId: string;
+  /** The round's id, made now and sent again with the play. */
+  roundId: string;
+}
+
+/** The server's note of when the round began, signed: the browser keeps it
+ *  for the round and sends it back with the play, untouched. */
+export interface RoundStartReply {
+  clock: string;
 }
 
 /** One line of a high score table. */

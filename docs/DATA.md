@@ -27,7 +27,7 @@ an id never changes once live. Mirrors Lean Into It's `docs/DATA.md`.
 | `badges_earned` | a badge a player holds | `scripts/db/badges.ts` |
 | `prizes` | a prize on the shelf (a removed one is retired, not deleted) | `scripts/db/prizes.ts` |
 | `redemptions` | a prize handed over, with its name and price on the day | `scripts/db/prizes.ts` |
-| `settings` | one of the arcade's own settings; today only the PIN's hash | `scripts/db/settings.ts` |
+| `settings` | one of the arcade's own settings: the PIN's hash, and the key round clocks are signed with | `scripts/db/settings.ts` |
 
 The high score tables are queries over `plays`. Which card comes next is
 worked out from a player's latest `answers`.
@@ -39,12 +39,24 @@ mistake is put right with another row (Grown-ups → Tickets). A row for a
 round points at its play (`play_id`); a row for a prize points at its
 hand-over (`redemption_id`).
 
-**A round is stored once.** The browser makes a round id when a round ends
+**A round is stored once.** The browser makes a round id when a round starts
 (`web/shared/roundid.ts`) and sends it with every try at saving that round.
 It is kept in `plays.round_id`, unique per player. A round id the server
 already has is answered with the play it was stored as; nothing is recorded
 or paid again. A play must carry one; plays from before migration
 `0003_round_ids` have none.
+
+**A round has the server's clock.** Before the countdown the browser asks
+`POST /api/plays/start`, and the server answers with a clock: the time on
+the Mac, and the player's latest play id, signed with a key kept in
+`settings` (`round_clock_key`, made once; `web/server/clock.ts`). Nothing
+else is stored, so a server restarted mid-round still knows its clocks. A
+new play is saved only with its round's clock, when no other play of that
+player was stored since the clock was given, and when its answers claim no
+more card time than has passed on the Mac since then. A round already
+stored is answered as before, whatever clock comes with it.
+`npm run pin:reset` leaves the key alone; deleting it only refuses the
+rounds being played at that moment.
 
 Migration `0002_prizes` also puts the three example prizes on the shelf.
 

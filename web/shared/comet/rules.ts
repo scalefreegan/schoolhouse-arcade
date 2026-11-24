@@ -48,8 +48,9 @@ const MAX_ANSWER_MS = 10 * 60_000;
 /** The least time an answer is counted as taking: nobody reads a card and
  *  answers faster. A shorter time (an instant tap, or a forged 0) is counted
  *  as this, not refused. It bounds a forged round (Blitz ends after 240
- *  answers); it does not make a time true, since the server has no clock of
- *  its own for a round. */
+ *  answers); it does not make a time true. The server's clock for a round
+ *  (web/server/clock.ts) bounds it from the other side: a play's cards may
+ *  not claim more time than the round took. */
 export const MIN_ANSWER_MS = 250;
 /** Survival has no end but the player's; this is far past any real round. */
 const MAX_ANSWERS = 2_000;

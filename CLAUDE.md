@@ -53,6 +53,8 @@ scripts/db/prizes.ts     the shelf and hand-overs; handOverPrize() spends ticket
 scripts/db/settings.ts   the arcade's own settings (the PIN's hash)
 scripts/db/migrations/   the SQL that reaches a database (generated, committed)
 scripts/tests/testdb.mjs freshDb(): an in-process PGlite with the real migrations
+scripts/db/backup*.mjs   npm run db:backup: pg_dump into backups/, newest 14 kept
+macos/                   the Dock app (build-app.sh, the launcher, the server helper, the icon) and the backup launchd template
 ```
 
 ## Rules that keep it working
@@ -120,6 +122,9 @@ scripts/tests/testdb.mjs freshDb(): an in-process PGlite with the real migration
 ```sh
 npm install && npm --prefix web install
 npm run db:setup            # once per machine (Postgres 17 running); idempotent
+npm run db:backup           # pg_dump into backups/, newest 14 kept (docs/DATA.md: restore, daily job)
+npm run db:backup:status    # newest backup's age; exits 1 if none or over 2 days old
+./macos/build-app.sh        # build and install the Dock app (macos/README.md); --out <dir> builds without installing
 npm run dev                 # http://localhost:38900, and the Mac's address on the home network
 npm test                    # node --test: shared rules, routes, database (PGlite)
 npm run typecheck && npm run lint

@@ -13,6 +13,9 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "node scripts/db/setup.mjs --migrate-only",
     "db:setup": "node scripts/db/setup.mjs",
+    "db:backup": "node scripts/db/backup-cli.mjs",
+    "db:backup:plist": "node scripts/db/backup-cli.mjs --plist",
+    "db:backup:status": "node scripts/db/backup-cli.mjs --status",
     "pin:reset": "node scripts/db/pin-reset.mjs"
   },
   "dependencies": {

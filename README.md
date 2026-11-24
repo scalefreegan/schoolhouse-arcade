@@ -48,6 +48,14 @@ Screen* opens it full screen.
 The server answers only this machine, private network addresses and `.local`
 names. `ARCADE_LOCAL_ONLY=1 npm run dev` keeps it to this machine.
 
+### Mac app
+
+`./macos/build-app.sh` installs *Schoolhouse Arcade.app*: click it in the
+Dock to start the server and open the arcade in Chrome; quit it to stop the
+server. See [`macos/README.md`](macos/README.md). `npm run db:backup` copies
+the database into `backups/` ([`docs/DATA.md`](docs/DATA.md) has restore
+and an optional daily job).
+
 ## Develop
 
 ```sh

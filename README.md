@@ -90,6 +90,21 @@ Screen* opens it full screen.
 The server answers only this machine, private network addresses and `.local`
 names. `ARCADE_LOCAL_ONLY=1 npm run dev` keeps it to this machine.
 
+**Over Tailscale.** The Mac's Tailscale address (`http://100.x.y.z:38900`)
+works as it is. For the https name instead, serve the port and tell the app
+its name (in `.env.local` at the repo root, so the Mac app sees it too), then
+restart. It is one or the other: once the port is served, Tailscale answers
+it in https only, and the plain `http://100.x.y.z:38900` address stops
+working (the home Wi-Fi address is not affected).
+
+```sh
+tailscale serve --bg --https=38900 http://localhost:38900
+echo 'ARCADE_TAILNET_HOST=my-mac.my-tailnet.ts.net' >> .env.local
+```
+
+Only that exact name is answered, never a pattern. Setting up the first PIN
+still has to be done at the Mac itself.
+
 ### Mac app
 
 `./macos/build-app.sh` installs *Schoolhouse Arcade.app*: click it in the

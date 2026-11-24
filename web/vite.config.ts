@@ -4,6 +4,7 @@ import tailwindcss from "@tailwindcss/vite";
 // The API is Vite `apply:"serve"` middleware on the dev server — there is no
 // separate backend. See server/api.ts.
 import { apiPlugins } from "./server/api.ts";
+import { tailnetHosts } from "./server/tailnet.ts";
 
 export default defineConfig({
   plugins: [react(), tailwindcss(), apiPlugins()],
@@ -13,8 +14,9 @@ export default defineConfig({
     // machine (a café, a hotel). server/origin.ts decides who may call the API.
     host: process.env.ARCADE_LOCAL_ONLY ? "localhost" : true,
     // Vite's own host check admits localhost and bare IP addresses; this
-    // adds the Mac's Bonjour name (my-mac.local).
-    allowedHosts: [".local"],
+    // adds the Mac's Bonjour name (my-mac.local), and its Tailscale name
+    // when ARCADE_TAILNET_HOST gives one (server/tailnet.ts).
+    allowedHosts: [".local", ...tailnetHosts()],
     // Fixed port so the tablet's bookmark and the Mac app have one URL;
     // strict so a second instance fails loudly instead of serving a twin on
     // the next port. 38900 = Schoolhouse Arcade; Lean Into It is 38800, Fret

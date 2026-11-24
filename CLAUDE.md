@@ -26,6 +26,7 @@ web/shared/comet/deck.ts     which card comes next (weighted by the player's mis
 web/shared/comet/session.ts  a round as events: countdown, deal, key, clock, pause (the screen's reducer); PACE
 web/server/api.ts        wrap() and the route table (ROUTES)
 web/server/origin.ts     who may call the API: this Mac or the home network, from the app
+web/server/tailnet.ts    ARCADE_TAILNET_HOST: the Mac's Tailscale name, the one name beyond those
 web/server/http.ts       JSON bodies and replies, HttpError
 web/server/db.ts         the pg pool, the boot check, setDb() for tests
 web/server/players.ts    /api/players
@@ -66,7 +67,9 @@ macos/                   the Dock app (build-app.sh, the launcher, the server he
   in `web/vite.config.ts`): the tablet plays, the Mac keeps score. That is
   the opposite of the sibling apps, so the wall matters more, not less.
   Every API route goes through `wrap()` in `web/server/api.ts`: the Host
-  must be this machine, a private address or a `.local` name; the Origin
+  must be this machine, a private address, a `.local` name or the exact
+  Tailscale name set in `ARCADE_TAILNET_HOST` (`web/server/tailnet.ts`:
+  shell or `.env.local`, read at start; never a pattern); the Origin
   must match it; and the request must come from the app (the browser says
   same-origin, or it carries `X-Schoolhouse-Arcade: 1`, which `client.ts`
   sends). Add a route to `ROUTES`; a test proves every entry is wrapped.

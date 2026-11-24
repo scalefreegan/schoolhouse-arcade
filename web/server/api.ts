@@ -6,6 +6,7 @@ import { checkDatabase, setDb, type Db } from "./db.ts";
 import { handleGrownup } from "./grownup.ts";
 import { HttpError, INTERNAL_ERROR, sendJson } from "./http.ts";
 import { fromApp, homeHost, sameOrigin } from "./origin.ts";
+import { tailnetHosts } from "./tailnet.ts";
 import { handlePlayers } from "./players.ts";
 import { handlePlays } from "./plays.ts";
 
@@ -18,15 +19,18 @@ export { fromApp, homeHost, sameOrigin };
 
 type Handler = (req: IncomingMessage, res: ServerResponse) => void | Promise<void>;
 
+/** The Mac's Tailscale name, if one is set: read once, when the server starts. */
+const TAILNET: readonly string[] = tailnetHosts();
+
 /**
  * Every route goes through here: the home-host, same-origin and
  * from-the-app checks first, then a JSON error envelope for anything
  * thrown. No exceptions: a route that bypasses wrap() is the bug the rule
  * in CLAUDE.md exists to prevent.
  */
-export function wrap(fn: Handler): Handler {
+export function wrap(fn: Handler, also: readonly string[] = TAILNET): Handler {
   return (req, res) => {
-    if (!homeHost(req.headers.host) || !sameOrigin(req.headers.origin, req.headers.host) || !fromApp(req.headers)) {
+    if (!homeHost(req.headers.host, also) || !sameOrigin(req.headers.origin, req.headers.host) || !fromApp(req.headers)) {
       sendJson(res, 403, { error: "cross-origin request refused" } satisfies ErrorReply);
       return;
     }

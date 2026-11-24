@@ -4,7 +4,11 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import type { ViteDevServer } from "vite";
 import { ROUTES, apiPlugins, fromApp, homeHost, sameOrigin, wrap } from "./api.ts";
 import { HttpError } from "./http.ts";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { atThisMac } from "./origin.ts";
+import { parseTailnetHosts, tailnetHosts } from "./tailnet.ts";
 
 // This server is on the home network on purpose. These rules are what keeps
 // a website open in another tab, or a page on the wider internet, from
@@ -31,6 +35,32 @@ test("this machine, a private address and a Bonjour name count as home; nothing 
     assert.equal(homeHost(host), false, host);
   }
   assert.equal(homeHost(undefined), false);
+});
+
+test("a Tailscale name counts as home only when it is the one that was set, exactly", () => {
+  const also = ["my-mac.tail1234.ts.net"];
+  assert.equal(homeHost("my-mac.tail1234.ts.net:38900", also), true);
+  assert.equal(homeHost("MY-MAC.tail1234.ts.net", also), true);
+  for (const host of ["my-mac.tail1234.ts.net", "other.tail1234.ts.net:38900", "my-mac.tail1234.ts.net.evil.example", "x.my-mac.tail1234.ts.net"]) {
+    assert.equal(homeHost(host, host === "my-mac.tail1234.ts.net" ? [] : also), false, host);
+  }
+  assert.deepEqual(parseTailnetHosts(" My-Mac.Tail1234.ts.net, other.ts.net  my-mac.tail1234.ts.net "), ["my-mac.tail1234.ts.net", "other.ts.net"]);
+  // Not names: a URL, a port, a wildcard, one label, an address.
+  const warn = console.warn;
+  console.warn = () => {};
+  try {
+    assert.deepEqual(parseTailnetHosts("https://a.ts.net a.ts.net:38900 *.ts.net .ts.net localhost 10.0.0.1"), []);
+  } finally {
+    console.warn = warn;
+  }
+  assert.deepEqual(parseTailnetHosts(undefined), []);
+  // The shell wins over the file; an empty shell value means none.
+  const file = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "arcade-env-")), ".env.local");
+  fs.writeFileSync(file, "ARCADE_TAILNET_HOST=file.ts.net\n");
+  assert.deepEqual(tailnetHosts({}, file), ["file.ts.net"]);
+  assert.deepEqual(tailnetHosts({ ARCADE_TAILNET_HOST: "shell.ts.net" }, file), ["shell.ts.net"]);
+  assert.deepEqual(tailnetHosts({ ARCADE_TAILNET_HOST: "" }, file), []);
+  assert.deepEqual(tailnetHosts({}, `${file}.missing`), []);
 });
 
 test("a request from the app: the browser says same-origin, or the app's marker where the browser says nothing", () => {
@@ -119,4 +149,13 @@ test("every route the plugin mounts is behind wrap()", async () => {
       assert.equal(sent.status, 403, `${route}, ${name}`);
     }
   }
+});
+
+test("wrap() lets the set Tailscale name in, and no other name", async () => {
+  const handler = wrap(() => {}, ["my-mac.tail1234.ts.net"]);
+  const ask = async (host: string) => (await call(handler, { host, origin: `https://${host}`, "sec-fetch-site": "same-origin" })).status;
+  assert.notEqual(await ask("my-mac.tail1234.ts.net:38900"), 403);
+  assert.equal(await ask("other.tail1234.ts.net:38900"), 403);
+  // With none set (the default here: no ARCADE_TAILNET_HOST in a test run).
+  assert.equal((await call(wrap(() => {}, []), { host: "my-mac.tail1234.ts.net:38900", origin: "https://my-mac.tail1234.ts.net:38900", "sec-fetch-site": "same-origin" })).status, 403);
 });

@@ -42,10 +42,11 @@ export function Attract() {
       </h1>
 
       <div className="mt-14 w-full max-w-2xl">
-        <div className="flex items-end justify-between px-4">
+        {/* The cast shrinks to fit a phone rather than push the screen wider. */}
+        <div className="flex items-end justify-between gap-1 px-4">
           {AVATARS.map((a, i) => (
-            <span key={a.id} className="hop" style={{ animationDelay: `${(i % 4) * 0.15}s` }}>
-              <AvatarSprite avatar={a.id} size={56} />
+            <span key={a.id} className="hop min-w-0" style={{ animationDelay: `${(i % 4) * 0.15}s` }}>
+              <AvatarSprite avatar={a.id} size={56} className="h-auto max-w-full" />
             </span>
           ))}
         </div>

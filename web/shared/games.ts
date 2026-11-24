@@ -19,7 +19,7 @@ export const GAMES: GameInfo[] = [
     title: "Comet Cards",
     pitch: "Answer the card before the comet burns out",
     teaches: "Adding and taking away, 0 to 10",
-    status: "soon",
+    status: "live",
   },
 ];
 

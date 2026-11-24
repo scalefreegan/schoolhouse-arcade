@@ -8,11 +8,48 @@ an id never changes once live. Mirrors Lean Into It's `docs/DATA.md`.
 | What | Where | Tracked by git |
 |---|---|---|
 | The games' rules, the avatars, the sprites | `web/shared/`, `web/src/sprites/` | yes |
-| Players | Postgres `schoolhouse_arcade` | no |
+| Players; every play and every answer in it; stars per level; tickets, badges, prizes and hand-overs; the grown-up PIN's hash | Postgres `schoolhouse_arcade` | no |
 | `DATABASE_URL`, local overrides | `.env.local` | no |
-| Which player this device is, whether sound is off | the browser's localStorage (`arcade.player`, `arcade.muted`) | no, and not in the database |
+| Which player this device is, whether sound is off, the set-up each player used last | the browser's localStorage (`arcade.player`, `arcade.muted`, `arcade.comet.setup.<player>`) | no, and not in the database |
 | `npm run db:backup`'s dumps of the database, the newest 14, readable only by you | `backups/` (`SCHOOLHOUSE_ARCADE_BACKUPS_DIR` moves it) | no (`backups/` is ignored) |
 | The Mac app's server log, and the daily backup's | `~/Library/Logs/SchoolhouseArcade.log` (`.old`: the run before), `SchoolhouseArcadeBackup.log` | no |
+
+## The tables
+
+| Table | One row is | Written by |
+|---|---|---|
+| `players` | someone on the "Who is playing?" screen | `scripts/db/players.ts` |
+| `plays` | one finished round, scored by the server; `round_id` is the round's own id | `scripts/db/plays.ts` |
+| `answers` | one card of a play: the fact, what was answered, how long it took | `scripts/db/plays.ts` |
+| `level_stars` | the most stars a player has on one level | `scripts/db/plays.ts` |
+| `level_opens` | a level a grown-up opened early for a player | `scripts/db/plays.ts` |
+| `ticket_events` | one change to a player's tickets: earned, spent, or adjusted by hand | `scripts/db/tickets.ts` |
+| `badges_earned` | a badge a player holds | `scripts/db/badges.ts` |
+| `prizes` | a prize on the shelf (a removed one is retired, not deleted) | `scripts/db/prizes.ts` |
+| `redemptions` | a prize handed over, with its name and price on the day | `scripts/db/prizes.ts` |
+| `settings` | one of the arcade's own settings; today only the PIN's hash | `scripts/db/settings.ts` |
+
+The high score tables are queries over `plays`. Which card comes next is
+worked out from a player's latest `answers`.
+
+**Tickets are a ledger.** A balance is the sum of a player's
+`ticket_events`; rows are added and never changed or deleted, so every
+ticket can be traced to the round, badge, prize or grown-up that moved it. A
+mistake is put right with another row (Grown-ups → Tickets). A row for a
+round points at its play (`play_id`); a row for a prize points at its
+hand-over (`redemption_id`).
+
+**A round is stored once.** The browser makes a round id when a round ends
+(`web/shared/roundid.ts`) and sends it with every try at saving that round.
+It is kept in `plays.round_id`, unique per player. A round id the server
+already has is answered with the play it was stored as; nothing is recorded
+or paid again. A play must carry one; plays from before migration
+`0003_round_ids` have none.
+
+Migration `0002_prizes` also puts the three example prizes on the shelf.
+
+`npm run pin:reset` forgets the grown-up PIN (and nothing else). The next
+one is chosen on the Mac, like the first.
 
 ## Setup
 

@@ -25,6 +25,13 @@ The first cabinet is **Comet Cards**: addition and subtraction flashcards,
 0 to 10, against the clock. [`docs/PRD.md`](docs/PRD.md) has the whole
 design: levels, modes, scoring, tickets, badges and prizes.
 
+Every right answer pays tickets; stars and badges pay more. At the **Prize
+Counter** a player sees what their tickets can buy from a shelf the
+grown-up stocks (a candy, an ice cream, a new video game). Handing a prize
+over takes a four-digit grown-up PIN, chosen on the Mac: open
+`http://localhost:38900` there and go to *Grown-ups*. Forgotten it?
+`npm run pin:reset` at the Mac, then choose a new one the same way.
+
 ## Run it
 
 ```sh

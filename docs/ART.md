@@ -37,6 +37,16 @@ whole blocks. `<AvatarSprite avatar="zib" />` draws a player's character.
 3. Never rename or remove an `id` once someone has picked it: it is stored
    on their player row.
 
+## Prizes and badges
+
+A prize's picture is one of `PRIZE_ICONS` in `web/shared/prizes.ts` (candy,
+icecream, gamepad, gift, pizza, book, ball, popcorn); a badge names its
+drawing and palette in `web/shared/badges.ts`. To add a prize picture, draw
+it in `art.ts` with a `default` palette and add its id to `PRIZE_ICONS`.
+`npm test` checks every badge and prize picture has a drawing. A badge not
+yet earned is the same drawing unlit (`<Sprite off />`), so a badge needs a
+shape that reads as a silhouette.
+
 ## Replacing a drawing with made art
 
 The rest of the app only knows a sprite's id, so art made elsewhere (ArtCraft,

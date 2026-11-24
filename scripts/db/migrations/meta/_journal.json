@@ -8,6 +8,27 @@
       "when": 1795533074970,
       "tag": "0000_init",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1795533765326,
+      "tag": "0001_plays",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1795534667418,
+      "tag": "0002_prizes",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1795546845599,
+      "tag": "0003_round_ids",
+      "breakpoints": true
     }
   ]
 }

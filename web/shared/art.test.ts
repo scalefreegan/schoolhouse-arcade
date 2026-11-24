@@ -3,6 +3,8 @@ import { test } from "node:test";
 import { ART } from "../src/sprites/art.ts";
 import { spriteRuns } from "../src/sprites/runs.ts";
 import { AVATARS, AVATAR_IDS, cleanPlayerName } from "./avatars.ts";
+import { BADGES } from "./badges.ts";
+import { PRIZE_ICONS } from "./prizes.ts";
 
 // The drawings are typed by hand as rows of characters; one short row or one
 // character missing from a palette would draw a hole or a black bar.
@@ -33,6 +35,20 @@ test("every avatar names a drawing and a palette that exist, and ids are unique"
     assert.ok(art, `${a.id}: no sprite ${a.sprite}`);
     assert.ok(a.palette in art.palettes, `${a.id}: ${a.sprite} has no palette ${a.palette}`);
   }
+});
+
+test("every badge and every prize picture names a drawing (and palette) that exists", () => {
+  const art = ART as Record<string, { palettes: Record<string, unknown> }>;
+  for (const b of BADGES) {
+    assert.ok(Object.hasOwn(art, b.sprite), `${b.id}: no sprite ${b.sprite}`);
+    assert.ok(b.palette in art[b.sprite].palettes, `${b.id}: ${b.sprite} has no palette ${b.palette}`);
+  }
+  for (const icon of PRIZE_ICONS) {
+    assert.ok(Object.hasOwn(art, icon), `no sprite for the prize picture ${icon}`);
+    assert.ok("default" in art[icon].palettes, `${icon} has no default palette`);
+  }
+  // What the screens draw by name.
+  for (const id of ["ticket", "gift", "lock"]) assert.ok(Object.hasOwn(art, id), id);
 });
 
 test("a player's name is trimmed and capped; an empty or overlong one is refused", () => {

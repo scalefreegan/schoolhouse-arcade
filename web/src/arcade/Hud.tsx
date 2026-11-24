@@ -41,7 +41,7 @@ export function Hud({ children }: { children?: ReactNode }) {
       )}
       <div className="flex items-center gap-4">
         {player && tickets !== null && (
-          <a href={href("prizes")} className="flex items-center gap-2 text-yellow no-underline" aria-label={`${tickets} tickets. Go to the Prize Counter`}>
+          <a href={href("prizes")} className="flex min-h-14 items-center gap-2 text-yellow no-underline" aria-label={`${tickets} tickets. Go to the Prize Counter`}>
             <Sprite id="ticket" size={40} />
             <span className="font-display glow text-sm">{tickets}</span>
           </a>

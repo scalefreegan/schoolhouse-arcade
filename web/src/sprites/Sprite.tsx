@@ -29,7 +29,7 @@ export function Sprite({ id, palette = "default", size = 64, className = "", tit
 }
 
 /** A player's character in its colour, as stored (shared/avatars.ts: lookOf). */
-export function AvatarSprite({ avatar, colour = null, size = 64, className = "", title }: { avatar: string; colour?: string | null; size?: number; className?: string; title?: string }) {
+export function AvatarSprite({ avatar, colour, size = 64, className = "", title }: { avatar: string; /** The player's stored colour; null is the character's own look. */ colour: string | null; size?: number; className?: string; title?: string }) {
   const look = lookOf(avatar, colour);
   return <Sprite id={look.character.sprite} palette={look.colour} size={size} className={className} {...(title ? { title } : {})} />;
 }

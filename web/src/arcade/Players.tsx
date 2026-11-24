@@ -48,7 +48,7 @@ function PlayerForm({ editing, onDone, onCancel }: { editing: Player | null; onD
             <button
               key={c.id}
               type="button"
-              className="panel pick flex min-w-0 flex-col items-center gap-1 px-1 py-2"
+              className="panel pick flex min-w-0 flex-col items-center gap-1 px-1! py-2!"
               aria-pressed={character.id === c.id}
               onClick={() => {
                 sfx.tap();
@@ -69,7 +69,7 @@ function PlayerForm({ editing, onDone, onCancel }: { editing: Player | null; onD
               <button
                 key={k}
                 type="button"
-                className="panel pick flex min-w-0 items-center justify-center p-1"
+                className="panel pick flex min-w-0 items-center justify-center p-1!"
                 aria-pressed={colour === k}
                 aria-label={COLOUR_NAMES[k] ?? k}
                 onClick={() => {

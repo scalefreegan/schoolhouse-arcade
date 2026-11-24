@@ -79,6 +79,13 @@ test("a player with an id from before colours keeps it through a rename, and can
   const [{ id }] = await query("insert into players (name, avatar) values ('Old', 'gizmo') returning id");
   assert.deepEqual((await request<PlayersReply>(players, "GET", "/", undefined, APP)).body.players.map((p) => [p.avatar, p.colour]), [["gizmo", null]]);
   assert.equal((await request<Player>(players, "PATCH", `/${id}`, { name: "Older" }, APP)).body.avatar, "gizmo");
+  // A tablet still showing the page from before colours sends the old id on every save, and may join with one.
+  for (const old of ["nova", "dash", "gizmo", "blip"]) {
+    const kept = await request<Player>(players, "PATCH", `/${id}`, { name: "Older", avatar: old }, APP);
+    assert.deepEqual([kept.status, kept.body.avatar, kept.body.colour], [200, old, null], old);
+  }
+  const joined = await request<Player>(players, "POST", "/", { name: "Late", avatar: "nova" }, APP);
+  assert.deepEqual([joined.status, joined.body.avatar, joined.body.colour], [201, "nova", null]);
   const moved = await request<Player>(players, "PATCH", `/${id}`, { avatar: "bolt", colour: "gold" }, APP);
   assert.deepEqual([moved.status, moved.body.avatar, moved.body.colour], [200, "bolt", "gold"]);
 });

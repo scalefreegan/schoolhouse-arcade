@@ -1,9 +1,9 @@
 # What is stored where
 
 Schoolhouse Arcade keeps who plays and what they have earned in a local
-Postgres 17 database, `schoolhouse_arcade`. Game ids, level ids and avatar
-ids come from `web/shared/` and are the keys the database uses, which is why
-an id never changes once live. Mirrors Lean Into It's `docs/DATA.md`.
+Postgres 17 database, `schoolhouse_arcade`. Game ids, level ids, avatar
+ids and colour ids come from `web/shared/` and are the keys the database
+uses, which is why an id never changes once live. Mirrors Lean Into It's `docs/DATA.md`.
 
 | What | Where | Tracked by git |
 |---|---|---|

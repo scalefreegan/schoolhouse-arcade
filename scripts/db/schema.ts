@@ -7,9 +7,9 @@
 // Node runs it by stripping types, so `node --test` imports it directly.
 //
 // There are no logins. A player is a row picked on the "Who is playing?"
-// screen, and every personal row hangs off it. Game ids, level ids and
-// avatar ids are the ones in web/shared/, which is why they must never
-// change once live.
+// screen, and every personal row hangs off it. Game ids, level ids, avatar
+// ids and colour ids are the ones in web/shared/, which is why they must
+// never change once live.
 
 import { bigint, bigserial, boolean, index, integer, pgTable, primaryKey, smallint, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 

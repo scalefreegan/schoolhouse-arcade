@@ -46,7 +46,7 @@ export function Attract() {
         <div className="grid grid-cols-6 items-end justify-items-center gap-x-1 gap-y-3 px-4 sm:grid-cols-12">
           {CHARACTERS.map((c, i) => (
             <span key={c.id} className="hop min-w-0" style={{ animationDelay: `${(i % 4) * 0.15}s` }}>
-              <AvatarSprite avatar={c.id} size={48} className="h-auto max-w-full" />
+              <AvatarSprite avatar={c.id} colour={null} size={48} className="h-auto max-w-full" />
             </span>
           ))}
         </div>

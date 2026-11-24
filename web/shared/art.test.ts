@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { test } from "node:test";
 import { ART } from "../src/sprites/art.ts";
 import { spriteRuns } from "../src/sprites/runs.ts";
@@ -61,6 +62,12 @@ test("the ids from before colours still draw exactly as they did", () => {
     const look = lookOf(id, null);
     assert.equal(look.character.sprite, sprite, id);
     assert.deepEqual((ART[look.character.sprite].palettes as Record<string, unknown>)[look.colour], colours, id);
+  }
+  // And the drawings themselves, pixel for pixel (a hash of their rows as they were).
+  const rowsWere: Record<string, string> = { alien: "e68bd3a8205bb2d2", dino: "d34c1f09321dbd22", robot: "d4ff145cd7627953", monster: "8e2e7feb30e97457" };
+  for (const [sprite, hash] of Object.entries(rowsWere)) {
+    const rows = (ART as Record<string, { rows: string[] }>)[sprite].rows;
+    assert.equal(createHash("sha256").update(rows.join("\n")).digest("hex").slice(0, 16), hash, `${sprite} was redrawn`);
   }
   // An old id keeps its own colour, whatever a row says beside it.
   assert.deepEqual([lookOf("nova", "blue").character.id, lookOf("nova", "blue").colour], ["zib", "pink"]);

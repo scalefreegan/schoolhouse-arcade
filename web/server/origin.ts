@@ -1,6 +1,7 @@
 // Who may call the API: this Mac or a device on the home network, from this
 // app's own pages. A leaf module (no imports), so any route can use it
-// without a cycle; api.ts applies all three in wrap().
+// without a cycle; api.ts applies sameOrigin, homeHost and fromApp in wrap(),
+// and grownup.ts asks atThisMac before it takes a first PIN.
 //
 // Unlike the sibling apps, this one is served to the home network on
 // purpose: the game is played on a tablet, the database is on the Mac.
@@ -33,6 +34,12 @@ function privateIpv4(name: string): boolean {
   return a === 10 || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) || (a === 100 && b >= 64 && b <= 127);
 }
 
+/** The name in a Host header, without its port. */
+const hostName = (host: string): string => host.replace(/:\d+$/, "").toLowerCase();
+
+/** The names by which a machine calls itself. */
+const loopbackName = (name: string): boolean => name === "localhost" || name === "127.0.0.1" || name === "[::1]";
+
 /**
  * The names this app answers to: this machine (localhost), a private
  * network address, or a Bonjour name (my-mac.local). The same-origin check
@@ -42,10 +49,27 @@ function privateIpv4(name: string): boolean {
  */
 export function homeHost(host: string | undefined): boolean {
   if (!host) return false;
-  const name = host.replace(/:\d+$/, "").toLowerCase();
-  if (name === "localhost" || name === "127.0.0.1" || name === "[::1]") return true;
-  if (privateIpv4(name)) return true;
+  const name = hostName(host);
+  if (loopbackName(name) || privateIpv4(name)) return true;
   return /^[a-z0-9]([a-z0-9-]*[a-z0-9])?\.local$/.test(name);
+}
+
+/** A socket address that only this machine can have: ::1 or 127/8. A server
+ *  listening on both families sees the second as ::ffff:127.0.0.1. */
+function loopbackAddress(address: string): boolean {
+  return address === "::1" || /^(::ffff:)?127\.\d{1,3}\.\d{1,3}\.\d{1,3}$/i.test(address);
+}
+
+/**
+ * The request was made at this Mac, in its own browser: it asked for a
+ * loopback name, and it came from a loopback address. Both are needed. Any
+ * device can write "localhost" in its Host header, but none can have the
+ * address; a tunnel or proxy running on this Mac has the address, but passes
+ * on the name that was asked for.
+ */
+export function atThisMac(host: string | undefined, remoteAddress: string | undefined): boolean {
+  if (!host || !remoteAddress) return false;
+  return loopbackName(hostName(host)) && loopbackAddress(remoteAddress);
 }
 
 /** The header only the app's own code sends (web/src/api/client.ts). */

@@ -131,7 +131,7 @@ export function PrizeCounter() {
       void load();
       return null;
     } catch (e) {
-      if (e instanceof ApiError && e.code === "pin_unset") return "No PIN yet. Choose one in the Grown-ups area first.";
+      if (e instanceof ApiError && e.code === "pin_unset") return "Ask a grown-up.";
       return e instanceof ApiError ? e.message : String(e);
     }
   };

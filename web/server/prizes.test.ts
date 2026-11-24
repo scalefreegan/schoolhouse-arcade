@@ -3,13 +3,14 @@ import { test } from "node:test";
 import { answerOf, parseFact } from "../shared/comet/facts.ts";
 import type { AnswerInput } from "../shared/play.ts";
 import type { CounterReply, ErrorReply, GrownupReply, PinState, PlayReply, Player, PlayersReply, Prize, ProgressReply, RedeemReply } from "../shared/wire.ts";
+import { addSetting, getSetting } from "../../scripts/db/settings.ts";
 import { freshDb } from "../../scripts/tests/testdb.mjs";
 import { wrap } from "./api.ts";
 import { handleCounter } from "./counter.ts";
 import { rawDb, setDb } from "./db.ts";
 import { handleGrownup } from "./grownup.ts";
 import type { IncomingMessage } from "node:http";
-import { LOCK_MS, MAX_TRIES, requirePin, resetPinGuard } from "./pin.ts";
+import { LOCK_MS, MAX_TRIES, requirePin, resetPinGuard, setFirstPin } from "./pin.ts";
 import { handlePlayers } from "./players.ts";
 import { handlePlays } from "./plays.ts";
 import { request } from "./testhttp.ts";
@@ -20,6 +21,9 @@ import { request } from "./testhttp.ts";
 const APP = { host: "localhost:38900", "x-schoolhouse-arcade": "1" };
 const PIN = "4821";
 const withPin = (pin = PIN) => ({ ...APP, "x-grownup-pin": pin });
+/** The tablet: the Mac's address on the home network, from the tablet's own. */
+const TABLET = { host: "192.168.1.20:38900", origin: "http://192.168.1.20:38900", "x-schoolhouse-arcade": "1" };
+const TABLET_ADDRESS = "192.168.1.44";
 const plays = wrap(handlePlays);
 const players = wrap(handlePlayers);
 const counter = wrap(handleCounter);
@@ -121,44 +125,98 @@ test("the shelf starts with the three examples, cheapest first, and the counter 
   assert.equal((await request(counter, "GET", "/?player=nobody", undefined, APP)).status, 404);
 });
 
-test("nothing behind the PIN happens without it: no PIN, a wrong PIN and a malformed one are all refused, and nothing is written", async (t) => {
+/** Every grown-up route that changes or shows something, as [method, url, body]. */
+const behindThePin = (playerId: string, prizeId: string): [string, string, unknown?][] => [
+  ["GET", "/"],
+  ["POST", "/redeem", { playerId, prizeId }],
+  ["POST", "/prizes", { name: "Bike", icon: "gift", cost: 1 }],
+  ["PATCH", `/prizes/${prizeId}`, { name: "Free candy", icon: "candy", cost: 1 }],
+  ["DELETE", `/prizes/${prizeId}`],
+  ["POST", "/tickets", { playerId, delta: 9999 }],
+  ["POST", "/levels", { playerId, gameId: "comet-cards", level: "big-20" }],
+  ["DELETE", `/players/${playerId}`],
+  ["POST", "/pin", { pin: "0000" }],
+  ["GET", "/no-such-thing"],
+];
+const COUNTS = "select (select count(*) from ticket_events) as t, (select count(*) from redemptions) as r, (select count(*) from prizes where retired_at is null) as p, (select count(*) from players where retired_at is null) as pl, (select count(*) from level_opens) as o, (select string_agg(value, ',') from settings) as s";
+
+test("nothing behind the PIN happens without it: no PIN, a wrong PIN and a malformed one are all refused, at the Mac and on the tablet, and nothing is written", async (t) => {
   const { join, give, prize, query } = await arcade(t);
   const em = await join("Em");
   await give(em, 500);
   const candy = await prize(em, "A candy");
-  const before = JSON.stringify(await query("select (select count(*) from ticket_events) as t, (select count(*) from redemptions) as r, (select count(*) from prizes where retired_at is null) as p, (select count(*) from players where retired_at is null) as pl, (select count(*) from level_opens) as o"));
-  const calls: [string, string, unknown?][] = [
-    ["GET", "/"],
-    ["POST", "/redeem", { playerId: em, prizeId: candy.id }],
-    ["POST", "/prizes", { name: "Bike", icon: "gift", cost: 1 }],
-    ["PATCH", `/prizes/${candy.id}`, { name: "Free candy", icon: "candy", cost: 1 }],
-    ["DELETE", `/prizes/${candy.id}`],
-    ["POST", "/tickets", { playerId: em, delta: 9999 }],
-    ["POST", "/levels", { playerId: em, gameId: "comet-cards", level: "big-20" }],
-    ["DELETE", `/players/${em}`],
-    ["POST", "/pin", { pin: "0000" }],
-    ["GET", "/no-such-thing"],
-  ];
-  for (const headers of [APP, withPin("0000"), withPin("48211"), withPin("")]) {
-    for (const [method, url, body] of calls) {
-      resetPinGuard(); // this test is about the wall, not the lock
-      const sent = await request<ErrorReply>(grownup, method, url, body, headers);
-      assert.deepEqual([sent.status, sent.body.code], [401, "pin_wrong"], `${method} ${url} with ${JSON.stringify(headers["x-grownup-pin" as keyof typeof headers])}`);
+  const before = JSON.stringify(await query(COUNTS));
+  for (const [from, address] of [[APP, "127.0.0.1"], [TABLET, TABLET_ADDRESS]] as const) {
+    for (const pin of [undefined, "0000", "48211", ""]) {
+      const headers: Record<string, string> = { ...from, ...(pin === undefined ? {} : { "x-grownup-pin": pin }) };
+      for (const [method, url, body] of behindThePin(em, candy.id)) {
+        resetPinGuard(); // this test is about the wall, not the lock
+        const sent = await request<ErrorReply>(grownup, method, url, body, headers, address);
+        assert.deepEqual([sent.status, sent.body.code], [401, "pin_wrong"], `${method} ${url} from ${address} with ${JSON.stringify(pin)}`);
+      }
     }
   }
-  assert.equal(JSON.stringify(await query("select (select count(*) from ticket_events) as t, (select count(*) from redemptions) as r, (select count(*) from prizes where retired_at is null) as p, (select count(*) from players where retired_at is null) as pl, (select count(*) from level_opens) as o")), before);
+  assert.equal(JSON.stringify(await query(COUNTS)), before);
   assert.equal((await request(grownup, "GET", "/", undefined, withPin())).status, 200, "and the right PIN still works");
 });
 
-test("the first PIN is chosen without one; after that changing it needs the old one; the hash is stored, never the PIN", async (t) => {
+test("before there is a PIN nothing on the tablet makes one: every route is refused, whatever its Host says, and nothing is written", async (t) => {
+  const { join, prize, query } = await arcade(t, { pin: false });
+  const em = await join("Em");
+  const candy = await prize(em, "A candy");
+  const before = JSON.stringify(await query(COUNTS));
+  const elsewhere: [string, Record<string, string>, string | undefined][] = [
+    ["the tablet", TABLET, TABLET_ADDRESS],
+    ["the tablet, writing localhost in its Host", APP, TABLET_ADDRESS],
+    ["the tablet, as a dual-stack server sees it", APP, `::ffff:${TABLET_ADDRESS}`],
+    ["a proxy on the Mac", TABLET, "127.0.0.1"],
+    ["the Mac by its network address", TABLET, "192.168.1.20"],
+    ["a socket with no address", APP, ""],
+  ];
+  for (const [name, headers, address] of elsewhere) {
+    for (const [method, url, body] of behindThePin(em, candy.id)) {
+      const sent = await request<ErrorReply>(grownup, method, url, body, { ...headers, "x-grownup-pin": "0000" }, address);
+      assert.deepEqual([sent.status, sent.body.code], url === "/pin" ? [403, "pin_at_mac"] : [401, "pin_unset"], `${name}: ${method} ${url}`);
+    }
+    assert.deepEqual((await request<PinState>(grownup, "GET", "/pin", undefined, headers, address)).body, { set: false, mayChoose: false }, name);
+  }
+  assert.equal(JSON.stringify(await query(COUNTS)), before);
+  // At the Mac it is chosen; the tablet can then change it, with the old one.
+  assert.deepEqual((await request<PinState>(grownup, "GET", "/pin", undefined, APP, "::1")).body, { set: false, mayChoose: true });
+  assert.equal((await request(grownup, "POST", "/pin", { pin: PIN }, APP, "::ffff:127.0.0.1")).status, 200);
+  assert.deepEqual((await request<PinState>(grownup, "GET", "/pin", undefined, TABLET, TABLET_ADDRESS)).body, { set: true, mayChoose: false });
+  assert.equal((await request(grownup, "POST", "/pin", { pin: "1111" }, TABLET, TABLET_ADDRESS)).status, 401);
+  assert.equal((await request(grownup, "POST", "/pin", { pin: "1111" }, { ...TABLET, "x-grownup-pin": PIN }, TABLET_ADDRESS)).status, 200);
+  assert.equal((await request(grownup, "GET", "/", undefined, withPin("1111"))).status, 200);
+});
+
+test("a first PIN never replaces one that exists: a second is a 409, and of two at once one wins", async (t) => {
+  await arcade(t, { pin: false });
+  const db = rawDb();
+  // Both ask "is there a PIN?" before either has chosen one.
+  const both = await Promise.all(["1111", "2222"].map((pin) => request<ErrorReply>(grownup, "POST", "/pin", { pin }, APP)));
+  assert.deepEqual(both.map((b) => b.status).sort(), [200, 409]);
+  assert.equal(both.find((b) => b.status === 409)!.body.code, "pin_taken");
+  const winner = both[0].status === 200 ? "1111" : "2222";
+  const loser = winner === "1111" ? "2222" : "1111";
+  assert.equal((await request(grownup, "GET", "/", undefined, withPin(winner))).status, 200);
+  assert.equal((await request(grownup, "GET", "/", undefined, withPin(loser))).status, 401);
+  // The same one step down, where there is no "is there a PIN?" in front of it.
+  const stored = await getSetting(db, "grownup_pin");
+  await assert.rejects(setFirstPin(db, true, "3333"), { status: 409, code: "pin_taken" });
+  assert.equal(await addSetting(db, "grownup_pin", "not a hash"), false);
+  assert.equal(await getSetting(db, "grownup_pin"), stored);
+});
+
+test("the first PIN is chosen at the Mac without one; after that changing it needs the old one; the hash is stored, never the PIN", async (t) => {
   const { query } = await arcade(t, { pin: false });
-  assert.deepEqual((await request<PinState>(grownup, "GET", "/pin", undefined, APP)).body, { set: false });
+  assert.deepEqual((await request<PinState>(grownup, "GET", "/pin", undefined, APP)).body, { set: false, mayChoose: true });
   const early = await request<ErrorReply>(grownup, "GET", "/", undefined, withPin());
   assert.deepEqual([early.status, early.body.code], [401, "pin_unset"]);
   for (const bad of ["123", "12345", "abcd", 1234, null]) assert.equal((await request(grownup, "POST", "/pin", { pin: bad }, APP)).status, 400, String(bad));
-  assert.deepEqual((await request<PinState>(grownup, "GET", "/pin", undefined, APP)).body, { set: false });
+  assert.deepEqual((await request<PinState>(grownup, "GET", "/pin", undefined, APP)).body, { set: false, mayChoose: true });
   assert.equal((await request(grownup, "POST", "/pin", { pin: PIN }, APP)).status, 200);
-  assert.deepEqual((await request<PinState>(grownup, "GET", "/pin", undefined, APP)).body, { set: true });
+  assert.deepEqual((await request<PinState>(grownup, "GET", "/pin", undefined, APP)).body, { set: true, mayChoose: false });
   const [{ value }] = (await query("select value from settings where key = 'grownup_pin'")) as { value: string }[];
   assert.match(value, /^scrypt\$[0-9a-f]{32}\$[0-9a-f]{64}$/);
   assert.ok(!value.includes(PIN));

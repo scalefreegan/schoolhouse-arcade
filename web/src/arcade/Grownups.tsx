@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { BADGES, badgeById } from "../../shared/badges.ts";
 import { ADJUST_MAX, NOTE_MAX, PRIZE_COST_MAX, PRIZE_ICONS, PRIZE_NAME_MAX, cleanPrize, type PrizeFields } from "../../shared/prizes.ts";
-import type { GrownupPlayer, GrownupReply, LedgerLine, Prize } from "../../shared/wire.ts";
+import type { GrownupPlayer, GrownupReply, LedgerLine, PinState, Prize } from "../../shared/wire.ts";
 import { ApiError, addPrize, adjustTickets, changePrize, choosePin, getGrownup, getPinState, openLevelFor, removePrize, retirePlayer } from "../api/client.ts";
 import { go } from "../router.ts";
 import { AvatarSprite, Picture, Sprite } from "../sprites/Sprite.tsx";
@@ -168,8 +168,8 @@ function PrizeForm({ editing, busy, onSave, onCancel }: { editing: Prize | null;
 
 export function Grownups() {
   const { player, reload, setTickets } = useArcade();
-  /** Whether a PIN exists; null until the server has said. */
-  const [pinSet, setPinSet] = useState<boolean | null>(null);
+  /** Whether a PIN exists, and if not whether this device may choose it; null until the server has said. */
+  const [pinState, setPinState] = useState<PinState | null>(null);
   const [pin, setPin] = useState<string | null>(null);
   /** Choosing a PIN: the first typing, waiting for the second. */
   const [first, setFirst] = useState<string | null>(null);
@@ -181,10 +181,7 @@ export function Grownups() {
   const [prizeForm, setPrizeForm] = useState<{ editing: Prize | null } | null>(null);
 
   useEffect(() => {
-    getPinState().then(
-      (s) => setPinSet(s.set),
-      (e) => setError(message(e)),
-    );
+    getPinState().then(setPinState, (e) => setError(message(e)));
   }, []);
 
   const leave = () => go(player ? "lobby" : "players");
@@ -201,11 +198,14 @@ export function Grownups() {
       await choosePin(typed, current);
       setData(await getGrownup(typed));
       setPin(typed);
-      setPinSet(true);
+      setPinState({ set: true, mayChoose: false });
       if (current) setNotice("The PIN is changed.");
       setChanging(false);
       return null;
     } catch (e) {
+      // A first PIN refused: someone chose one meanwhile, or this is not the
+      // Mac. Ask again which it is, so the screen offers only what can be done.
+      if (current === undefined) getPinState().then(setPinState, () => {});
       return message(e);
     }
   };
@@ -220,7 +220,7 @@ export function Grownups() {
     }
   };
 
-  if (pinSet === null) {
+  if (pinState === null) {
     return (
       <main className="screen items-center justify-center text-center">
         {error ? (
@@ -237,10 +237,24 @@ export function Grownups() {
       </main>
     );
   }
+  if (!pinState.set && !pinState.mayChoose) {
+    return (
+      <main className="screen items-center justify-center text-center">
+        <div className="panel panel-cyan max-w-xl">
+          <h1 className="font-display glow m-0 text-sm text-cyan">No PIN yet</h1>
+          <p className="mt-4 mb-0">A grown-up chooses it on the Mac.</p>
+          <p className="mt-2 mb-0 break-all text-cyan">http://localhost:38900</p>
+          <button type="button" className="btn btn-quiet mt-4" onClick={leave}>
+            Back
+          </button>
+        </div>
+      </main>
+    );
+  }
   if (pin === null || data === null) {
     return (
       <main className="screen">
-        {pinSet ? (
+        {pinState.set ? (
           <PinPad title="Grown-ups only" hint="Type the PIN." onPin={enter} onCancel={leave} />
         ) : (
           <PinPad

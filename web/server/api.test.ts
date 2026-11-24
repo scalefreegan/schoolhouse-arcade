@@ -4,6 +4,7 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import type { ViteDevServer } from "vite";
 import { ROUTES, apiPlugins, fromApp, homeHost, sameOrigin, wrap } from "./api.ts";
 import { HttpError } from "./http.ts";
+import { atThisMac } from "./origin.ts";
 
 // This server is on the home network on purpose. These rules are what keeps
 // a website open in another tab, or a page on the wider internet, from
@@ -38,6 +39,16 @@ test("a request from the app: the browser says same-origin, or the app's marker 
   assert.equal(fromApp({}), false);
   assert.equal(fromApp({ "x-schoolhouse-arcade": "yes" }), false);
   for (const site of ["cross-site", "same-site", "none"]) assert.equal(fromApp({ "sec-fetch-site": site, "x-schoolhouse-arcade": "1" }), false, site);
+});
+
+test("a request was made at this Mac only when its Host and its socket address are both loopback", () => {
+  for (const host of ["localhost:38900", "LOCALHOST", "127.0.0.1:38900", "[::1]:38900"]) {
+    for (const address of ["127.0.0.1", "::1", "::ffff:127.0.0.1", "127.0.0.2"]) assert.equal(atThisMac(host, address), true, `${host} from ${address}`);
+    // A device on the network can write any Host it likes.
+    for (const address of ["192.168.1.44", "::ffff:192.168.1.44", "10.0.0.7", "100.105.11.98", "fe80::1", "::", "::ffff:128.0.0.1", "1127.0.0.1", "127.0.0.1.evil.example", "", undefined]) assert.equal(atThisMac(host, address), false, `${host} from ${address}`);
+  }
+  // A proxy on this Mac comes from loopback, whoever is behind it.
+  for (const host of ["192.168.1.20:38900", "my-mac.local:38900", "localhost.evil.example", "127.0.0.1.evil.example", "::1", "", undefined]) assert.equal(atThisMac(host, "127.0.0.1"), false, String(host));
 });
 
 /** A request as connect would hand it over, and a response that records what was sent. */

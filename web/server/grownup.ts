@@ -11,15 +11,16 @@ import { addTickets, balanceOf, balances, recentLedger } from "../../scripts/db/
 import { toPrize, toWon } from "./counter.ts";
 import { rawDb, type Db } from "./db.ts";
 import { HttpError, isUuid, methodNotAllowed, pathSegments, readJsonBody, sendJson } from "./http.ts";
-import { pinIsSet, requirePin, setPin } from "./pin.ts";
+import { atThisMac } from "./origin.ts";
+import { changePin, pinIsSet, requirePin, setFirstPin } from "./pin.ts";
 import { toPlayer } from "./players.ts";
 
 // /api/grownup: everything that costs real money or overrides the game.
 // Every route here needs the grown-up PIN on the request (web/server/pin.ts),
 // with two exceptions that could not: asking whether a PIN exists, and
-// choosing the first one.
+// choosing the first one, which is taken only at this Mac.
 //   GET    /api/grownup/pin            is a PIN set?            (no PIN)
-//   POST   /api/grownup/pin            choose it; change it     (no PIN the first time)
+//   POST   /api/grownup/pin            choose it; change it     (no PIN the first time, at the Mac)
 //   GET    /api/grownup                players, prizes, hand-overs, the ledger
 //   POST   /api/grownup/redeem         hand a prize over and take the tickets
 //   POST   /api/grownup/prizes         a new prize
@@ -106,12 +107,20 @@ export async function handleGrownup(req: IncomingMessage, res: ServerResponse): 
   if (rest.length) throw new HttpError(404, "no such route");
 
   if (what === "pin" && id === undefined) {
-    if (req.method === "GET") return sendJson(res, 200, { set: await pinIsSet(db) } satisfies PinState);
+    const atMac = atThisMac(req.headers.host, req.socket.remoteAddress);
+    if (req.method === "GET") {
+      const set = await pinIsSet(db);
+      return sendJson(res, 200, { set, mayChoose: !set && atMac } satisfies PinState);
+    }
     if (req.method !== "POST") return methodNotAllowed(res, "GET, POST");
-    // Changing the PIN needs the PIN. Choosing the first one cannot.
-    if (await pinIsSet(db)) await requirePin(db, req);
-    await setPin(db, (await readJsonBody<{ pin?: unknown }>(req)).pin);
-    return sendJson(res, 200, { set: true } satisfies PinState);
+    // Changing the PIN needs the PIN. Choosing the first one cannot, so it is
+    // only done at the Mac. From the tablet it would belong to whoever got
+    // there first.
+    const isSet = await pinIsSet(db);
+    if (isSet) await requirePin(db, req);
+    const { pin } = await readJsonBody<{ pin?: unknown }>(req);
+    await (isSet ? changePin(db, pin) : setFirstPin(db, atMac, pin));
+    return sendJson(res, 200, { set: true, mayChoose: false } satisfies PinState);
   }
 
   // Past here, nothing happens without the PIN.

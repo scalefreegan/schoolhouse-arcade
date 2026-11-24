@@ -178,11 +178,15 @@ balance never goes below nothing), opening a level early, and retiring a
 player.
 
 **The PIN** is four digits, chosen on first use and stored only as a salted
-scrypt hash. It is sent with every request that needs it and checked by the
-server every time; the browser keeps it only while the grown-up screen is
-open. Five wrong tries in a row lock every PIN request for a minute. It
-keeps a six-year-old out; it is not a safe. A forgotten PIN is reset at the
-Mac: `npm run pin:reset`.
+scrypt hash. The first one is chosen only on the Mac itself, in its own
+browser at `http://localhost:38900`: until there is a PIN, the tablet says
+so and offers no pad, or whoever opened *Grown-ups* first would choose it.
+Once there is one it is changed from any device, with the old PIN. It is
+sent with every request that needs it and checked by the server every time;
+the browser keeps it only while the grown-up screen is open. Five wrong
+tries in a row lock every PIN request for a minute. It keeps a six-year-old
+out; it is not a safe. A forgotten PIN is reset at the Mac:
+`npm run pin:reset`.
 
 ## Adding a cabinet
 

@@ -80,7 +80,9 @@ scripts/tests/testdb.mjs freshDb(): an in-process PGlite with the real migration
   changing tickets by hand, opening a level, retiring a player. All of it
   is under `/api/grownup`, whose handler calls `requirePin()` before
   anything but the two PIN routes; a test calls every route without the
-  PIN. The browser never stores the PIN.
+  PIN. The browser never stores the PIN. The first PIN is taken only at this
+  Mac (`atThisMac()` in `web/server/origin.ts`: Host and socket address both
+  loopback) and never replaces one that exists.
 - **Tickets are a ledger** (`ticket_events`): rows are added, never updated
   or deleted. Whatever reads a balance and then pays or spends against it
   does so in one transaction that takes `lockPlayer()` first.

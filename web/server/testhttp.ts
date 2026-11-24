@@ -12,9 +12,11 @@ export interface Sent<T = unknown> {
   body: T;
 }
 
-/** `url` is the path after the mount point ("/", "/<id>", "/?x=1"). */
-export async function request<T = unknown>(handler: Handler, method: string, url = "/", body?: unknown, headers: Record<string, string> = {}): Promise<Sent<T>> {
-  const req = Object.assign(Readable.from(body === undefined ? [] : [Buffer.from(JSON.stringify(body))]), { method, url, headers }) as unknown as IncomingMessage;
+/** `url` is the path after the mount point ("/", "/<id>", "/?x=1").
+ *  `remoteAddress` is where the socket comes from: this machine, unless the
+ *  test says otherwise. */
+export async function request<T = unknown>(handler: Handler, method: string, url = "/", body?: unknown, headers: Record<string, string> = {}, remoteAddress = "127.0.0.1"): Promise<Sent<T>> {
+  const req = Object.assign(Readable.from(body === undefined ? [] : [Buffer.from(JSON.stringify(body))]), { method, url, headers, socket: { remoteAddress } }) as unknown as IncomingMessage;
   const sent = { status: 0, text: "" };
   const res = {
     headersSent: false,

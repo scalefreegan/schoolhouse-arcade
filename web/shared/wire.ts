@@ -132,11 +132,17 @@ export type ErrorCode =
   /** The request needs the PIN and carried none, or the wrong one. */
   | "pin_wrong"
   /** Too many wrong tries: wait and try again. */
-  | "pin_locked";
+  | "pin_locked"
+  /** The first PIN is chosen at the Mac, and this is another device. */
+  | "pin_at_mac"
+  /** A first PIN was sent, but one had just been chosen. It stays. */
+  | "pin_taken";
 
 /** GET /api/grownup/pin */
 export interface PinState {
   set: boolean;
+  /** This device may choose the PIN: there is none yet, and it is the Mac itself. */
+  mayChoose: boolean;
 }
 
 /** One level of one game, for one player, as a grown-up sees it. */

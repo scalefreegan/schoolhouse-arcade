@@ -37,7 +37,8 @@ mistake is put right with another row (Grown-ups → Tickets).
 
 Migration `0002_prizes` also puts the three example prizes on the shelf.
 
-`npm run pin:reset` forgets the grown-up PIN (and nothing else).
+`npm run pin:reset` forgets the grown-up PIN (and nothing else). The next
+one is chosen on the Mac, like the first.
 
 ## Setup
 

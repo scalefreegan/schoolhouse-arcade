@@ -176,10 +176,13 @@ Two things can make this job fail without a sign:
   version-specific, a Node upgrade can delete it and launchd then silently
   fails to start the job every night. Regenerate the plist and reload it
   after an upgrade.
-- **Documents access.** launchd starts the job, and macOS may deny a process
+- **Documents access.** launchd starts the job, and macOS can deny a process
   launched that way the repo under `~/Documents` (the same silent EPERM
-  `macos/README.md` describes for the server). **This has not been measured
-  on this machine.** After installing, check rather than assume: run it once
+  `macos/README.md` describes for the server). Measured on this machine on
+  2026-11-24 (macOS 26, Homebrew node at `/opt/homebrew/bin/node`): the job
+  was allowed, with no prompt; it read the checkout and wrote the dump into
+  `backups/`. That is one machine on one day, and a macOS or Node update can
+  change it, so check after installing and after either update: run it once
   with `launchctl kickstart "gui/$(id -u)/com.schoolhousearcade.db-backup"`,
   read `~/Library/Logs/SchoolhouseArcadeBackup.log`, then run
   `npm run db:backup:status`. Run `db:backup:status` now and then after that

@@ -13,8 +13,8 @@ export class ErrorBoundary extends Component<{ label: string; children: ReactNod
   render() {
     if (!this.state.error) return this.props.children;
     return (
-      <div role="alert" data-crash={this.props.label} className="panel panel-bad mx-auto my-8 max-w-xl">
-        <p className="font-display text-sm text-bad">Game over, sort of.</p>
+      <div role="alert" data-crash={this.props.label} className="panel panel-cyan mx-auto my-8 max-w-xl">
+        <p className="font-display text-sm text-cyan">Game over, sort of.</p>
         <p className="mt-3">{this.props.label} hit an error. Reload the page to try again.</p>
         <p className="mt-2 text-dim">{this.state.error.message}</p>
       </div>

@@ -65,7 +65,7 @@ function PlayerForm({ editing, onDone, onCancel }: { editing: Player | null; onD
         />
       </label>
       {error && (
-        <p role="alert" className="mt-4 text-bad">
+        <p role="alert" className="panel panel-cyan mt-4 text-cyan">
           {error}
         </p>
       )}
@@ -96,8 +96,8 @@ export function Players() {
     return (
       <main className="screen">
         <Hud />
-        <div role="alert" className="panel panel-bad mx-auto mt-16 max-w-xl text-center">
-          <p className="font-display text-sm text-bad">No signal</p>
+        <div role="alert" className="panel panel-cyan mx-auto mt-16 max-w-xl text-center">
+          <p className="font-display text-sm text-cyan">No signal</p>
           <p className="mt-4">{error}</p>
           <button type="button" className="btn btn-cyan mt-6" onClick={() => void reload()}>
             Try again

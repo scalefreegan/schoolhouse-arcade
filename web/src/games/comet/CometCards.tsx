@@ -116,8 +116,8 @@ export function CometCards({ player, onExit }: GameProps) {
   if (loadError && !progress) {
     return (
       <main className="screen">
-        <div role="alert" className="panel panel-bad mx-auto mt-16 max-w-xl text-center">
-          <p className="font-display m-0 text-sm text-bad">No signal</p>
+        <div role="alert" className="panel panel-cyan mx-auto mt-16 max-w-xl text-center">
+          <p className="font-display m-0 text-sm text-cyan">No signal</p>
           <p className="mt-4">{loadError}</p>
           <div className="mt-4 flex flex-wrap justify-center gap-2">
             <button type="button" className="btn btn-quiet" onClick={onExit}>
@@ -184,8 +184,8 @@ export function CometCards({ player, onExit }: GameProps) {
     return (
       <main className="screen items-center justify-center text-center">
         {stage.error ? (
-          <div role="alert" className="panel panel-bad max-w-xl">
-            <p className="font-display m-0 text-sm text-bad">The score did not save</p>
+          <div role="alert" className="panel panel-cyan max-w-xl">
+            <p className="font-display m-0 text-sm text-cyan">The score did not save</p>
             <p className="mt-4">{stage.error}</p>
             <div className="mt-4 flex flex-wrap justify-center gap-2">
               <button type="button" className="btn btn-quiet" onClick={() => setStage({ at: "setup" })}>

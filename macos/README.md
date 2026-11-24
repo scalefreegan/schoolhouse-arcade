@@ -56,9 +56,10 @@ honours it and the tablet cannot reach it.
 - **`com.schoolhousearcade.db-backup.plist.template`** is the optional daily
   `npm run db:backup` job; `docs/DATA.md` "Backup and restore" says how to
   fill it in and load it. Nothing loads it for you. launchd starts it, and
-  macOS may deny a launchd job the repo under `~/Documents`, as it does the
-  server (see below). That has not been measured here: after installing, run
-  it once with `launchctl kickstart`, read
+  macOS can deny a launchd job the repo under `~/Documents`, as it does the
+  server (see below). Measured here on 2026-11-24: the job was allowed with
+  no prompt. After installing, and after a macOS or Node update, check
+  again: run it once with `launchctl kickstart`, read
   `~/Library/Logs/SchoolhouseArcadeBackup.log` and run
   `npm run db:backup:status`. Regenerate the plist after a Node upgrade if
   `db:backup:plist` warned about a version-specific node path.

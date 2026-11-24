@@ -157,7 +157,6 @@ body {
 .panel-cyan { --edge: var(--cyan); }
 .panel-magenta { --edge: var(--magenta); }
 .panel-yellow { --edge: var(--yellow); }
-.panel-bad { --edge: var(--bad); }
 
 /* A button you could hit with your palm: lit face, a dark lip underneath
    that the face sinks into when pressed. --btn is the face colour. */

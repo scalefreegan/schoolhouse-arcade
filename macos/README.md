@@ -55,7 +55,13 @@ honours it and the tablet cannot reach it.
   `sips` draws SVG without filters or text.
 - **`com.schoolhousearcade.db-backup.plist.template`** is the optional daily
   `npm run db:backup` job; `docs/DATA.md` "Backup and restore" says how to
-  fill it in and load it. Nothing loads it for you.
+  fill it in and load it. Nothing loads it for you. launchd starts it, and
+  macOS may deny a launchd job the repo under `~/Documents`, as it does the
+  server (see below). That has not been measured here: after installing, run
+  it once with `launchctl kickstart`, read
+  `~/Library/Logs/SchoolhouseArcadeBackup.log` and run
+  `npm run db:backup:status`. Regenerate the plist after a Node upgrade if
+  `db:backup:plist` warned about a version-specific node path.
 
 The app itself is a build product and is not committed. Rebuild after
 changing the AppleScript, the shim, the runner or the icon.

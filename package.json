@@ -14,7 +14,8 @@
     "db:migrate": "node scripts/db/setup.mjs --migrate-only",
     "db:setup": "node scripts/db/setup.mjs",
     "db:backup": "node scripts/db/backup-cli.mjs",
-    "db:backup:plist": "node scripts/db/backup-cli.mjs --plist"
+    "db:backup:plist": "node scripts/db/backup-cli.mjs --plist",
+    "db:backup:status": "node scripts/db/backup-cli.mjs --status"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.4",

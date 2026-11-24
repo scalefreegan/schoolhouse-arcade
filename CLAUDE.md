@@ -82,6 +82,7 @@ macos/                   the Dock app (build-app.sh, the launcher, the server he
 npm install && npm --prefix web install
 npm run db:setup            # once per machine (Postgres 17 running); idempotent
 npm run db:backup           # pg_dump into backups/, newest 14 kept (docs/DATA.md: restore, daily job)
+npm run db:backup:status    # newest backup's age; exits 1 if none or over 2 days old
 ./macos/build-app.sh        # build and install the Dock app (macos/README.md); --out <dir> builds without installing
 npm run dev                 # http://localhost:38900, and the Mac's address on the home network
 npm test                    # node --test: shared rules, routes, database (PGlite)

@@ -61,7 +61,13 @@ ported from Lean Into It) runs `pg_dump -Fc` on the database
 worktree without one refuses) into `backups/` at the checkout's root
 (gitignored; `SCHOOLHOUSE_ARCADE_BACKUPS_DIR` puts them elsewhere). Files
 are `<database>-<UTC stamp>.dump`, mode 0600; a `backups/` it creates is
-0700.
+0700. `backups/` is inside the checkout, so `git clean -fdx` or deleting the
+checkout deletes every backup; `SCHOOLHOUSE_ARCADE_BACKUPS_DIR` moves them
+elsewhere.
+`npm run db:backup:status` (no connection to the database, only its name
+from `DATABASE_URL`, so a worktree without one refuses) prints the newest
+backup's name, size and age, and exits 1 when there is none or the newest is
+over 2 days old.
 
 - The dump goes to a private `.partial` file and gets its real name only
   when `pg_dump` exits 0, so a failed dump never looks like a good one;
@@ -102,13 +108,30 @@ the role the app connects as.
 `~/Library/Logs/SchoolhouseArcadeBackup.log`.
 `npm run db:backup:plist -- <path>` fills in node, this checkout and your
 home, and writes the result to the path you give (replacing what is there),
-nothing else; loading it is your step:
+nothing else; loading it is your step. It prefers a stable node path
+(`/opt/homebrew/bin/node`, `/usr/local/bin/node`) over the versioned Cellar
+one, and prints the one it used.
 
 ```sh
 npm run db:backup:plist -- ~/Library/LaunchAgents/com.schoolhousearcade.db-backup.plist
 launchctl bootstrap "gui/$(id -u)" ~/Library/LaunchAgents/com.schoolhousearcade.db-backup.plist
 # to stop it: launchctl bootout "gui/$(id -u)/com.schoolhousearcade.db-backup"
 ```
+
+Two things can make this job fail without a sign:
+
+- **Node path.** If `db:backup:plist` warned that the node path is
+  version-specific, a Node upgrade can delete it and launchd then silently
+  fails to start the job every night. Regenerate the plist and reload it
+  after an upgrade.
+- **Documents access.** launchd starts the job, and macOS may deny a process
+  launched that way the repo under `~/Documents` (the same silent EPERM
+  `macos/README.md` describes for the server). **This has not been measured
+  on this machine.** After installing, check rather than assume: run it once
+  with `launchctl kickstart "gui/$(id -u)/com.schoolhousearcade.db-backup"`,
+  read `~/Library/Logs/SchoolhouseArcadeBackup.log`, then run
+  `npm run db:backup:status`. Run `db:backup:status` now and then after that
+  too; it is the only thing that notices a job that never ran.
 
 ## Tests
 

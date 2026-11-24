@@ -10,6 +10,8 @@ import path from "node:path";
 import { ROOT as REPO_ROOT } from "../env.mjs";
 
 export const KEEP_BACKUPS = 14;
+/** `db:backup:status` calls the newest backup stale after this long. */
+export const STALE_BACKUP_DAYS = 2;
 const DAY_MS = 24 * 3600 * 1000;
 
 /** Where backups go: SCHOOLHOUSE_ARCADE_BACKUPS_DIR (resolved against the repo
@@ -58,6 +60,44 @@ export function futureBackups(names, database, now = new Date()) {
 export function backupsToPrune(names, database, keep = KEEP_BACKUPS, protect = []) {
   const mine = names.filter((n) => isBackupFile(n, database)).sort();
   return mine.slice(0, Math.max(0, mine.length - keep)).filter((n) => !protect.includes(n));
+}
+
+/** The newest backup of this database and how old it is, from the UTC stamp in
+ *  its name (not the file's mtime, which a copy changes). null when there is none. */
+export function newestBackup(names, database, now = new Date()) {
+  const mine = names.filter((n) => isBackupFile(n, database)).sort();
+  if (!mine.length) return null;
+  const name = mine[mine.length - 1];
+  const s = stampOf(name, database);
+  const at = new Date(`${s.slice(0, 4)}-${s.slice(4, 6)}-${s.slice(6, 8)}T${s.slice(9, 11)}:${s.slice(11, 13)}:${s.slice(13, 15)}Z`);
+  return { name, at, ageMs: now.getTime() - at.getTime() };
+}
+
+/** Stable places a node binary lives, tried in order. */
+export const STABLE_NODE_PATHS = ["/opt/homebrew/bin/node", "/usr/local/bin/node"];
+
+/** The node path to put in the launchd plist. process.execPath is usually a
+ *  versioned Cellar path that `brew upgrade node` deletes; a stable symlink
+ *  survives. Take the first stable path that exists and is the same file as
+ *  `execPath`; else fall back to `execPath` and say it is version-specific. */
+export function stableNodePath({
+  execPath = process.execPath,
+  candidates = STABLE_NODE_PATHS,
+  exists = (p) => fs.existsSync(p),
+  realpath = (p) => fs.realpathSync(p),
+} = {}) {
+  const real = (p) => {
+    try {
+      return realpath(p);
+    } catch {
+      return null;
+    }
+  };
+  const want = real(execPath);
+  for (const c of candidates) {
+    if (exists(c) && want !== null && real(c) === want) return { node: c, stable: true };
+  }
+  return { node: execPath, stable: false };
 }
 
 /** Homebrew PostgreSQL directories to look in after PATH. A launchd job has a

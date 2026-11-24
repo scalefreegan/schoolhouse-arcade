@@ -11,10 +11,12 @@ import {
   backupsToPrune,
   dumpToolIsNewEnough,
   isBackupFile,
+  newestBackup,
   parseMajor,
   partialName,
   pgDumpCandidates,
   serverMajor,
+  stableNodePath,
 } from "../db/backup.mjs";
 
 test("file name carries the database and a sortable UTC stamp", () => {
@@ -60,4 +62,37 @@ test("version parsing and the no-older rule", () => {
   assert.ok(dumpToolIsNewEnough(18, 17));
   assert.ok(!dumpToolIsNewEnough(16, 17));
   assert.ok(!dumpToolIsNewEnough(null, 17));
+});
+
+test("newest backup: the latest stamp of this database, with its age", () => {
+  const now = new Date("2026-11-20T12:00:00Z");
+  const names = [
+    backupFileName("db", new Date("2026-11-18T03:30:00Z")),
+    backupFileName("db", new Date("2026-11-19T03:30:00Z")),
+    backupFileName("other", new Date("2026-11-20T03:30:00Z")),
+    ".db-20261120T030000Z.dump.1.partial",
+  ];
+  const n = newestBackup(names, "db", now);
+  assert.equal(n.name, "db-20261119T033000Z.dump");
+  assert.equal(n.ageMs, 32.5 * 3600 * 1000);
+  assert.equal(newestBackup([], "db", now), null);
+  assert.equal(newestBackup(["notes.txt"], "db", now), null);
+});
+
+test("stable node path: the first stable symlink to the running node", () => {
+  const cellar = "/opt/homebrew/Cellar/node/26.4.0/bin/node";
+  const real = { "/opt/homebrew/bin/node": cellar, "/usr/local/bin/node": "/elsewhere/node", [cellar]: cellar };
+  const opts = { execPath: cellar, exists: (p) => p in real, realpath: (p) => real[p] };
+  assert.deepEqual(stableNodePath(opts), { node: "/opt/homebrew/bin/node", stable: true });
+  // A stable path that is some other node is skipped.
+  const other = { ...real, "/opt/homebrew/bin/node": "/other/node" };
+  assert.deepEqual(stableNodePath({ ...opts, exists: (p) => p in other, realpath: (p) => other[p] }), { node: cellar, stable: false });
+  // No stable path exists: fall back.
+  assert.deepEqual(stableNodePath({ ...opts, exists: () => false }), { node: cellar, stable: false });
+  // A stable path that cannot be resolved is skipped, not trusted.
+  const boom = (p) => {
+    if (p === "/opt/homebrew/bin/node") throw new Error("ELOOP");
+    return real[p];
+  };
+  assert.deepEqual(stableNodePath({ ...opts, realpath: boom }), { node: cellar, stable: false });
 });

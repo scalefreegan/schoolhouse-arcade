@@ -487,9 +487,12 @@ test("the grown-up page shows every player's tickets and levels, the shelf, the 
   await give(al, 120, "birthday");
   await redeem(al, (await prize(al, "A candy")).id);
   const page = (await request<GrownupReply>(grownup, "GET", "/", undefined, withPin())).body;
-  assert.deepEqual(page.players.map((p) => [p.name, p.tickets]), [["Em", 16 + 20 + 10 + 25 + 20], ["Al", 20]]);
-  assert.deepEqual(page.players[0].levels.map((l) => [l.level, l.stars, l.open]), [["add-5", 1, true], ["add-10", 0, true], ["sub-10", 0, false], ["mix-10", 0, false], ["big-20", 0, false]]);
-  assert.equal(page.players[0].levels[0].game, "Comet Cards");
+  // By name: two players who joined in the same millisecond come in either order.
+  const named = (name: string) => page.players.find((p) => p.name === name)!;
+  assert.equal(page.players.length, 2);
+  assert.deepEqual([named("Em").tickets, named("Al").tickets], [16 + 20 + 10 + 25 + 20, 20]);
+  assert.deepEqual(named("Em").levels.map((l) => [l.level, l.stars, l.open]), [["add-5", 1, true], ["add-10", 0, true], ["sub-10", 0, false], ["mix-10", 0, false], ["big-20", 0, false]]);
+  assert.equal(named("Em").levels[0].game, "Comet Cards");
   assert.equal(page.prizes.length, 3);
   assert.deepEqual(page.handed.map((h) => [h.player, h.name, h.cost]), [["Al", "A candy", 100]]);
   assert.deepEqual(page.ledger.slice(0, 2).map((l) => [l.name, l.delta, l.reason, l.note]), [["Al", -100, "prize", "A candy"], ["Al", 120, "adjust", "birthday"]]);

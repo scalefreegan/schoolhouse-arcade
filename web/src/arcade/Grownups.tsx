@@ -99,7 +99,7 @@ function PlayerRow({ p, busy, onAdjust, onOpen, onRetire }: { p: GrownupPlayer; 
           <p className="m-0 flex-1">
             Take {p.name} off the "Who is playing?" screen? Their scores stay on the high score tables. This cannot be undone from here.
           </p>
-          <button type="button" className="btn btn-bad" disabled={busy} onClick={onRetire}>
+          <button type="button" className="btn btn-quiet" disabled={busy} onClick={onRetire}>
             Retire {p.name}
           </button>
           <button type="button" className="btn btn-quiet" onClick={() => setForm(null)}>
@@ -224,8 +224,8 @@ export function Grownups() {
     return (
       <main className="screen items-center justify-center text-center">
         {error ? (
-          <div role="alert" className="panel panel-bad max-w-xl">
-            <p className="font-display m-0 text-sm text-bad">No signal</p>
+          <div role="alert" className="panel panel-cyan max-w-xl">
+            <p className="font-display m-0 text-sm text-cyan">No signal</p>
             <p className="mt-4">{error}</p>
             <button type="button" className="btn btn-quiet mt-4" onClick={leave}>
               Back
@@ -307,7 +307,7 @@ export function Grownups() {
       <p className="mt-3 mb-0 text-dim">Tickets are earned by playing: one for a right answer on Easy, two on Arcade, and bonuses for stars, badges and beating a best. A prize is handed over at the Prize Counter, with this PIN.</p>
 
       {error && (
-        <p role="alert" className="panel panel-bad mt-3 text-bad">
+        <p role="alert" className="panel panel-cyan mt-3 text-cyan">
           {error}
         </p>
       )}

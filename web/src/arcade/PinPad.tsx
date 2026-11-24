@@ -58,7 +58,7 @@ export function PinPad({ title, hint, onPin, onCancel }: { title: string; hint?:
             </span>
           ))}
         </p>
-        <p role="alert" className="mt-3 mb-0 min-h-[1.5em] text-bad">
+        <p role="alert" className="mt-3 mb-0 min-h-[1.5em] text-cyan">
           {error}
         </p>
         <div className="mx-auto mt-2 grid max-w-xs grid-cols-3" role="group" aria-label="Number pad">

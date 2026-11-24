@@ -313,7 +313,7 @@ body {
 
 /* A key on the number pad. Bigger than a button: it is hit without looking. */
 .key {
-  min-height: calc(var(--px) * 17);
+  min-height: max(56px, calc(var(--px) * 17));
   padding-inline: 0;
   font-size: 1.5rem;
 }

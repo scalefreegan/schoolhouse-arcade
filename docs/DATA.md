@@ -8,9 +8,21 @@ an id never changes once live. Mirrors Lean Into It's `docs/DATA.md`.
 | What | Where | Tracked by git |
 |---|---|---|
 | The games' rules, the avatars, the sprites | `web/shared/`, `web/src/sprites/` | yes |
-| Players | Postgres `schoolhouse_arcade` | no |
+| Players; every play and every answer in it; stars per level | Postgres `schoolhouse_arcade` | no |
 | `DATABASE_URL`, local overrides | `.env.local` | no |
-| Which player this device is, whether sound is off | the browser's localStorage (`arcade.player`, `arcade.muted`) | no, and not in the database |
+| Which player this device is, whether sound is off, the set-up each player used last | the browser's localStorage (`arcade.player`, `arcade.muted`, `arcade.comet.setup.<player>`) | no, and not in the database |
+
+## The tables
+
+| Table | One row is | Written by |
+|---|---|---|
+| `players` | someone on the "Who is playing?" screen | `scripts/db/players.ts` |
+| `plays` | one finished round, scored by the server | `scripts/db/plays.ts` |
+| `answers` | one card of a play: the fact, what was answered, how long it took | `scripts/db/plays.ts` |
+| `level_stars` | the most stars a player has on one level | `scripts/db/plays.ts` |
+
+The high score tables are queries over `plays`. Which card comes next is
+worked out from a player's latest `answers`.
 
 ## Setup
 

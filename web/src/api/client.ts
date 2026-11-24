@@ -1,4 +1,5 @@
-import type { ErrorReply, Player, PlayerInput, PlayersReply } from "../../shared/wire.ts";
+import type { PlayConfig } from "../../shared/play.ts";
+import type { BoardReply, ErrorReply, PlayReply, PlayRequest, Player, PlayerInput, PlayersReply, ProgressReply } from "../../shared/wire.ts";
 
 // The one fetch. Every call to the server goes through here, so an error is
 // always an ApiError carrying the server's own sentence.
@@ -35,3 +36,10 @@ export async function api<T>(path: string, body?: unknown, method?: string, head
 export const getPlayers = () => api<PlayersReply>("/api/players");
 export const addPlayer = (input: PlayerInput) => api<Player>("/api/players", input);
 export const changePlayer = (id: string, input: PlayerInput) => api<Player>(`/api/players/${id}`, input, "PATCH");
+
+const q = (params: Record<string, string>) => new URLSearchParams(params).toString();
+
+/** A finished round. The server scores it from the answers and says what it earned. */
+export const postPlay = (req: PlayRequest) => api<PlayReply>("/api/plays", req);
+export const getBoard = (gameId: string, c: PlayConfig) => api<BoardReply>(`/api/plays/board?${q({ game: gameId, level: c.level, mode: c.mode, skill: c.skill })}`);
+export const getProgress = (playerId: string, gameId: string) => api<ProgressReply>(`/api/plays/progress?${q({ player: playerId, game: gameId })}`);

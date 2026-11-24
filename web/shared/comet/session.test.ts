@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { levelById } from "./facts.ts";
-import { settle, type Mode, type Skill } from "./rules.ts";
+import { MIN_ANSWER_MS, settle, type Mode, type Skill } from "./rules.ts";
 import { COUNT_FROM, advance, cardAnswer, startSession, waited, type Session, type SessionEvent } from "./session.ts";
 
 // A round played by hand, event by event, with a clock the test owns.
@@ -162,4 +162,15 @@ test("what the screen plays is what the server scores: a whole round's answers s
     assert.deepEqual([settled.score, settled.right, settled.wrong, settled.bestCombo, settled.answers.length], [s.round.score, s.round.right, s.round.wrong, s.round.bestCombo, s.answers.length], mode);
     assert.equal(settled.finished, true, mode);
   }
+});
+
+test("an instant key press counts as the floor in the session and in settle()", () => {
+  let s = begin("sprint", "arcade");
+  s = typeRight(s, 0); // answered the moment the card came up
+  assert.equal(s.answers[0].ms, MIN_ANSWER_MS);
+  assert.equal(s.round.cardMs, MIN_ANSWER_MS);
+  const settled = settle({ level: level.id, mode: "sprint", skill: "arcade" }, s.answers);
+  assert.deepEqual([settled.timeMs, settled.score, settled.answers[0].ms], [s.round.cardMs, s.round.score, MIN_ANSWER_MS]);
+  const raw = settle({ level: level.id, mode: "sprint", skill: "arcade" }, [{ ...s.answers[0], ms: 0 }]);
+  assert.deepEqual([raw.timeMs, raw.score], [settled.timeMs, settled.score], "a posted 0 settles as the pressed 0 played");
 });

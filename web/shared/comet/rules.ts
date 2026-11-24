@@ -45,8 +45,20 @@ export const FAST_BONUS = 50;
 const GRACE_MS = 250;
 /** No real answer takes longer than this; a larger number is a bug or a lie. */
 const MAX_ANSWER_MS = 10 * 60_000;
+/** The least time an answer is counted as taking: nobody reads a card and
+ *  answers faster. A shorter time (an instant tap, or a forged 0) is counted
+ *  as this, not refused. It bounds a forged round (Blitz ends after 240
+ *  answers); it does not make a time true, since the server has no clock of
+ *  its own for a round. */
+export const MIN_ANSWER_MS = 250;
 /** Survival has no end but the player's; this is far past any real round. */
 const MAX_ANSWERS = 2_000;
+
+/** An answer's time as every round counts it: whole ms, at least MIN_ANSWER_MS.
+ *  The session and settle() both use it, so they cannot disagree. */
+export function countedMs(ms: number): number {
+  return Math.max(MIN_ANSWER_MS, Math.round(ms));
+}
 
 /** Points multiplier for the n-th right answer in a row (n ≥ 1). */
 export function multiplier(combo: number): number {
@@ -132,7 +144,9 @@ function configOf(config: PlayConfig): { mode: Mode; skill: Skill } {
  * Judge and score a whole play from its answers. An answer that arrives
  * after the round is over (the clock had run out, the lives were gone) is
  * left out rather than refused: a slow tablet can send one. An answer to a
- * card the level does not hold, or with a time that cannot be, is refused.
+ * card the level does not hold, or with a time that cannot be (negative,
+ * not a number, past MAX_ANSWER_MS), is refused. A time under MIN_ANSWER_MS is
+ * not refused: it is counted as MIN_ANSWER_MS.
  */
 export function settle(config: PlayConfig, inputs: AnswerInput[]): Settled {
   const { mode, skill } = configOf(config);
@@ -146,7 +160,7 @@ export function settle(config: PlayConfig, inputs: AnswerInput[]): Settled {
     if (!fact || !level.has(fact)) throw new RuleError(`"${String(input?.fact)}" is not a card in ${level.title}.`);
     if (!Number.isFinite(input.ms) || input.ms < 0 || input.ms > MAX_ANSWER_MS) throw new RuleError("An answer's time is out of range.");
     if (input.given !== null && !Number.isInteger(input.given)) throw new RuleError("An answer must be a whole number.");
-    const ms = Math.round(input.ms);
+    const ms = countedMs(input.ms);
     const limit = cardLimit(mode, round);
     // Blitz: the clock ran out while this card was up. It was never answered in time.
     if (mode === "blitz" && limit !== null && ms > limit + GRACE_MS) break;

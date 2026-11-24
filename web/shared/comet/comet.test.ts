@@ -5,7 +5,7 @@ import { GAMES } from "../games.ts";
 import { RULES } from "../rules.ts";
 import { NO_REPEAT, RETURN_AFTER, choicesFor, deal, factStats, missed, newDeck, seeded, weightOf } from "./deck.ts";
 import { LEVELS, answerOf, factsOf, levelById, parseFact } from "./facts.ts";
-import { BLITZ_MS, cardLimit, cometRules, multiplier, settle, startRound, starsFor, stepRound } from "./rules.ts";
+import { BLITZ_MS, MIN_ANSWER_MS, cardLimit, cometRules, countedMs, multiplier, settle, startRound, starsFor, stepRound } from "./rules.ts";
 
 const level = (id: string) => levelById(id)!;
 const right = (fact: string, ms = 2500): AnswerInput => ({ fact, given: answerOf(parseFact(fact)!), ms });
@@ -240,4 +240,18 @@ test("the answer is not always in the same place", () => {
   const places = new Set<number>();
   for (let i = 0; i < 60; i++) places.add(choicesFor("6+4", rng).indexOf(10));
   assert.equal(places.size, 4);
+});
+
+test("a time under the floor is counted as the floor, and a forged round of instant answers still runs out the clock", () => {
+  const blitz = { level: "add-5", mode: "blitz", skill: "arcade" };
+  const forged = settle(blitz, Array.from({ length: 2000 }, () => right("1+1", 0)));
+  assert.equal(forged.right, BLITZ_MS / MIN_ANSWER_MS, "240 answers use up 60 s; the rest are left out");
+  assert.equal(forged.answers.length, 240);
+  assert.ok(forged.answers.every((a) => a.ms === MIN_ANSWER_MS), "the stored time is the counted one");
+  assert.equal(forged.timeMs, BLITZ_MS);
+  assert.equal(forged.score, settle(blitz, Array.from({ length: 240 }, () => right("1+1", 250))).score, "as if each took 250 ms");
+  const sprint = settle({ level: "add-5", mode: "sprint", skill: "arcade" }, Array.from({ length: 20 }, () => right("1+1", 0)));
+  assert.equal(sprint.timeMs, 20 * MIN_ANSWER_MS);
+  assert.equal(countedMs(249.6), 250);
+  assert.equal(countedMs(1234.4), 1234);
 });

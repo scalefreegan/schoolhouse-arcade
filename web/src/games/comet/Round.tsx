@@ -172,7 +172,7 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
         <div className="track flex-1" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(bar * 100)} aria-label={mode === "sprint" || mode === "practice" ? "Cards done" : "Time left"}>
           <div className="track-fill" style={{ width: `${bar * 100}%` }} />
         </div>
-        <button type="button" className="btn btn-quiet" style={{ minHeight: 0, marginBottom: "var(--px)" }} onClick={() => send({ type: "pause", now: performance.now() })} aria-label="Pause">
+        <button type="button" className="btn btn-quiet" style={{ minHeight: 56, marginBottom: "var(--px)" }} onClick={() => send({ type: "pause", now: performance.now() })} aria-label="Pause">
           II
         </button>
       </div>

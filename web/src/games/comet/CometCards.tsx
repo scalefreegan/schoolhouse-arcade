@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { LEVELS, levelById } from "../../../shared/comet/facts.ts";
 import { MODES, SKILLS, type Mode, type Skill } from "../../../shared/comet/rules.ts";
-import type { AnswerInput, PlayConfig } from "../../../shared/play.ts";
+import { playable, type AnswerInput, type PlayConfig } from "../../../shared/play.ts";
 import { newRoundId } from "../../../shared/roundid.ts";
 import type { PlayReply, ProgressReply } from "../../../shared/wire.ts";
 import { ApiError, getProgress, postPlay } from "../../api/client.ts";
@@ -26,9 +26,11 @@ function remembered(playerId: string): PlayConfig {
 
 type Stage =
   | { at: "setup" }
-  | { at: "round"; round: number }
-  | { at: "saving"; answers: AnswerInput[]; roundId: string; error: string | null }
-  | { at: "results"; answers: AnswerInput[]; reply: PlayReply };
+  // Each stage past set-up carries the set-up its round is played on, so
+  // what is sent, and shown, is what was played.
+  | { at: "round"; round: number; config: PlayConfig }
+  | { at: "saving"; config: PlayConfig; answers: AnswerInput[]; roundId: string; error: string | null }
+  | { at: "results"; config: PlayConfig; answers: AnswerInput[]; reply: PlayReply };
 
 /**
  * The Comet Cards cabinet: set up, play, see how it went. The round is
@@ -65,20 +67,22 @@ export function CometCards({ player, onExit }: GameProps) {
     }
   };
 
-  // Send a round. `roundId` is the round's own, made once when it ended: a
-  // round sent again after a lost reply is stored and paid only once.
+  // Send a round with the set-up it was played on: not the remembered one,
+  // which may name a level that is locked here. `roundId` is the round's
+  // own, made once when it ended: a round sent again after a lost reply is
+  // stored and paid only once.
   const save = useCallback(
-    async (answers: AnswerInput[], roundId: string) => {
-      setStage({ at: "saving", answers, roundId, error: null });
+    async (played: PlayConfig, answers: AnswerInput[], roundId: string) => {
+      setStage({ at: "saving", config: played, answers, roundId, error: null });
       try {
-        const reply = await postPlay({ playerId: player.id, gameId: GAME, roundId, ...config, answers });
-        setStage({ at: "results", answers, reply });
+        const reply = await postPlay({ playerId: player.id, gameId: GAME, roundId, ...played, answers });
+        setStage({ at: "results", config: played, answers, reply });
         void load();
       } catch (e) {
-        setStage({ at: "saving", answers, roundId, error: e instanceof ApiError ? e.message : String(e) });
+        setStage({ at: "saving", config: played, answers, roundId, error: e instanceof ApiError ? e.message : String(e) });
       }
     },
-    [player.id, config, load],
+    [player.id, load],
   );
 
   if (loadError && !progress) {
@@ -109,18 +113,18 @@ export function CometCards({ player, onExit }: GameProps) {
 
   // A remembered level that is locked for this player (another device, a
   // fresh database) falls back to the hardest one that is open.
-  const level = progress.open.includes(config.level) ? config.level : progress.open[progress.open.length - 1];
-  const live: PlayConfig = level === config.level ? config : { ...config, level };
+  const live = playable(config, progress.open);
+  const play = () => setStage({ at: "round", round: Date.now(), config: live });
 
   if (stage.at === "round") {
     return (
       <RoundScreen
         key={stage.round}
-        level={levelById(live.level)!}
-        mode={live.mode as Mode}
-        skill={live.skill as Skill}
+        level={levelById(stage.config.level)!}
+        mode={stage.config.mode as Mode}
+        skill={stage.config.skill as Skill}
         stats={progress.facts}
-        onDone={(answers) => void save(answers, newRoundId())}
+        onDone={(answers) => void save(stage.config, answers, newRoundId())}
         onQuit={() => setStage({ at: "setup" })}
       />
     );
@@ -136,7 +140,7 @@ export function CometCards({ player, onExit }: GameProps) {
               <button type="button" className="btn btn-quiet" onClick={() => setStage({ at: "setup" })}>
                 Give up
               </button>
-              <button type="button" className="btn btn-cyan" onClick={() => void save(stage.answers, stage.roundId)}>
+              <button type="button" className="btn btn-cyan" onClick={() => void save(stage.config, stage.answers, stage.roundId)}>
                 Try again
               </button>
             </div>
@@ -148,7 +152,7 @@ export function CometCards({ player, onExit }: GameProps) {
     );
   }
   if (stage.at === "results") {
-    return <Results config={live} reply={stage.reply} answers={stage.answers} onAgain={() => setStage({ at: "round", round: Date.now() })} onSetup={() => setStage({ at: "setup" })} onExit={onExit} />;
+    return <Results config={stage.config} reply={stage.reply} answers={stage.answers} onAgain={play}onSetup={() => setStage({ at: "setup" })} onExit={onExit} />;
   }
-  return <Setup progress={progress} config={live} onChange={choose} onStart={() => setStage({ at: "round", round: Date.now() })} onExit={onExit} />;
+  return <Setup progress={progress} config={live} onChange={choose} onStart={play} onExit={onExit} />;
 }

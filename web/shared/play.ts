@@ -79,3 +79,14 @@ export const MAX_STARS = 3;
 export function openLevels(levels: Choice[], stars: Record<string, number>, opened: string[] = []): string[] {
   return levels.filter((l, i) => i === 0 || (stars[levels[i - 1].id] ?? 0) > 0 || opened.includes(l.id)).map((l) => l.id);
 }
+
+/**
+ * The set-up a round is played on: the one asked for, unless its level is
+ * not open to this player (a set-up remembered on another device, or before
+ * a database was restored), when it falls back to the last open level. The
+ * round is played on this, and this is what is sent when it ends. Pure.
+ */
+export function playable(config: PlayConfig, open: string[]): PlayConfig {
+  if (open.includes(config.level) || !open.length) return config;
+  return { ...config, level: open[open.length - 1] };
+}

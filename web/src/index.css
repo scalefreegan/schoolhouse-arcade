@@ -1,0 +1,330 @@
+@import "tailwindcss";
+
+/* ============================================================
+   Schoolhouse Arcade — the screen of an early-80s coin-op cabinet.
+
+   The page is the tube: black glass, scanlines, and light that glows
+   because it is the only thing there. Three phosphors do all the work and
+   each means one thing everywhere:
+
+     cyan     the game talking (titles, the card, what to do next)
+     magenta  the player (their name, their score, the thing they press)
+     yellow   reward (tickets, stars, a new best)
+
+   Green and red are kept for right and wrong, and appear nowhere else.
+
+   Edges are stepped, never rounded: a "pixel" here is --px, and borders,
+   shadows and motion all move in whole pixels of it. Motion is stepped too
+   (steps(), never an ease): sprites hop, text blinks.
+
+   Raw values live on :root; the @theme inline block maps them to Tailwind
+   utilities (text-cyan, bg-panel, border-line …) so components never write
+   a raw hex.
+   ============================================================ */
+
+:root {
+  color-scheme: dark;
+  --tube: #05030f;
+  --panel: #0e0826;
+  --raised: #1a1140;
+  --line: #3b2b7c;
+  --fg: #f2ecff;
+  --dim: #a99bdc;
+  --cyan: #2ff3e0;
+  --magenta: #ff2e9a;
+  --yellow: #ffd23f;
+  --good: #7dff5a;
+  --bad: #ff5a3c;
+  /* The shadow under the cyan marquee. */
+  --cyan-depth: #0b6b70;
+  /* One arcade pixel. Everything stepped is a multiple of this. */
+  --px: 4px;
+}
+
+@theme inline {
+  --color-tube: var(--tube);
+  --color-panel: var(--panel);
+  --color-raised: var(--raised);
+  --color-line: var(--line);
+  --color-fg: var(--fg);
+  --color-dim: var(--dim);
+  --color-cyan: var(--cyan);
+  --color-magenta: var(--magenta);
+  --color-yellow: var(--yellow);
+  --color-good: var(--good);
+  --color-bad: var(--bad);
+  --font-display: "Press Start 2P", ui-monospace, monospace;
+  --font-body: "VT323", ui-monospace, monospace;
+}
+
+html {
+  background: var(--tube);
+  /* A double tap is two answers, not a zoom. */
+  touch-action: manipulation;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background: var(--tube);
+  color: var(--fg);
+  /* VT323 is small for its size: 24px of it reads like 17px of a text face. */
+  font-family: var(--font-body);
+  font-size: 1.5rem;
+  line-height: 1.25;
+  -webkit-font-smoothing: none;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
+/* The tube: everything is drawn inside it, the scanlines over it. */
+.tube {
+  position: relative;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  isolation: isolate;
+  background:
+    radial-gradient(120% 90% at 50% 40%, transparent 55%, rgb(0 0 0 / 0.55) 100%),
+    radial-gradient(60% 45% at 50% 0%, rgb(59 43 124 / 0.35), transparent 70%),
+    var(--tube);
+}
+.tube::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  background: repeating-linear-gradient(to bottom, transparent 0 2px, rgb(0 0 0 / 0.22) 2px 4px);
+}
+
+.screen {
+  width: 100%;
+  max-width: 60rem;
+  margin-inline: auto;
+  padding: calc(var(--px) * 4) calc(var(--px) * 4) calc(var(--px) * 8);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- type ---------- */
+
+.font-display {
+  font-family: var(--font-display);
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+
+/* Light on glass: a tight halo and a wide one, in the text's own colour. */
+.glow {
+  text-shadow: 0 0 calc(var(--px) * 1.5) currentColor, 0 0 calc(var(--px) * 6) color-mix(in srgb, currentColor 55%, transparent);
+}
+
+/* The marquee lettering: a hard pixel extrusion under the glow. */
+.marquee {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  line-height: 1.15;
+  text-shadow:
+    var(--px) var(--px) 0 var(--marquee-depth, #6d0f47),
+    calc(var(--px) * 2) calc(var(--px) * 2) 0 var(--marquee-depth, #6d0f47),
+    0 0 calc(var(--px) * 8) color-mix(in srgb, currentColor 60%, transparent);
+}
+
+/* ---------- pixel boxes ---------- */
+
+/* A box with stepped corners: four shadows draw the edges one pixel out,
+   leaving the corners empty. --edge is the edge colour. */
+.panel {
+  --edge: var(--line);
+  background: var(--panel);
+  margin: var(--px);
+  padding: calc(var(--px) * 4);
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--edge),
+    0 var(--px) 0 0 var(--edge),
+    calc(var(--px) * -1) 0 0 0 var(--edge),
+    var(--px) 0 0 0 var(--edge);
+}
+.panel-cyan { --edge: var(--cyan); }
+.panel-magenta { --edge: var(--magenta); }
+.panel-yellow { --edge: var(--yellow); }
+.panel-bad { --edge: var(--bad); }
+
+/* A button you could hit with your palm: lit face, a dark lip underneath
+   that the face sinks into when pressed. --btn is the face colour. */
+.btn {
+  --btn: var(--magenta);
+  --lip: color-mix(in srgb, var(--btn) 45%, black);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--px) * 3);
+  min-height: max(56px, calc(var(--px) * 14));
+  margin: var(--px) var(--px) calc(var(--px) * 3);
+  padding: calc(var(--px) * 3) calc(var(--px) * 5);
+  border: 0;
+  background: var(--btn);
+  color: var(--tube);
+  font-family: var(--font-display);
+  font-size: 0.875rem;
+  line-height: 1.4;
+  text-transform: uppercase;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--btn),
+    calc(var(--px) * -1) 0 0 0 var(--btn),
+    var(--px) 0 0 0 var(--btn),
+    0 var(--px) 0 0 var(--lip),
+    calc(var(--px) * -1) var(--px) 0 0 var(--lip),
+    var(--px) var(--px) 0 0 var(--lip),
+    0 calc(var(--px) * 2) 0 0 var(--lip),
+    0 0 calc(var(--px) * 6) color-mix(in srgb, var(--btn) 45%, transparent);
+}
+.btn:active:not(:disabled),
+.btn[data-pressed="true"] {
+  transform: translateY(calc(var(--px) * 2));
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--btn),
+    calc(var(--px) * -1) 0 0 0 var(--btn),
+    var(--px) 0 0 0 var(--btn),
+    0 var(--px) 0 0 var(--btn);
+}
+.btn:disabled {
+  --btn: var(--line);
+  color: var(--dim);
+  cursor: not-allowed;
+}
+.btn-cyan { --btn: var(--cyan); }
+.btn-yellow { --btn: var(--yellow); }
+.btn-good { --btn: var(--good); }
+.btn-quiet {
+  --btn: var(--raised);
+  color: var(--fg);
+}
+.btn-lg {
+  min-height: max(56px, calc(var(--px) * 18));
+  padding-inline: calc(var(--px) * 8);
+  font-size: 1.125rem;
+}
+
+/* A tappable panel (a player, a cabinet): lights up instead of sinking. */
+.pick {
+  min-height: 56px;
+  cursor: pointer;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  text-align: center;
+}
+.pick:hover:not(:disabled),
+.pick:focus-visible {
+  --edge: var(--magenta);
+  background: var(--raised);
+}
+.pick[aria-pressed="true"] {
+  --edge: var(--yellow);
+  background: var(--raised);
+}
+
+:focus-visible {
+  outline: var(--px) dashed var(--yellow);
+  outline-offset: calc(var(--px) * 2);
+}
+
+.field {
+  width: 100%;
+  min-height: 56px;
+  margin: var(--px);
+  padding: calc(var(--px) * 3) calc(var(--px) * 4);
+  border: 0;
+  background: var(--tube);
+  color: var(--fg);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  text-transform: uppercase;
+  caret-color: var(--magenta);
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--cyan),
+    0 var(--px) 0 0 var(--cyan),
+    calc(var(--px) * -1) 0 0 0 var(--cyan),
+    var(--px) 0 0 0 var(--cyan);
+}
+.field::placeholder { color: var(--line); }
+/* The field already has an edge: light it instead of ringing it. */
+.field:focus-visible {
+  outline: none;
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--yellow),
+    0 var(--px) 0 0 var(--yellow),
+    calc(var(--px) * -1) 0 0 0 var(--yellow),
+    var(--px) 0 0 0 var(--yellow),
+    0 0 calc(var(--px) * 6) color-mix(in srgb, var(--yellow) 40%, transparent);
+}
+
+/* ---------- sprites and motion ---------- */
+
+.sprite {
+  display: block;
+  image-rendering: pixelated;
+  shape-rendering: crispEdges;
+  filter: drop-shadow(0 0 calc(var(--px) * 2) rgb(255 255 255 / 0.18));
+}
+
+@keyframes hop {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(calc(var(--px) * -2)); }
+}
+@keyframes blink {
+  0%, 60% { opacity: 1; }
+  61%, 100% { opacity: 0; }
+}
+@keyframes drift {
+  from { background-position: 0 0, 0 0; }
+  to { background-position: -240px 0, -120px 0; }
+}
+
+.hop { animation: hop 0.6s steps(1) infinite; }
+.blink { animation: blink 1.1s steps(1) infinite; }
+
+/* Two layers of stars sliding past at different speeds. Used once, behind
+   the title screen. */
+.starfield {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    radial-gradient(2px 2px at 20px 30px, #fff, transparent),
+    radial-gradient(2px 2px at 150px 90px, var(--cyan), transparent),
+    radial-gradient(2px 2px at 90px 160px, #fff, transparent),
+    radial-gradient(1px 1px at 40px 100px, var(--dim), transparent),
+    radial-gradient(1px 1px at 100px 20px, var(--dim), transparent),
+    radial-gradient(1px 1px at 70px 60px, var(--magenta), transparent);
+  background-size: 240px 200px, 240px 200px, 240px 200px, 120px 120px, 120px 120px, 120px 120px;
+  /* 120 steps: the layers move 2 px and 1 px at a time. */
+  animation: drift 24s steps(120) infinite;
+  opacity: 0.7;
+}
+
+/* The lit line the characters stand on. */
+.floor {
+  height: var(--px);
+  background: var(--cyan);
+  box-shadow: 0 0 calc(var(--px) * 4) var(--cyan), 0 calc(var(--px) * 2) 0 0 color-mix(in srgb, var(--cyan) 30%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hop, .blink, .starfield { animation: none; }
+  .btn:active:not(:disabled) { transform: none; }
+}
+
+@media (max-width: 30rem) {
+  :root { --px: 3px; }
+  body { font-size: 1.375rem; }
+}

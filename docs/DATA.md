@@ -63,7 +63,10 @@ worktree without one refuses) into `backups/` at the checkout's root
 are `<database>-<UTC stamp>.dump`, mode 0600; a `backups/` it creates is
 0700. `backups/` is inside the checkout, so `git clean -fdx` or deleting the
 checkout deletes every backup; `SCHOOLHOUSE_ARCADE_BACKUPS_DIR` moves them
-elsewhere.
+elsewhere. It is read from the environment only, not from `.env.local`: set
+it in your shell and, for the daily job, add it to the plist's
+`EnvironmentVariables` too, or the job and `db:backup:status` will look in
+different places.
 `npm run db:backup:status` (no connection to the database, only its name
 from `DATABASE_URL`, so a worktree without one refuses) prints the newest
 backup's name, size and age, and exits 1 when there is none or the newest is

@@ -63,14 +63,21 @@ export function backupsToPrune(names, database, keep = KEEP_BACKUPS, protect = [
 }
 
 /** The newest backup of this database and how old it is, from the UTC stamp in
- *  its name (not the file's mtime, which a copy changes). null when there is none. */
+ *  its name (not the file's mtime, which a copy changes). null when there is
+ *  none. A stamp after `now` (the clock was ahead when it was written) or one
+ *  that is no date is passed over: it would look fresh for as long as it sat
+ *  there, whatever had happened to the nightly job since. */
 export function newestBackup(names, database, now = new Date()) {
-  const mine = names.filter((n) => isBackupFile(n, database)).sort();
-  if (!mine.length) return null;
-  const name = mine[mine.length - 1];
-  const s = stampOf(name, database);
-  const at = new Date(`${s.slice(0, 4)}-${s.slice(4, 6)}-${s.slice(6, 8)}T${s.slice(9, 11)}:${s.slice(11, 13)}:${s.slice(13, 15)}Z`);
-  return { name, at, ageMs: now.getTime() - at.getTime() };
+  const dated = names
+    .filter((n) => isBackupFile(n, database))
+    .sort()
+    .map((name) => {
+      const s = stampOf(name, database);
+      const at = new Date(`${s.slice(0, 4)}-${s.slice(4, 6)}-${s.slice(6, 8)}T${s.slice(9, 11)}:${s.slice(11, 13)}:${s.slice(13, 15)}Z`);
+      return { name, at, ageMs: now.getTime() - at.getTime() };
+    })
+    .filter((b) => b.ageMs >= 0);
+  return dated.length ? dated[dated.length - 1] : null;
 }
 
 /** Stable places a node binary lives, tried in order. */

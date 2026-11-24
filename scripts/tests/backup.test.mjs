@@ -77,6 +77,9 @@ test("newest backup: the latest stamp of this database, with its age", () => {
   assert.equal(n.ageMs, 32.5 * 3600 * 1000);
   assert.equal(newestBackup([], "db", now), null);
   assert.equal(newestBackup(["notes.txt"], "db", now), null);
+  // A stamp from the future, or one that is no date, is not the newest.
+  assert.equal(newestBackup([...names, "db-20271119T033000Z.dump", "db-20261399T033000Z.dump"], "db", now).name, "db-20261119T033000Z.dump");
+  assert.equal(newestBackup(["db-20271119T033000Z.dump"], "db", now), null);
 });
 
 test("stable node path: the first stable symlink to the running node", () => {

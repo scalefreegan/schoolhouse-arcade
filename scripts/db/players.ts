@@ -14,10 +14,11 @@ export interface PlayerRow {
   id: string;
   name: string;
   avatar: string;
+  colour: string | null;
   createdAt: Date;
 }
 
-const columns = { id: players.id, name: players.name, avatar: players.avatar, createdAt: players.createdAt };
+const columns = { id: players.id, name: players.name, avatar: players.avatar, colour: players.colour, createdAt: players.createdAt };
 
 /** Everyone on the picker, in the order they joined. */
 export async function listPlayers(db: Db): Promise<PlayerRow[]> {
@@ -30,17 +31,17 @@ export async function findPlayer(db: Db, id: string): Promise<PlayerRow | null> 
   return row ?? null;
 }
 
-export async function createPlayer(db: Db, input: { name: string; avatar: string }): Promise<PlayerRow> {
+export async function createPlayer(db: Db, input: { name: string; avatar: string; colour: string | null }): Promise<PlayerRow> {
   const [row] = await db.insert(players).values(input).returning(columns);
   return row;
 }
 
-/** Change a player's name or character. Null when there is no such player. */
-export async function updatePlayer(db: Db, id: string, patch: { name?: string; avatar?: string }): Promise<PlayerRow | null> {
-  if (patch.name === undefined && patch.avatar === undefined) return findPlayer(db, id);
+/** Change a player's name, or their character and its colour (together). Null when there is no such player. */
+export async function updatePlayer(db: Db, id: string, patch: { name?: string; look?: { avatar: string; colour: string | null } }): Promise<PlayerRow | null> {
+  if (patch.name === undefined && patch.look === undefined) return findPlayer(db, id);
   const [row] = await db
     .update(players)
-    .set({ ...(patch.name === undefined ? {} : { name: patch.name }), ...(patch.avatar === undefined ? {} : { avatar: patch.avatar }) })
+    .set({ ...(patch.name === undefined ? {} : { name: patch.name }), ...(patch.look === undefined ? {} : { avatar: patch.look.avatar, colour: patch.look.colour }) })
     .where(and(eq(players.id, id), isNull(players.retiredAt)))
     .returning(columns);
   return row ?? null;

@@ -13,8 +13,8 @@ alien: {
     …
   ],
   palettes: {
-    lime: { g: "#7dff5a", d: "#2fae3a", w: "#ffffff", k: "#0b0620" },
-    rose: { g: "#ff7ac8", d: "#c23a8c", w: "#ffffff", k: "#0b0620" },
+    green: { g: "#7dff5a", d: "#2fae3a", w: "#ffffff", k: "#0b0620" },
+    pink: { g: "#ff7ac8", d: "#c23a8c", w: "#ffffff", k: "#0b0620" },
   },
 },
 ```
@@ -23,19 +23,29 @@ alien: {
 - `.` is empty. Any other character is a key into the palette.
 - Every row must be the same length. `npm test` checks that, and that every
   character has a colour in every palette.
-- The same drawing with another palette is another character: Zib and Nova
-  are one alien. That is how eight avatars come from four drawings.
+- A character is one drawing; its palettes are the colours it comes in,
+  named from one list (green, pink, blue … `COLOUR_NAMES` in
+  `web/shared/avatars.ts`). The first is the character's own look.
 
-`<Sprite id="alien" palette="lime" size={64} />` draws one at any size, as
-whole blocks. `<AvatarSprite avatar="zib" />` draws a player's character.
+`<Sprite id="alien" palette="green" size={64} />` draws one at any size, as
+whole blocks. `<AvatarSprite avatar="zib" colour="pink" />` draws a
+player's character in their colour (no colour: its own look).
 
-## Adding an avatar
+## Adding a character, or a colour
 
-1. Draw it in `art.ts` (16 × 16 matches the others), or add a palette to a
-   drawing that is already there.
-2. Add a line to `AVATARS` in `web/shared/avatars.ts` with a new `id`.
-3. Never rename or remove an `id` once someone has picked it: it is stored
-   on their player row.
+1. Draw it in `art.ts` at 16 × 16 like the others, with a palette per
+   colour; or add a palette to a drawing that is already there.
+2. Add it to `CHARACTERS` in `web/shared/avatars.ts` (a new `id`, a short
+   original name, its colours with its own look first), or the new colour
+   to that character's `colours`. The picker is rows of four.
+3. Never rename or remove a character `id` or a colour once someone has
+   picked it: both are stored on their player row.
+
+The first eight avatars were four drawings in two looks each. `nova`,
+`dash`, `gizmo` and `blip` are kept in `LEGACY_AVATARS` as Zib in pink, Rex
+in orange, Bolt in gold and Fuzz in blue: a row that holds one draws as it
+always did, and its edit form opens on that character and colour. The
+picker no longer offers them by name.
 
 ## Prizes and badges
 
@@ -70,11 +80,17 @@ For an image tool, one character at a time:
 > Chunky pixels, a limited palette of six flat colours, a one-pixel dark
 > outline, no shading gradients, no text, no shadow on the ground.
 
-Swap the bracketed sentence. The cast so far, to keep a family likeness:
-a green alien with two antennae and three stubby legs (Zib, Nova in pink); a
-small green T-rex in profile with a cream belly (Rex, Dash in orange); a
-boxy steel robot with cyan eyes and a red antenna bulb (Bolt, Gizmo in
-brass); a round one-eyed monster with horns (Fuzz in purple, Blip in blue).
+Swap the bracketed sentence. The cast so far, to keep a family likeness
+(each also comes in five other colours): a green alien with two antennae and
+three stubby legs (Zib); a small green T-rex in profile with a cream belly
+(Rex); a boxy steel robot with cyan eyes and a pink antenna bulb (Bolt); a
+round purple one-eyed monster with horns (Fuzz); a bearded wizard in a blue
+starry hat with a glowing staff (Fenn); a red winged dragon with a yellow
+belly, facing left (Toast); a round white ghost with blushing cheeks and a
+curling tail (Peeka); a white rocket with a red nose, fins and a face
+(Orbit); a sitting ginger cat with whiskers (Mitts); a brown owl with big
+yellow eyes on a branch (Tawny); a wide green frog with a big smile (Puddle);
+a pink-iced cupcake with a cherry and a smile (Crumb).
 
 ## The colours on screen
 

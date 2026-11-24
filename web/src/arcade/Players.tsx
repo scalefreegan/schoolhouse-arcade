@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { AVATARS, PLAYER_NAME_MAX, cleanPlayerName } from "../../shared/avatars.ts";
+import { CHARACTERS, COLOUR_NAMES, PLAYER_NAME_MAX, cleanPlayerName, lookOf } from "../../shared/avatars.ts";
 import type { Player } from "../../shared/wire.ts";
 import { ApiError, addPlayer, changePlayer } from "../api/client.ts";
 import { go } from "../router.ts";
@@ -8,9 +8,16 @@ import { AvatarSprite } from "../sprites/Sprite.tsx";
 import { useArcade } from "../state.tsx";
 import { Hud } from "./Hud.tsx";
 
-/** The form for a new player, or for changing one: a character and a name. */
+/**
+ * The form for a new player, or for changing one: a character, its colour
+ * and a name. The colours are the chosen character itself, once in each.
+ * On a tablet the characters sit beside the rest, so nothing scrolls.
+ */
 function PlayerForm({ editing, onDone, onCancel }: { editing: Player | null; onDone: (p: Player) => void; onCancel: () => void }) {
-  const [avatar, setAvatar] = useState(editing?.avatar ?? AVATARS[0].id);
+  // An old id opens as its character with its colour chosen.
+  const [first] = useState(() => (editing ? lookOf(editing.avatar, editing.colour) : { character: CHARACTERS[0], colour: CHARACTERS[0].colours[0] }));
+  const [character, setCharacter] = useState(first.character);
+  const [colour, setColour] = useState(first.colour);
   const [name, setName] = useState(editing?.name ?? "");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -21,8 +28,11 @@ function PlayerForm({ editing, onDone, onCancel }: { editing: Player | null; onD
     if (!clean || busy) return;
     setBusy(true);
     setError(null);
+    // A look left as it was is not sent, so a rename keeps an old id as it is.
+    const look = { avatar: character.id, colour };
+    const changedLook = !editing || character.id !== first.character.id || colour !== first.colour;
     try {
-      onDone(editing ? await changePlayer(editing.id, { name: clean, avatar }) : await addPlayer({ name: clean, avatar }));
+      onDone(editing ? await changePlayer(editing.id, { name: clean, ...(changedLook ? look : {}) }) : await addPlayer({ name: clean, ...look }));
     } catch (err) {
       setError(err instanceof ApiError ? err.message : String(err));
       setBusy(false);
@@ -30,53 +40,77 @@ function PlayerForm({ editing, onDone, onCancel }: { editing: Player | null; onD
   }
 
   return (
-    <form onSubmit={save} className="mx-auto mt-8 w-full max-w-2xl">
+    <form onSubmit={save} className="mx-auto mt-6 w-full max-w-4xl">
       <h2 className="font-display glow m-0 text-center text-base text-cyan">{editing ? `Change ${editing.name}` : "Pick your character"}</h2>
-      <div className="mt-6 grid grid-cols-4 gap-2" role="group" aria-label="Character">
-        {AVATARS.map((a) => (
-          <button
-            key={a.id}
-            type="button"
-            className="panel pick flex flex-col items-center gap-2"
-            aria-pressed={avatar === a.id}
-            onClick={() => {
-              sfx.tap();
-              setAvatar(a.id);
-            }}
-          >
-            <AvatarSprite avatar={a.id} size={64} className={avatar === a.id ? "hop" : ""} />
-            <span className={avatar === a.id ? "text-yellow" : "text-dim"}>{a.name}</span>
-          </button>
-        ))}
-      </div>
+      <div className="mt-6 grid items-start gap-x-8 gap-y-6 md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+        <div className="grid grid-cols-4 gap-2" role="group" aria-label="Character">
+          {CHARACTERS.map((c) => (
+            <button
+              key={c.id}
+              type="button"
+              className="panel pick flex min-w-0 flex-col items-center gap-1 px-1 py-2"
+              aria-pressed={character.id === c.id}
+              onClick={() => {
+                sfx.tap();
+                // A new pick arrives looking as it does in the grid.
+                if (c.id !== character.id) setColour(c.colours[0]);
+                setCharacter(c);
+              }}
+            >
+              <AvatarSprite avatar={c.id} colour={character.id === c.id ? colour : null} size={64} className={`max-w-full ${character.id === c.id ? "hop" : ""}`} />
+              <span className={`text-lg leading-none ${character.id === c.id ? "text-yellow" : "text-dim"}`}>{c.name}</span>
+            </button>
+          ))}
+        </div>
 
-      <label className="mt-8 block">
-        <span className="font-display text-sm text-cyan">Your name</span>
-        <input
-          className="field mt-3"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          maxLength={PLAYER_NAME_MAX}
-          autoComplete="off"
-          autoCapitalize="characters"
-          spellCheck={false}
-          autoFocus
-          placeholder="AAA"
-        />
-      </label>
-      {error && (
-        <p role="alert" className="panel panel-cyan mt-4 text-cyan">
-          {error}
-        </p>
-      )}
+        <div>
+          <div className="grid grid-cols-3 gap-2" role="group" aria-label="Colour">
+            {character.colours.map((k) => (
+              <button
+                key={k}
+                type="button"
+                className="panel pick flex min-w-0 items-center justify-center p-1"
+                aria-pressed={colour === k}
+                aria-label={COLOUR_NAMES[k] ?? k}
+                onClick={() => {
+                  sfx.tap();
+                  setColour(k);
+                }}
+              >
+                <AvatarSprite avatar={character.id} colour={k} size={48} className="max-w-full" />
+              </button>
+            ))}
+          </div>
 
-      <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-        <button type="button" className="btn btn-quiet" onClick={onCancel}>
-          Back
-        </button>
-        <button type="submit" className="btn btn-lg" disabled={!clean || busy}>
-          {editing ? "Save changes" : "Join the arcade"}
-        </button>
+          <label className="mt-6 block">
+            <span className="font-display text-sm text-cyan">Your name</span>
+            <input
+              className="field mt-3"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              maxLength={PLAYER_NAME_MAX}
+              autoComplete="off"
+              autoCapitalize="characters"
+              spellCheck={false}
+              autoFocus
+              placeholder="AAA"
+            />
+          </label>
+          {error && (
+            <p role="alert" className="panel panel-cyan mt-4 text-cyan">
+              {error}
+            </p>
+          )}
+
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-4">
+            <button type="button" className="btn btn-quiet" onClick={onCancel}>
+              Back
+            </button>
+            <button type="submit" className="btn btn-lg" disabled={!clean || busy}>
+              {editing ? "Save changes" : "Join the arcade"}
+            </button>
+          </div>
+        </div>
       </div>
     </form>
   );
@@ -155,7 +189,7 @@ export function Players() {
                   go("lobby");
                 }}
               >
-                <AvatarSprite avatar={p.avatar} size={88} />
+                <AvatarSprite avatar={p.avatar} colour={p.colour} size={88} />
                 <span className="font-display text-sm text-magenta">{p.name}</span>
               </button>
             ))}

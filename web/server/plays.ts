@@ -37,7 +37,7 @@ async function playerFor(db: Db, id: unknown): Promise<string> {
 const text = (v: unknown): string => (typeof v === "string" ? v : "");
 
 function toScoreRow(r: BoardRow): ScoreRow {
-  return { playId: r.playId, playerId: r.playerId, name: r.name, avatar: r.avatar, score: r.score, timeMs: r.timeMs, right: r.right, at: r.at.toISOString() };
+  return { playId: r.playId, playerId: r.playerId, name: r.name, avatar: r.avatar, colour: r.colour, score: r.score, timeMs: r.timeMs, right: r.right, at: r.at.toISOString() };
 }
 
 const boardOf = (rules: GameRules, mode: string) => rules.modes.find((m) => m.id === mode)?.board ?? null;

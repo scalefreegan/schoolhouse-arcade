@@ -15,13 +15,16 @@ import { bigint, bigserial, boolean, index, integer, pgTable, primaryKey, smalli
 
 const tz = (name: string) => timestamp(name, { withTimezone: true });
 
-/** Who plays. `avatar` is an id from web/shared/avatars.ts. A retired
+/** Who plays. `avatar` is a character id from web/shared/avatars.ts and
+ *  `colour` one of its colours (null: the character's own look; always null
+ *  for the ids from before colours, which have their own). A retired
  *  player keeps their rows (and their place on the high score tables) but
  *  leaves the picker. */
 export const players = pgTable("players", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: text("name").notNull(),
   avatar: text("avatar").notNull(),
+  colour: text("colour"),
   createdAt: tz("created_at").notNull().defaultNow(),
   retiredAt: tz("retired_at"),
 });

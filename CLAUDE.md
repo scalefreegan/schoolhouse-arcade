@@ -12,7 +12,7 @@ game, the schema or the artwork.
 ## Layout
 ```
 web/shared/games.ts      the cabinets on the floor (id, title, status)
-web/shared/avatars.ts    the characters a player can be, and what a legal name is
+web/shared/avatars.ts    the characters a player can be, their colours, the old ids, and what a legal name is
 web/shared/wire.ts       request and reply types shared by server and client
 web/shared/play.ts       what every game shares: a play, GameRules, Settled, openLevels()
 web/shared/roundid.ts    newRoundId(): the id a round keeps through every try at saving it

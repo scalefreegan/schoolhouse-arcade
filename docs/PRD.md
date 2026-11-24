@@ -22,8 +22,8 @@ all answers below are final for v1):
 | Fact range | **A level ladder**, unlocked by mastery: add within 5, add within 10, take away within 10, mixed within 10, then both numbers 0–10 with sums to 20. Subtraction never goes below zero |
 | Mistakes | **Show the answer, and the card returns.** The right answer flashes, the combo resets, the fact comes back later in the round and more often in later games until it sticks. No other penalty, except in Survival where it costs a life |
 | Prizes | **Tickets and mastery badges.** Every game pays tickets, spent at a Prize Counter on small prizes the grown-up prices. Big prizes are locked behind mastery badges as well, so they cannot be ground out by volume alone |
-| Players | **Profiles with avatars.** A "Who is playing?" screen; each player picks a pixel character and a name. Tickets, badges and unlocks are per player; the high score tables show everyone |
-| Theme | Space and aliens, dinosaurs, robots, monsters: **all four**, as the cast of avatars. The first game is the space one |
+| Players | **Profiles with avatars.** A "Who is playing?" screen; each player picks a pixel character, its colour, and a name. Tickets, badges and unlocks are per player; the high score tables show everyone |
+| Theme | Space and aliens, dinosaurs, robots, monsters: **all four**, as the cast of avatars, since joined by a wizard, a dragon, a ghost, a rocket, a cat, an owl, a frog and a cupcake (twelve, in rows of four), each in six colours. The first game is the space one |
 | Hosting | **Mac server and Postgres**, the shape of Lingo Dojo and Lean Into It. The tablet reaches the Mac over home Wi-Fi; scores are shared across devices; it works when the Mac is on and at home |
 | Artwork | **Pixel sprites drawn in code** (`web/src/sprites/art.ts`): small character grids with palettes. Nothing downloaded, nothing to license. `docs/ART.md` says how to swap in made art later |
 | Look | **Neon CRT cabinet.** Early-80s coin-op: black glass, scanlines and glow, cyan / magenta / yellow, chunky pixel type, a title screen that says *press start* |
@@ -35,8 +35,8 @@ all answers below are final for v1):
 | Word | Meaning |
 |---|---|
 | **Cabinet** | One game on the arcade floor. Listed in `web/shared/games.ts` |
-| **Player** | A row picked on the "Who is playing?" screen: a name and an avatar. No logins |
-| **Avatar** | The pixel character a player is (`web/shared/avatars.ts`) |
+| **Player** | A row picked on the "Who is playing?" screen: a name, an avatar and its colour. No logins |
+| **Avatar** | The pixel character a player is, in one of its colours (`web/shared/avatars.ts`). The first colour is the character's own look |
 | **Fact** | One sum, written `7+5` or `10-2`. The unit everything is counted in |
 | **Card** | A fact shown to be answered |
 | **Level** | A set of facts (add within 5, …). Levels unlock in order |
@@ -53,7 +53,8 @@ all answers below are final for v1):
 ## User flow
 
 1. **Title screen.** The marquee, the cast, *press start*. A tap or any key.
-2. **Who is playing?** Pick a player, or join with a character and a name. A
+2. **Who is playing?** Pick a player, or join with a character, a colour and
+   a name. The colours are the character itself, once in each. A
    device remembers its player, so next time start goes to the floor.
 3. **The floor.** Every cabinet. Pick one.
 4. **Comet Cards: set up.** Pick a level (locked ones are shown dark), a mode

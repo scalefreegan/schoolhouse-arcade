@@ -1,5 +1,5 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { AVATAR_IDS, PLAYER_NAME_MAX, cleanPlayerName } from "../shared/avatars.ts";
+import { AVATAR_IDS, PLAYER_NAME_MAX, cleanPlayerName, colourFor } from "../shared/avatars.ts";
 import type { Player, PlayerInput, PlayersReply } from "../shared/wire.ts";
 import { createPlayer, listPlayers, updatePlayer, type PlayerRow } from "../../scripts/db/players.ts";
 import { rawDb } from "./db.ts";
@@ -7,14 +7,14 @@ import { HttpError, isUuid, methodNotAllowed, pathSegments, readJsonBody, sendJs
 
 // /api/players: who is on the "Who is playing?" screen.
 //   GET   /api/players        everyone
-//   POST  /api/players        a new player { name, avatar }
-//   PATCH /api/players/<id>   a new name or character
+//   POST  /api/players        a new player { name, avatar, colour? }
+//   PATCH /api/players/<id>   a new name, or a new character { avatar, colour? }
 
 /** More players than this is a mistake (a stuck button), not a family. */
 export const MAX_PLAYERS = 12;
 
 export function toPlayer(row: PlayerRow): Player {
-  return { id: row.id, name: row.name, avatar: row.avatar };
+  return { id: row.id, name: row.name, avatar: row.avatar, colour: row.colour };
 }
 
 function nameFrom(body: PlayerInput): string {
@@ -23,9 +23,12 @@ function nameFrom(body: PlayerInput): string {
   return name;
 }
 
-function avatarFrom(body: PlayerInput): string {
+/** A character and its colour, as sent together. No colour is its own look. */
+function lookFrom(body: PlayerInput): { avatar: string; colour: string | null } {
   if (typeof body.avatar !== "string" || !AVATAR_IDS.includes(body.avatar)) throw new HttpError(400, "Pick one of the characters.");
-  return body.avatar;
+  const colour = colourFor(body.avatar, body.colour);
+  if (colour === undefined) throw new HttpError(400, "Pick one of that character's colours.");
+  return { avatar: body.avatar, colour };
 }
 
 export async function handlePlayers(req: IncomingMessage, res: ServerResponse): Promise<void> {
@@ -38,7 +41,7 @@ export async function handlePlayers(req: IncomingMessage, res: ServerResponse): 
     }
     if (req.method !== "POST") return methodNotAllowed(res, "GET, POST");
     const body = await readJsonBody<PlayerInput>(req);
-    const input = { name: nameFrom(body), avatar: avatarFrom(body) };
+    const input = { name: nameFrom(body), ...lookFrom(body) };
     if ((await listPlayers(db)).length >= MAX_PLAYERS) throw new HttpError(409, `The arcade holds ${MAX_PLAYERS} players. A grown-up can retire one to make room.`);
     sendJson(res, 201, toPlayer(await createPlayer(db, input)));
     return;
@@ -46,7 +49,8 @@ export async function handlePlayers(req: IncomingMessage, res: ServerResponse): 
   if (rest.length || !isUuid(id)) throw new HttpError(404, "no such player");
   if (req.method !== "PATCH") return methodNotAllowed(res, "PATCH");
   const body = await readJsonBody<PlayerInput>(req);
-  const patch = { ...(body.name === undefined ? {} : { name: nameFrom(body) }), ...(body.avatar === undefined ? {} : { avatar: avatarFrom(body) }) };
+  if (body.avatar === undefined && body.colour !== undefined) throw new HttpError(400, "A colour comes with its character.");
+  const patch = { ...(body.name === undefined ? {} : { name: nameFrom(body) }), ...(body.avatar === undefined ? {} : { look: lookFrom(body) }) };
   const row = await updatePlayer(db, id, patch);
   if (!row) throw new HttpError(404, "no such player");
   sendJson(res, 200, toPlayer(row));

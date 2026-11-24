@@ -16,8 +16,10 @@ export interface ErrorReply {
 export interface Player {
   id: string;
   name: string;
-  /** An id from shared/avatars.ts. */
+  /** A character id from shared/avatars.ts (or an old id, which has its own colour). */
   avatar: string;
+  /** One of that character's colours; null is its own look. */
+  colour: string | null;
 }
 
 /** GET /api/players */
@@ -25,10 +27,13 @@ export interface PlayersReply {
   players: Player[];
 }
 
-/** POST /api/players, PATCH /api/players/<id> (either field) */
+/** POST /api/players, PATCH /api/players/<id> (any field). A colour comes
+ *  with its character: a new `avatar` without `colour` is its own look, and
+ *  a `colour` without `avatar` is refused. */
 export interface PlayerInput {
   name?: string;
   avatar?: string;
+  colour?: string | null;
 }
 
 /** POST /api/plays: one finished round. The server scores it from the answers. */
@@ -63,6 +68,7 @@ export interface ScoreRow {
   playerId: string;
   name: string;
   avatar: string;
+  colour: string | null;
   score: number;
   timeMs: number;
   right: number;

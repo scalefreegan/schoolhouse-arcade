@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { avatarById } from "../../shared/avatars.ts";
+import { lookOf } from "../../shared/avatars.ts";
 import { ART, type SpriteArt, type SpriteId } from "./art.ts";
 import { spriteRuns } from "./runs.ts";
 
@@ -28,10 +28,10 @@ export function Sprite({ id, palette = "default", size = 64, className = "", tit
   );
 }
 
-/** A player's character, by avatar id (shared/avatars.ts). */
-export function AvatarSprite({ avatar, size = 64, className = "", title }: { avatar: string; size?: number; className?: string; title?: string }) {
-  const a = avatarById(avatar);
-  return <Sprite id={a.sprite} palette={a.palette} size={size} className={className} {...(title ? { title } : {})} />;
+/** A player's character in its colour, as stored (shared/avatars.ts: lookOf). */
+export function AvatarSprite({ avatar, colour = null, size = 64, className = "", title }: { avatar: string; colour?: string | null; size?: number; className?: string; title?: string }) {
+  const look = lookOf(avatar, colour);
+  return <Sprite id={look.character.sprite} palette={look.colour} size={size} className={className} {...(title ? { title } : {})} />;
 }
 
 /**

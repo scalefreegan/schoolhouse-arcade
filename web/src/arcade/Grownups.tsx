@@ -46,7 +46,7 @@ function PlayerRow({ p, busy, onAdjust, onOpen, onRetire }: { p: GrownupPlayer; 
   return (
     <li className="panel">
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-        <AvatarSprite avatar={p.avatar} size={48} />
+        <AvatarSprite avatar={p.avatar} colour={p.colour} size={48} />
         <span className="font-display text-sm text-magenta">{p.name}</span>
         <span className="flex items-center gap-2 text-yellow">
           <Sprite id="ticket" size={28} />

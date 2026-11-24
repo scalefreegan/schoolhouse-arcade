@@ -1,0 +1,18 @@
+# Runtime state
+data/
+
+node_modules
+web/dist/
+.env
+.env.*
+*.local
+.DS_Store
+
+# browser-automation debug artifacts
+.playwright-mcp/
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# npm run db:backup
+backups/

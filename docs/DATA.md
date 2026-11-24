@@ -17,7 +17,7 @@ an id never changes once live. Mirrors Lean Into It's `docs/DATA.md`.
 | Table | One row is | Written by |
 |---|---|---|
 | `players` | someone on the "Who is playing?" screen | `scripts/db/players.ts` |
-| `plays` | one finished round, scored by the server | `scripts/db/plays.ts` |
+| `plays` | one finished round, scored by the server; `round_id` is the round's own id | `scripts/db/plays.ts` |
 | `answers` | one card of a play: the fact, what was answered, how long it took | `scripts/db/plays.ts` |
 | `level_stars` | the most stars a player has on one level | `scripts/db/plays.ts` |
 | `level_opens` | a level a grown-up opened early for a player | `scripts/db/plays.ts` |
@@ -33,7 +33,16 @@ worked out from a player's latest `answers`.
 **Tickets are a ledger.** A balance is the sum of a player's
 `ticket_events`; rows are added and never changed or deleted, so every
 ticket can be traced to the round, badge, prize or grown-up that moved it. A
-mistake is put right with another row (Grown-ups → Tickets).
+mistake is put right with another row (Grown-ups → Tickets). A row for a
+round points at its play (`play_id`); a row for a prize points at its
+hand-over (`redemption_id`).
+
+**A round is stored once.** The browser makes a round id when a round ends
+(`web/shared/roundid.ts`) and sends it with every try at saving that round.
+It is kept in `plays.round_id`, unique per player. A round id the server
+already has is answered with the play it was stored as; nothing is recorded
+or paid again. A play must carry one; plays from before migration
+`0003_round_ids` have none.
 
 Migration `0002_prizes` also puts the three example prizes on the shelf.
 

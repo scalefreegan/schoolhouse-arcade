@@ -15,6 +15,7 @@ web/shared/games.ts      the cabinets on the floor (id, title, status)
 web/shared/avatars.ts    the characters a player can be, and what a legal name is
 web/shared/wire.ts       request and reply types shared by server and client
 web/shared/play.ts       what every game shares: a play, GameRules, Settled, openLevels()
+web/shared/roundid.ts    newRoundId(): the id a round keeps through every try at saving it
 web/shared/rules.ts      each live game's rules, by game id (the server scores with these)
 web/shared/tickets.ts    what a play pays: the arcade's bonuses, the reasons on a ledger row
 web/shared/badges.ts     every badge and the pure test for whether it is earned
@@ -88,7 +89,10 @@ scripts/tests/testdb.mjs freshDb(): an in-process PGlite with the real migration
   does so in one transaction that takes `lockPlayer()` first.
 - **A play is settled all or nothing** (`settlePlay()` in
   `web/server/plays.ts`): the play, its stars, its badges and its tickets.
-  A game supplies only `pay()`; bonuses and badges are the arcade's.
+  A game supplies only `pay()`; bonuses and badges are the arcade's. And
+  once: a game makes one round id per round and sends it on every retry; a
+  round id the player has already sent gets the stored play back and writes
+  nothing. `recordPlay()` comes after `playOfRound()`, under the lock.
 - The real database holds tickets a child has earned. Tests never touch a
   Postgres server: `freshDb()`. A worktree never uses the real database
   (`scripts/db/config.mjs` refuses to start without a `DATABASE_URL`).

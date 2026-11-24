@@ -11,7 +11,7 @@
 // avatar ids are the ones in web/shared/, which is why they must never
 // change once live.
 
-import { bigint, bigserial, boolean, index, integer, pgTable, primaryKey, smallint, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { bigint, bigserial, boolean, index, integer, pgTable, primaryKey, smallint, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 
 const tz = (name: string) => timestamp(name, { withTimezone: true });
 
@@ -31,6 +31,9 @@ export const players = pgTable("players", {
  * server from the play's answers with the game's rules (web/shared/rules.ts);
  * none came from the browser. `level`, `mode` and `skill` are the game's own
  * ids. The high score tables are queries over this table.
+ * `round_id` is the id the browser gave the round, the same on every try at
+ * saving it: unique per player, so a round sent twice is stored and paid
+ * once. Null only on plays from before there was one.
  */
 export const plays = pgTable(
   "plays",
@@ -53,9 +56,10 @@ export const plays = pgTable(
     finished: boolean("finished").notNull(),
     /** Stars this play earned for its level (0-3). */
     stars: smallint("stars").notNull().default(0),
+    roundId: uuid("round_id"),
     createdAt: tz("created_at").notNull().defaultNow(),
   },
-  (t) => [index("plays_board").on(t.gameId, t.level, t.mode, t.skill, t.score), index("plays_player").on(t.playerId, t.gameId, t.createdAt)],
+  (t) => [index("plays_board").on(t.gameId, t.level, t.mode, t.skill, t.score), index("plays_player").on(t.playerId, t.gameId, t.createdAt), uniqueIndex("plays_round").on(t.playerId, t.roundId)],
 );
 
 /**
@@ -122,7 +126,7 @@ export const ticketEvents = pgTable(
     delta: integer("delta").notNull(),
     reason: text("reason").notNull(),
     playId: bigint("play_id", { mode: "number" }).references(() => plays.id, { onDelete: "set null" }),
-    redemptionId: bigint("redemption_id", { mode: "number" }),
+    redemptionId: bigint("redemption_id", { mode: "number" }).references(() => redemptions.id, { onDelete: "set null" }),
     note: text("note"),
     createdAt: tz("created_at").notNull().defaultNow(),
   },

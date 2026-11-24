@@ -3,8 +3,8 @@
 //
 // Erasable TypeScript only, like schema.ts: `node --test` imports it as is.
 
-import { desc, eq, sql } from "drizzle-orm";
-import type { TicketReason } from "../../web/shared/tickets.ts";
+import { and, asc, desc, eq, sql } from "drizzle-orm";
+import type { TicketLine, TicketReason } from "../../web/shared/tickets.ts";
 import type { Db } from "./players.ts";
 import { players, ticketEvents } from "./schema.ts";
 
@@ -33,6 +33,16 @@ export async function balances(db: Db): Promise<Record<string, number>> {
 export async function addTickets(db: Db, playerId: string, entries: TicketEntry[]): Promise<void> {
   const rows = entries.filter((e) => e.delta !== 0).map((e) => ({ playerId, delta: e.delta, reason: e.reason, playId: e.playId ?? null, redemptionId: e.redemptionId ?? null, note: e.note ?? null }));
   if (rows.length) await db.insert(ticketEvents).values(rows);
+}
+
+/** What one of a player's plays paid, line by line, in the order it was paid. */
+export async function linesOf(db: Db, playerId: string, playId: number): Promise<TicketLine[]> {
+  const rows = await db
+    .select({ reason: ticketEvents.reason, amount: ticketEvents.delta, note: ticketEvents.note })
+    .from(ticketEvents)
+    .where(and(eq(ticketEvents.playerId, playerId), eq(ticketEvents.playId, playId)))
+    .orderBy(asc(ticketEvents.id));
+  return rows.map(({ reason, amount, note }) => ({ reason: reason as TicketReason, amount, ...(reason === "badge" && note ? { badge: note } : {}) }));
 }
 
 export interface LedgerRow {

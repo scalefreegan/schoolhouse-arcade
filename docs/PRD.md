@@ -134,7 +134,8 @@ below 0, never repeated, in random order.
 pays a flat 5 for finishing. Beating your own best with a set-up adds 10;
 each new star adds 20. A badge pays its own bonus once. Every line is
 written to a ledger (`ticket_events`); a balance is the sum of its rows,
-and rows are only ever added.
+and rows are only ever added. A round pays once: sending it again after a
+lost reply shows what it paid the first time.
 
 **Badges** are earned once per player and never taken away
 (`web/shared/badges.ts`). Whether one is earned is asked after every play,

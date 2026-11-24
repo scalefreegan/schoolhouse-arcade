@@ -35,6 +35,9 @@ export interface PlayerInput {
 export interface PlayRequest extends PlayConfig {
   playerId: string;
   gameId: string;
+  /** This round's id (shared/roundid.ts), the same on every try at saving it:
+   *  a round the server already has is answered, not stored or paid again. */
+  roundId: string;
   answers: AnswerInput[];
 }
 

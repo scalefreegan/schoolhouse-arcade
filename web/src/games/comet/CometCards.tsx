@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { LEVELS, levelById } from "../../../shared/comet/facts.ts";
 import { MODES, SKILLS, type Mode, type Skill } from "../../../shared/comet/rules.ts";
 import type { AnswerInput, PlayConfig } from "../../../shared/play.ts";
+import { newRoundId } from "../../../shared/roundid.ts";
 import type { PlayReply, ProgressReply } from "../../../shared/wire.ts";
 import { ApiError, getProgress, postPlay } from "../../api/client.ts";
 import type { GameProps } from "../index.ts";
@@ -26,7 +27,7 @@ function remembered(playerId: string): PlayConfig {
 type Stage =
   | { at: "setup" }
   | { at: "round"; round: number }
-  | { at: "saving"; answers: AnswerInput[]; error: string | null }
+  | { at: "saving"; answers: AnswerInput[]; roundId: string; error: string | null }
   | { at: "results"; answers: AnswerInput[]; reply: PlayReply };
 
 /**
@@ -64,15 +65,17 @@ export function CometCards({ player, onExit }: GameProps) {
     }
   };
 
+  // Send a round. `roundId` is the round's own, made once when it ended: a
+  // round sent again after a lost reply is stored and paid only once.
   const save = useCallback(
-    async (answers: AnswerInput[]) => {
-      setStage({ at: "saving", answers, error: null });
+    async (answers: AnswerInput[], roundId: string) => {
+      setStage({ at: "saving", answers, roundId, error: null });
       try {
-        const reply = await postPlay({ playerId: player.id, gameId: GAME, ...config, answers });
+        const reply = await postPlay({ playerId: player.id, gameId: GAME, roundId, ...config, answers });
         setStage({ at: "results", answers, reply });
         void load();
       } catch (e) {
-        setStage({ at: "saving", answers, error: e instanceof ApiError ? e.message : String(e) });
+        setStage({ at: "saving", answers, roundId, error: e instanceof ApiError ? e.message : String(e) });
       }
     },
     [player.id, config, load],
@@ -117,7 +120,7 @@ export function CometCards({ player, onExit }: GameProps) {
         mode={live.mode as Mode}
         skill={live.skill as Skill}
         stats={progress.facts}
-        onDone={(answers) => void save(answers)}
+        onDone={(answers) => void save(answers, newRoundId())}
         onQuit={() => setStage({ at: "setup" })}
       />
     );
@@ -133,7 +136,7 @@ export function CometCards({ player, onExit }: GameProps) {
               <button type="button" className="btn btn-quiet" onClick={() => setStage({ at: "setup" })}>
                 Give up
               </button>
-              <button type="button" className="btn btn-cyan" onClick={() => void save(stage.answers)}>
+              <button type="button" className="btn btn-cyan" onClick={() => void save(stage.answers, stage.roundId)}>
                 Try again
               </button>
             </div>

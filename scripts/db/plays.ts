@@ -35,13 +35,15 @@ export interface RecordedPlay {
 
 /**
  * Store one settled play: the play, its answers, and the level's stars if
- * this play raised them. One transaction, so a play is never half there.
+ * this play raised them. One transaction, so a play is never half there. A
+ * round already stored for this player cannot be stored again (the unique
+ * index on their round ids throws); ask playOfRound() first.
  */
-export async function recordPlay(db: Db, playerId: string, key: BoardKey, s: Settled): Promise<RecordedPlay> {
+export async function recordPlay(db: Db, playerId: string, key: BoardKey, s: Settled, roundId: string): Promise<RecordedPlay> {
   return db.transaction(async (tx) => {
     const [{ id: playId }] = await tx
       .insert(plays)
-      .values({ playerId, gameId: key.gameId, level: key.level, mode: key.mode, skill: key.skill, score: s.score, rightCount: s.right, wrongCount: s.wrong, bestCombo: s.bestCombo, timeMs: s.timeMs, finished: s.finished, stars: s.stars })
+      .values({ playerId, gameId: key.gameId, level: key.level, mode: key.mode, skill: key.skill, score: s.score, rightCount: s.right, wrongCount: s.wrong, bestCombo: s.bestCombo, timeMs: s.timeMs, finished: s.finished, stars: s.stars, roundId })
       .returning({ id: plays.id });
     if (s.answers.length) {
       await tx.insert(answers).values(s.answers.map((a) => ({ playId, playerId, gameId: key.gameId, fact: a.fact, given: a.given, correct: a.correct, ms: a.ms })));
@@ -57,6 +59,36 @@ export async function recordPlay(db: Db, playerId: string, key: BoardKey, s: Set
     }
     return { playId, starsBefore, starsAfter: Math.max(starsBefore, s.stars) };
   });
+}
+
+export interface StoredPlay extends RecordedPlay {
+  key: BoardKey;
+  score: number;
+  right: number;
+  wrong: number;
+  bestCombo: number;
+  timeMs: number;
+  finished: boolean;
+}
+
+/**
+ * The play one of a player's rounds was stored as, or null when it has not
+ * been. The level's stars before it are the most an earlier play of the
+ * level earned: stars come only from plays, and a player's plays are
+ * recorded one at a time (lockPlayer), so a lower id is an earlier play.
+ */
+export async function playOfRound(db: Db, playerId: string, roundId: string): Promise<StoredPlay | null> {
+  const [row] = await db
+    .select({ playId: plays.id, gameId: plays.gameId, level: plays.level, mode: plays.mode, skill: plays.skill, score: plays.score, right: plays.rightCount, wrong: plays.wrongCount, bestCombo: plays.bestCombo, timeMs: plays.timeMs, finished: plays.finished, stars: plays.stars })
+    .from(plays)
+    .where(and(eq(plays.playerId, playerId), eq(plays.roundId, roundId)));
+  if (!row) return null;
+  const { gameId, level, mode, skill, stars, ...told } = row;
+  const [{ starsBefore }] = await db
+    .select({ starsBefore: sql<number>`coalesce(max(${plays.stars}), 0)::int` })
+    .from(plays)
+    .where(and(eq(plays.playerId, playerId), eq(plays.gameId, gameId), eq(plays.level, level), lt(plays.id, row.playId)));
+  return { ...told, key: { gameId, level, mode, skill }, starsBefore, starsAfter: Math.max(starsBefore, stars) };
 }
 
 const onBoard = (key: BoardKey) => and(eq(plays.gameId, key.gameId), eq(plays.level, key.level), eq(plays.mode, key.mode), eq(plays.skill, key.skill), eq(plays.finished, true));

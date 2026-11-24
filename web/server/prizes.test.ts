@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
+import { randomUUID } from "node:crypto";
 import { test } from "node:test";
 import { answerOf, parseFact } from "../shared/comet/facts.ts";
 import type { AnswerInput } from "../shared/play.ts";
 import type { CounterReply, ErrorReply, GrownupReply, PinState, PlayReply, Player, PlayersReply, Prize, ProgressReply, RedeemReply } from "../shared/wire.ts";
+import { recordPlay } from "../../scripts/db/plays.ts";
 import { addSetting, getSetting } from "../../scripts/db/settings.ts";
 import { freshDb } from "../../scripts/tests/testdb.mjs";
 import { wrap } from "./api.ts";
@@ -44,8 +46,8 @@ async function arcade(t: { after: (fn: () => unknown) => void }, opts: { pin?: b
   });
   if (opts.pin !== false) await request(grownup, "POST", "/pin", { pin: PIN }, APP);
   const join = async (name: string) => (await request<Player>(players, "POST", "/", { name, avatar: "rex" }, APP)).body.id;
-  const play = (playerId: string, config: { level?: string; mode?: string; skill?: string }, answers: AnswerInput[]) =>
-    request<Reply<PlayReply>>(plays, "POST", "/", { playerId, gameId: "comet-cards", level: "add-5", mode: "blitz", skill: "easy", ...config, answers }, APP);
+  const play = (playerId: string, config: { level?: string; mode?: string; skill?: string }, answers: AnswerInput[], roundId: unknown = randomUUID()) =>
+    request<Reply<PlayReply>>(plays, "POST", "/", { playerId, gameId: "comet-cards", roundId, level: "add-5", mode: "blitz", skill: "easy", ...config, answers }, APP);
   const at = async (playerId: string) => (await request<CounterReply>(counter, "GET", `/?player=${playerId}`, undefined, APP)).body;
   const give = (playerId: string, delta: number, note?: string) => request<Reply<{ tickets: number }>>(grownup, "POST", "/tickets", { playerId, delta, note }, withPin());
   const prize = async (playerId: string, name: string) => (await at(playerId)).prizes.find((p) => p.name === name)!;
@@ -79,6 +81,122 @@ test("a play pays its right answers, its star and its badges, every line goes in
   const seen = await at(em);
   assert.equal(seen.tickets, 91);
   assert.deepEqual(seen.badges.map((b) => b.id).sort(), ["combo-10", "comet-add-5", "first-game"]);
+});
+
+/** What a repeat must not change: rows of every table a play writes. */
+const WRITTEN = "select (select count(*)::int from plays) as plays, (select count(*)::int from answers) as answers, (select count(*)::int from ticket_events) as lines, (select sum(delta)::int from ticket_events) as tickets, (select count(*)::int from badges_earned) as badges, (select sum(stars)::int from level_stars) as stars";
+
+test("a round sent twice is one play, paid once, and both replies say the same", async (t) => {
+  const { join, play, at, query } = await arcade(t);
+  const em = await join("Em");
+  // A star, the next level, three badges, and the round id in either case.
+  const round = [...many(12, () => right("2+3")), wrong("1+1"), ...many(4, () => right("2+2"))];
+  const id = randomUUID();
+  const first = await play(em, {}, round, id);
+  const written = await query(WRITTEN);
+  assert.deepEqual(written, [{ plays: 1, answers: 17, lines: 5, tickets: 91, badges: 3, stars: 1 }]);
+  assert.deepEqual([first.body.opened, first.body.rank, first.body.tickets.balance], ["add-10", 1, 91]);
+  for (const again of [id, id.toUpperCase()]) assert.deepEqual(await play(em, {}, round, again), first);
+  assert.deepEqual(await query(WRITTEN), written);
+
+  // A best, with its bonus, and the same stars before and after.
+  const bestId = randomUUID();
+  const best = await play(em, {}, [...round, right("0+1")], bestId);
+  assert.deepEqual([best.body.personalBest, best.body.tickets.lines], [true, [{ reason: "play", amount: 17 }, { reason: "best", amount: 10 }]]);
+  assert.deepEqual(await play(em, {}, [...round, right("0+1")], bestId), best);
+
+  // An unranked play, and one worth nothing at all.
+  for (const answers of [many(15, () => right("2+3")), [wrong("1+1")], []]) {
+    const practiceId = randomUUID();
+    const practice = await play(em, { mode: "practice" }, answers, practiceId);
+    assert.equal(practice.status, 201);
+    assert.deepEqual(await play(em, { mode: "practice" }, answers, practiceId), practice);
+  }
+  assert.equal((await at(em)).tickets, 91 + 27 + 5);
+});
+
+test("two rounds are two plays, however alike; another player's round id is their own", async (t) => {
+  const { join, play, at, query } = await arcade(t);
+  const [em, al] = [await join("Em"), await join("Al")];
+  const round = [right("2+3"), right("1+1")];
+  const id = randomUUID();
+  const a = await play(em, {}, round, id);
+  const b = await play(em, {}, round);
+  const c = await play(al, {}, round, id);
+  assert.equal(new Set([a.body.playId, b.body.playId, c.body.playId]).size, 3);
+  assert.deepEqual(await query("select count(*)::int as n from plays"), [{ n: 3 }]);
+  assert.deepEqual([(await at(em)).tickets, (await at(al)).tickets], [2 + 10 + 2, 2 + 10]);
+});
+
+test("a round sent again later says what it paid then, with the tickets and the table as they are now", async (t) => {
+  const { join, play, give, query } = await arcade(t);
+  const [em, al] = [await join("Em"), await join("Al")];
+  const round = many(16, () => right("2+3"));
+  const id = randomUUID();
+  const first = await play(em, {}, round, id);
+  await play(al, {}, many(17, () => right("2+3")));
+  await play(em, { skill: "arcade" }, round); // a second star on the level
+  await give(em, 40);
+  const written = await query(WRITTEN);
+  const again = await play(em, {}, round, id);
+  const { rank, board, tickets, ...same } = first.body;
+  const { rank: rankNow, board: boardNow, tickets: ticketsNow, ...sameNow } = again.body;
+  assert.deepEqual(sameNow, same);
+  assert.deepEqual([ticketsNow.lines, ticketsNow.total], [tickets.lines, tickets.total]);
+  assert.deepEqual([rank, board.rows.length, tickets.balance], [1, 1, 91]);
+  assert.deepEqual([rankNow, boardNow.rows.length, ticketsNow.balance], [2, 2, 91 + 32 + 20 + 40]);
+  // The round decides, not what came with it: it is never scored twice.
+  const other = await play(em, { mode: "sprint", skill: "arcade" }, many(20, () => right("1+1")), id);
+  assert.deepEqual([other.body.playId, other.body.score], [first.body.playId, first.body.score]);
+  assert.deepEqual(await query(WRITTEN), written);
+});
+
+test("a reply lost after the play was stored: the retry gets it, and pays nothing", async (t) => {
+  const { join, play, at, query } = await arcade(t);
+  const em = await join("Em");
+  const round = many(16, () => right("2+3"));
+  const id = randomUUID();
+  const db = rawDb();
+  // The transaction commits, and then whatever comes next fails.
+  setDb(new Proxy(db, { get: (real, name) => (name === "transaction" ? async (fn: Parameters<typeof db.transaction>[0]) => { await real.transaction(fn); throw new Error("the board fell over"); } : Reflect.get(real, name)) }));
+  assert.equal((await play(em, {}, round, id)).status, 500);
+  setDb(db);
+  const written = await query(WRITTEN);
+  assert.deepEqual(written, [{ plays: 1, answers: 16, lines: 5, tickets: 91, badges: 3, stars: 1 }], "it was stored and paid");
+  const retry = await play(em, {}, round, id);
+  assert.deepEqual([retry.status, retry.body.score > 0, retry.body.tickets.total, retry.body.tickets.balance], [201, true, 91, 91]);
+  assert.deepEqual(await query(WRITTEN), written);
+  assert.equal((await at(em)).tickets, 91);
+});
+
+test("a round sent twice at once is one play, paid once; and the database itself refuses a second", async (t) => {
+  const { join, play, query } = await arcade(t);
+  const em = await join("Em");
+  const round = many(16, () => right("2+3"));
+  const id = randomUUID();
+  const all = await Promise.all(Array.from({ length: 4 }, () => play(em, {}, round, id)));
+  for (const reply of all) assert.deepEqual(reply, all[0]);
+  assert.equal(all[0].status, 201);
+  const written = await query(WRITTEN);
+  assert.deepEqual([written[0].plays, written[0].tickets], [1, 91]);
+  const settled = { answers: [], score: 0, right: 0, wrong: 0, bestCombo: 0, timeMs: 0, finished: true, stars: 0, board: null };
+  const key = { gameId: "comet-cards", level: "add-5", mode: "blitz", skill: "easy" };
+  await assert.rejects(recordPlay(rawDb(), em, key, settled, id), (e: Error) => /plays_round/.test(String(e.cause)));
+  assert.deepEqual(await query(WRITTEN), written);
+});
+
+test("a play with no round id, or a malformed one, is refused, and nothing is stored", async (t) => {
+  const { join, play, query } = await arcade(t);
+  const em = await join("Em");
+  const id = randomUUID();
+  for (const bad of [null, "", "nope", 7, `${id}0`, ` ${id}`, id.replaceAll("-", ""), [id], { id }]) {
+    const sent = await play(em, {}, [right("2+3")], bad);
+    assert.equal(sent.status, 400, JSON.stringify(bad));
+    assert.match(sent.body.error, /Reload/);
+  }
+  const without = { playerId: em, gameId: "comet-cards", level: "add-5", mode: "blitz", skill: "easy", answers: [right("2+3")] };
+  assert.equal((await request(plays, "POST", "/", without, APP)).status, 400);
+  assert.deepEqual(await query("select (select count(*)::int from plays) as p, (select count(*)::int from ticket_events) as t"), [{ p: 0, t: 0 }]);
 });
 
 test("a badge and a star pay once: the same round again pays only its answers, and beating it pays the best bonus", async (t) => {

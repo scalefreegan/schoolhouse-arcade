@@ -97,6 +97,17 @@ answer is never counted as taking less than 250 ms (nobody reads a card and
 answers faster), so a round of instant answers still uses up its clock; this
 bounds a forged play, it does not make a time trustworthy.
 
+The server keeps a clock of its own for each round: it is started (on the
+Mac) before the countdown, and a play whose cards claim more time than the
+whole round took is not saved. A real round always takes longer than its
+cards: the countdown, each answer shown and the pause before the results are
+never counted. A round cannot start without the Mac (the screen says "No
+signal" and offers Try again, before anything is played), and one player's
+rounds are saved one after another: a round is refused if another round of
+the same player was saved while it was played. This makes a hand-made play
+wait out the time it claims; it still does not make a card's time
+trustworthy.
+
 Survival's countdown per card starts at 10 seconds and loses 0.3 seconds for
 every right answer, down to 2.5.
 

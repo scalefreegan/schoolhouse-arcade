@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { RuleError, openLevels, type AnswerInput } from "../play.ts";
+import { RuleError, openLevels, playable, type AnswerInput } from "../play.ts";
 import { GAMES } from "../games.ts";
 import { RULES } from "../rules.ts";
 import { NO_REPEAT, RETURN_AFTER, choicesFor, deal, factStats, missed, newDeck, seeded, weightOf } from "./deck.ts";
@@ -126,6 +126,16 @@ test("levels open in order: the first, then each one after a level with a star, 
   assert.deepEqual(openLevels(cometRules.levels, { "add-5": 1 }), ["add-5", "add-10"]);
   assert.deepEqual(openLevels(cometRules.levels, { "add-5": 2, "add-10": 1, "sub-10": 0 }), ["add-5", "add-10", "sub-10"]);
   assert.deepEqual(openLevels(cometRules.levels, {}, ["mix-10"]), ["add-5", "mix-10"]);
+});
+
+test("a remembered set-up whose level is locked is played, and sent, on the last open level (arc-zob)", () => {
+  const asked = { level: "big-20", mode: "blitz", skill: "arcade" };
+  assert.deepEqual(playable(asked, ["add-5", "add-10"]), { level: "add-10", mode: "blitz", skill: "arcade" });
+  assert.equal(playable(asked, ["add-5", "big-20"]), asked, "an open level is kept as it is");
+  // What the cabinet sends is what was played: the server's locked-level check passes.
+  const sent = playable(asked, openLevels(cometRules.levels, {}));
+  assert.equal(sent.level, "add-5");
+  assert.doesNotThrow(() => settle(sent, [right("2+3")]));
 });
 
 // ---------- refusals ----------

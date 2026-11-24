@@ -15,6 +15,17 @@ export type Phase = "countdown" | "ask" | "right" | "wrong" | "paused" | "done";
 /** The countdown starts here: "3, 2, 1", then "Go!" at 0. */
 export const COUNT_FROM = 3;
 
+/**
+ * How the screen paces a round, in ms: each step of the countdown, "Go!",
+ * a right answer shown, a missed card's answer shown, and the pause before
+ * the results. None of it is card time. The server's clock check
+ * (web/server/plays.ts) counts on that: a whole round always takes longer
+ * than its cards say, so a play that claims more card time than has passed
+ * was not played. A right answer is shown for longer than MIN_ANSWER_MS, so
+ * that holds even for answers quicker than the floor.
+ */
+export const PACE = { countStep: 650, go: 350, right: 380, wrong: 1900, done: 1100 } as const;
+
 export interface Session {
   mode: Mode;
   skill: Skill;

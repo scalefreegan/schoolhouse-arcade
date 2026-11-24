@@ -2,7 +2,7 @@ import { useEffect, useEffectEvent, useReducer, useState } from "react";
 import type { FactStat } from "../../../shared/comet/deck.ts";
 import { parseFact, type Level } from "../../../shared/comet/facts.ts";
 import { BLITZ_MS, PRACTICE_CARDS, SPRINT_CARDS, SURVIVAL_LIVES, cardLimit, multiplier, roundTime, type Mode, type Skill } from "../../../shared/comet/rules.ts";
-import { advance, cardAnswer, startSession, waited } from "../../../shared/comet/session.ts";
+import { PACE, advance, cardAnswer, startSession, waited } from "../../../shared/comet/session.ts";
 import type { AnswerInput } from "../../../shared/play.ts";
 import { sfx } from "../../sound.ts";
 import { Sprite } from "../../sprites/Sprite.tsx";
@@ -12,14 +12,8 @@ import { fmtClock, fmtScore, fmtStopwatch } from "./format.ts";
 // decided by the session (shared/comet/session.ts): this file sends it
 // events (a key, a tap, a frame of the clock), times what follows each
 // change, and draws it. It hands back the answers; the server scores them
-// again and its numbers are the ones kept.
-
-/** How long a right answer stays up before the next card, and a missed one's answer. */
-const RIGHT_MS = 380;
-const WRONG_MS = 1900;
-const COUNT_STEP_MS = 650;
-const GO_MS = 350;
-const DONE_MS = 1100;
+// again and its numbers are the ones kept. How long each step takes is the
+// session's PACE.
 
 const PAD = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "back", "0", "ok"];
 
@@ -34,16 +28,16 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
     switch (s.phase) {
       case "countdown":
         if (s.count > 0) sfx.tick();
-        return window.setTimeout(s.count > 0 ? () => send({ type: "beat" }) : deal, s.count > 0 ? COUNT_STEP_MS : GO_MS);
+        return window.setTimeout(s.count > 0 ? () => send({ type: "beat" }) : deal, s.count > 0 ? PACE.countStep : PACE.go);
       case "right":
         sfx.right(multiplier(s.round.combo) - 1);
-        return window.setTimeout(deal, RIGHT_MS);
+        return window.setTimeout(deal, PACE.right);
       case "wrong":
         sfx.wrong();
-        return window.setTimeout(deal, WRONG_MS);
+        return window.setTimeout(deal, PACE.wrong);
       case "done":
         sfx.over();
-        return window.setTimeout(() => onDone(s.answers), DONE_MS);
+        return window.setTimeout(() => onDone(s.answers), PACE.done);
       default:
         return undefined;
     }

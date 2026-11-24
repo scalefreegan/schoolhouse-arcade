@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { levelById } from "./facts.ts";
-import { MIN_ANSWER_MS, settle, type Mode, type Skill } from "./rules.ts";
-import { COUNT_FROM, advance, cardAnswer, startSession, waited, type Session, type SessionEvent } from "./session.ts";
+import { MIN_ANSWER_MS, cardLimit, settle, type Mode, type Skill } from "./rules.ts";
+import { COUNT_FROM, PACE, advance, cardAnswer, startSession, waited, type Session, type SessionEvent } from "./session.ts";
 
 // A round played by hand, event by event, with a clock the test owns.
 
@@ -173,4 +173,41 @@ test("an instant key press counts as the floor in the session and in settle()", 
   assert.deepEqual([settled.timeMs, settled.score, settled.answers[0].ms], [s.round.cardMs, s.round.score, MIN_ANSWER_MS]);
   const raw = settle({ level: level.id, mode: "sprint", skill: "arcade" }, [{ ...s.answers[0], ms: 0 }]);
   assert.deepEqual([raw.timeMs, raw.score], [settled.timeMs, settled.score], "a posted 0 settles as the pressed 0 played");
+});
+
+test("a round played as fast as the screen allows still takes longer on the wall than its cards claim (the server's clock check)", () => {
+  // The wall clock from the moment the server started the round: the
+  // countdown, every card, every answer shown, the pause before the results.
+  for (const [mode, skill] of [["blitz", "easy"], ["sprint", "arcade"], ["survival", "easy"], ["practice", "easy"]] as [Mode, Skill][]) {
+    for (const how of ["instant", "wrong", "timeout"] as const) {
+      let s = startSession(level, mode, skill);
+      let wall = 0;
+      for (let i = 0; i < COUNT_FROM; i++) {
+        wall += PACE.countStep;
+        s = advance(s, { type: "beat" });
+      }
+      wall += PACE.go;
+      for (let i = 0; i < 2_000; i++) {
+        s = advance(s, { type: "deal", now: wall, seed: i });
+        if (s.phase !== "ask") break;
+        if (how === "timeout" && (mode === "survival" || mode === "blitz")) {
+          wall += cardLimit(mode, s.round)!;
+          s = advance(s, { type: "clock", now: wall });
+        } else {
+          const pick = how === "wrong" && i % 3 === 0 ? (s.choices.find((n) => n !== cardAnswer(s)) ?? 99) : cardAnswer(s);
+          // Answered 1 ms after the card came up: quicker than MIN_ANSWER_MS, so counted as more than it took.
+          wall += 1;
+          if (skill === "easy") s = advance(s, { type: "choose", n: pick, now: wall });
+          else if (pick === cardAnswer(s)) s = typeRight(s, wall);
+          else s = each(s, [{ type: "key", key: "9", now: wall }, { type: "key", key: "9", now: wall }, { type: "key", key: "ok", now: wall }]);
+        }
+        if (s.phase === "done") break;
+        wall += s.phase === "right" ? PACE.right : PACE.wrong;
+      }
+      wall += PACE.done; // (a Survival of all right answers is cut off here at 2,000 cards)
+      const claimed = s.answers.reduce((sum, a) => sum + a.ms, 0);
+      assert.ok(claimed + PACE.countStep * COUNT_FROM + PACE.go + PACE.done <= wall, `${mode} ${how}: ${claimed} ms counted in ${wall} ms`);
+    }
+  }
+  assert.ok(PACE.right > MIN_ANSWER_MS && PACE.wrong > MIN_ANSWER_MS, "an answer shown outlasts what the floor can add to it");
 });

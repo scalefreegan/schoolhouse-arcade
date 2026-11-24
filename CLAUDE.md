@@ -23,16 +23,17 @@ web/shared/prizes.ts     what a prize may be (pictures, limits), what a PIN is
 web/shared/comet/facts.ts    Comet Cards: a fact ("7+5"), the five levels and what each holds
 web/shared/comet/rules.ts    modes, scoring, stars, and settle(): a play scored from its answers
 web/shared/comet/deck.ts     which card comes next (weighted by the player's misses), Easy's four choices
-web/shared/comet/session.ts  a round as events: countdown, deal, key, clock, pause (the screen's reducer)
+web/shared/comet/session.ts  a round as events: countdown, deal, key, clock, pause (the screen's reducer); PACE
 web/server/api.ts        wrap() and the route table (ROUTES)
 web/server/origin.ts     who may call the API: this Mac or the home network, from the app
 web/server/http.ts       JSON bodies and replies, HttpError
 web/server/db.ts         the pg pool, the boot check, setDb() for tests
 web/server/players.ts    /api/players
-web/server/plays.ts      /api/plays: post a round, a high score table, a player's progress
+web/server/plays.ts      /api/plays: start a round, post a round, a high score table, a player's progress
 web/server/counter.ts    /api/counter: the Prize Counter as a player sees it (read-only)
 web/server/grownup.ts    /api/grownup: everything behind the PIN
 web/server/pin.ts        the PIN: its hash, the check, the lock after wrong tries
+web/server/clock.ts      a round's clock: the signed start the server checks a play against
 web/server/testhttp.ts   call a route handler without a socket (tests)
 web/src/App.tsx          the routes: title, players, the floor, a game
 web/src/state.tsx        ArcadeProvider: the players, who is playing, the sound switch
@@ -95,6 +96,17 @@ macos/                   the Dock app (build-app.sh, the launcher, the server he
   once: a game makes one round id per round and sends it on every retry; a
   round id the player has already sent gets the stored play back and writes
   nothing. `recordPlay()` comes after `playOfRound()`, under the lock.
+- **A round has the server's clock** (`web/server/clock.ts`). A game asks
+  `POST /api/plays/start` with its round id before its countdown and plays
+  only once it has the clock; it sends the clock back with the play. A new
+  play is refused if the clock is not this server's for that player, game
+  and round, if another play of the player was stored since, or if its
+  answers claim more card time than has passed on the Mac since the start.
+  No slack is added: the time a screen never counts (countdown, answers
+  shown, `PACE` in `session.ts`) must stay longer than what `countedMs()`
+  can add, and a test proves it. The check runs inside `settlePlay()`
+  (`admit`), after `playOfRound()`, so a retry of a stored round is never
+  refused.
 - The real database holds tickets a child has earned. Tests never touch a
   Postgres server: `freshDb()`. A worktree never uses the real database
   (`scripts/db/config.mjs` refuses to start without a `DATABASE_URL`).

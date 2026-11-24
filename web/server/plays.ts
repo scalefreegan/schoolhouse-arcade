@@ -4,15 +4,17 @@ import { factStats } from "../shared/comet/deck.ts";
 import { RuleError, openLevels, type GameRules, type PlayConfig, type Settled } from "../shared/play.ts";
 import { RULES } from "../shared/rules.ts";
 import { ticketLines, totalOf } from "../shared/tickets.ts";
-import type { BoardReply, PlayReply, PlayRequest, ProgressReply, ScoreRow } from "../shared/wire.ts";
+import type { BoardReply, PlayReply, PlayRequest, ProgressReply, RoundStartReply, RoundStartRequest, ScoreRow } from "../shared/wire.ts";
 import { awardBadges, badgesOf } from "../../scripts/db/badges.ts";
 import { findPlayer, lockPlayer } from "../../scripts/db/players.ts";
-import { bestsOf, board, opensOf, playOfRound, rankOf, recentAnswers, recordPlay, starsOf, tallyOf, type BoardKey, type BoardRow, type StoredPlay } from "../../scripts/db/plays.ts";
+import { bestsOf, board, lastPlayOf, opensOf, playOfRound, rankOf, recentAnswers, recordPlay, starsOf, tallyOf, type BoardKey, type BoardRow, type StoredPlay } from "../../scripts/db/plays.ts";
 import { addTickets, balanceOf, linesOf } from "../../scripts/db/tickets.ts";
+import { readClock, startClock, type RoundOf } from "./clock.ts";
 import { rawDb, type Db } from "./db.ts";
 import { HttpError, isUuid, methodNotAllowed, pathSegments, queryParams, readJsonBody, sendJson } from "./http.ts";
 
 // /api/plays: rounds, high scores and progress.
+//   POST /api/plays/start                             a round begins: the server's clock for it (clock.ts)
 //   POST /api/plays                                   a finished round; the server scores it, once
 //   GET  /api/plays/board?game=&level=&mode=&skill=   a high score table
 //   GET  /api/plays/progress?player=&game=            stars, open levels, bests, fact stats
@@ -81,8 +83,12 @@ async function retell(tx: Db, playerId: string, { key, ...play }: StoredPlay): P
  * And once: a round id this player has already sent is answered with the
  * play it was stored as, and nothing is written. A reply can be lost after
  * the commit, so a screen must be able to send a round again.
+ *
+ * `admit` is asked, with the lock held, only of a round not yet stored: it
+ * throws to refuse it (postPlay's clock check). A round already stored is
+ * answered whatever it would say.
  */
-export async function settlePlay(db: Db, rules: GameRules, playerId: string, key: BoardKey, settled: Settled, roundId: string): Promise<PlayReply> {
+export async function settlePlay(db: Db, rules: GameRules, playerId: string, key: BoardKey, settled: Settled, roundId: string, admit?: (tx: Db) => Promise<void>): Promise<PlayReply> {
   const { at, told } = await db.transaction(async (tx): Promise<{ at: BoardKey; told: Told }> => {
     // One play at a time per player: badges and tickets are read, then written.
     if (!(await lockPlayer(tx, playerId))) throw new HttpError(404, "no such player");
@@ -92,6 +98,7 @@ export async function settlePlay(db: Db, rules: GameRules, playerId: string, key
     // index on round ids would throw, and this try would write nothing.
     const stored = await playOfRound(tx, playerId, roundId);
     if (stored) return { at: stored.key, told: await retell(tx, playerId, stored) };
+    await admit?.(tx);
     // The player's best before this play, to tell a new best from a first try.
     const before = (await bestsOf(tx, playerId, key.gameId)).find((b) => b.level === key.level && b.mode === key.mode && b.skill === key.skill);
     const opens = await opensOf(tx, playerId, key.gameId);
@@ -126,6 +133,38 @@ export async function settlePlay(db: Db, rules: GameRules, playerId: string, key
   return { ...told, rank: kind ? await rankOf(db, at, kind, told) : null, board: await boardReply(db, tables, at) };
 }
 
+/** A round begins: the server notes the time, in a clock the browser keeps
+ *  for the round and sends back with it. */
+async function startRound(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  const db = rawDb();
+  const body = await readJsonBody<Partial<RoundStartRequest>>(req);
+  rulesFor(body.gameId);
+  const playerId = await playerFor(db, body.playerId);
+  if (!isUuid(body.roundId)) throw new HttpError(400, "This page is too old to start a round. Reload it.");
+  const clock = await startClock(db, { playerId, gameId: body.gameId as string, roundId: body.roundId.toLowerCase() });
+  sendJson(res, 201, { clock } satisfies RoundStartReply);
+}
+
+/**
+ * The clock check, for a round not yet stored: its clock is this server's,
+ * for this player's round; no other play was stored since it started; and
+ * its cards claim no more time than has passed since then on this server's
+ * clock. That last needs no slack: the browser spends time it never counts
+ * on every round (the countdown, each answer shown, the pause before the
+ * results; shared/comet/session.ts PACE), and that is far more than the
+ * little it can count over (an answer quicker than MIN_ANSWER_MS).
+ */
+function clockCheck(round: RoundOf, clock: unknown, settled: Settled) {
+  return async (tx: Db): Promise<void> => {
+    if (clock === undefined) throw new HttpError(400, "This page is too old to save a score. Reload it.");
+    const started = await readClock(tx, clock, round);
+    if (!started) throw new HttpError(400, "This round was not started here.");
+    if ((await lastPlayOf(tx, round.playerId)) !== started.after) throw new HttpError(409, "Another round was saved while this one was played.");
+    const cardMs = settled.answers.reduce((sum, a) => sum + a.ms, 0);
+    if (cardMs > Date.now() - started.at) throw new HttpError(400, "That round was quicker than the clock.");
+  };
+}
+
 async function postPlay(req: IncomingMessage, res: ServerResponse): Promise<void> {
   const db = rawDb();
   const body = await readJsonBody<Partial<PlayRequest>>(req);
@@ -146,7 +185,9 @@ async function postPlay(req: IncomingMessage, res: ServerResponse): Promise<void
   const gameId = body.gameId as string;
   const open = openLevels(rules.levels, await starsOf(db, playerId, gameId), await opensOf(db, playerId, gameId));
   if (!open.includes(config.level)) throw new HttpError(403, "That level is still locked.");
-  sendJson(res, 201, await settlePlay(db, rules, playerId, { gameId, ...config }, settled, body.roundId));
+  // Round ids are stored lower case (a uuid column); the clock was signed so.
+  const round: RoundOf = { playerId, gameId, roundId: body.roundId.toLowerCase() };
+  sendJson(res, 201, await settlePlay(db, rules, playerId, { gameId, ...config }, settled, body.roundId, clockCheck(round, body.clock, settled)));
 }
 
 export async function handlePlays(req: IncomingMessage, res: ServerResponse): Promise<void> {
@@ -154,6 +195,10 @@ export async function handlePlays(req: IncomingMessage, res: ServerResponse): Pr
   if (what === undefined) {
     if (req.method !== "POST") return methodNotAllowed(res, "POST");
     return postPlay(req, res);
+  }
+  if (what === "start" && !rest.length) {
+    if (req.method !== "POST") return methodNotAllowed(res, "POST");
+    return startRound(req, res);
   }
   if (rest.length || (what !== "board" && what !== "progress")) throw new HttpError(404, "no such route");
   if (req.method !== "GET") return methodNotAllowed(res, "GET");

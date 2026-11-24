@@ -91,6 +91,16 @@ export async function playOfRound(db: Db, playerId: string, roundId: string): Pr
   return { ...told, key: { gameId, level, mode, skill }, starsBefore, starsAfter: Math.max(starsBefore, stars) };
 }
 
+/** The id of the latest play stored for this player, in any game; 0 when
+ *  there is none. Ids only grow, so it changes whenever a play is stored. */
+export async function lastPlayOf(db: Db, playerId: string): Promise<number> {
+  const [{ last }] = await db
+    .select({ last: sql<number>`coalesce(max(${plays.id}), 0)::bigint` })
+    .from(plays)
+    .where(eq(plays.playerId, playerId));
+  return Number(last);
+}
+
 const onBoard = (key: BoardKey) => and(eq(plays.gameId, key.gameId), eq(plays.level, key.level), eq(plays.mode, key.mode), eq(plays.skill, key.skill), eq(plays.finished, true));
 
 /** Best first. Ties go to whoever got there first. */

@@ -1,6 +1,6 @@
 import type { PlayConfig } from "../../shared/play.ts";
 import type { PrizeFields } from "../../shared/prizes.ts";
-import type { AdjustRequest, BoardReply, CounterReply, ErrorReply, GrownupReply, LevelState, OpenLevelRequest, PinState, PlayReply, PlayRequest, Player, PlayerInput, PlayersReply, Prize, ProgressReply, RedeemReply, RedeemRequest } from "../../shared/wire.ts";
+import type { AdjustRequest, BoardReply, CounterReply, ErrorReply, GrownupReply, LevelState, OpenLevelRequest, PinState, PlayReply, PlayRequest, Player, PlayerInput, PlayersReply, Prize, ProgressReply, RedeemReply, RedeemRequest, RoundStartReply, RoundStartRequest } from "../../shared/wire.ts";
 
 // The one fetch. Every call to the server goes through here, so an error is
 // always an ApiError carrying the server's own sentence.
@@ -40,6 +40,8 @@ export const changePlayer = (id: string, input: PlayerInput) => api<Player>(`/ap
 
 const q = (params: Record<string, string>) => new URLSearchParams(params).toString();
 
+/** A round is about to begin: the server's clock for it, to send back with the play. */
+export const startRound = (req: RoundStartRequest) => api<RoundStartReply>("/api/plays/start", req);
 /** A finished round. The server scores it from the answers and says what it earned. */
 export const postPlay = (req: PlayRequest) => api<PlayReply>("/api/plays", req);
 export const getBoard = (gameId: string, c: PlayConfig) => api<BoardReply>(`/api/plays/board?${q({ game: gameId, level: c.level, mode: c.mode, skill: c.skill })}`);

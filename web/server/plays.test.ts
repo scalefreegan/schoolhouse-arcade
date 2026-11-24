@@ -6,10 +6,11 @@ import type { AnswerInput } from "../shared/play.ts";
 import type { BoardReply, ErrorReply, PlayReply, Player, ProgressReply } from "../shared/wire.ts";
 import { freshDb } from "../../scripts/tests/testdb.mjs";
 import { wrap } from "./api.ts";
-import { setDb } from "./db.ts";
+import { startClock } from "./clock.ts";
+import { rawDb, setDb } from "./db.ts";
 import { handlePlayers } from "./players.ts";
 import { handlePlays } from "./plays.ts";
-import { request } from "./testhttp.ts";
+import { playedClock, request } from "./testhttp.ts";
 
 // The real routes on an in-process PGlite: what the browser sends, what the
 // server stores, what comes back.
@@ -30,8 +31,10 @@ async function arcade(t: { after: (fn: () => unknown) => void }) {
     await fresh.close();
   });
   const join = async (name: string) => (await request<Player>(players, "POST", "/", { name, avatar: "rex" }, APP)).body.id;
-  const play = (playerId: string, config: { level?: string; mode?: string; skill?: string }, answers: AnswerInput[]) =>
-    request<PlayReply & ErrorReply>(plays, "POST", "/", { playerId, gameId: "comet-cards", roundId: randomUUID(), level: "add-5", mode: "blitz", skill: "arcade", ...config, answers }, APP);
+  const play = async (playerId: string, config: { level?: string; mode?: string; skill?: string }, answers: AnswerInput[]) => {
+    const roundId = randomUUID();
+    return request<PlayReply & ErrorReply>(plays, "POST", "/", { playerId, gameId: "comet-cards", roundId, clock: await playedClock(playerId, roundId, answers), level: "add-5", mode: "blitz", skill: "arcade", ...config, answers }, APP);
+  };
   const progress = async (playerId: string) => (await request<ProgressReply>(plays, "GET", `/progress?player=${playerId}&game=comet-cards`, undefined, APP)).body;
   return { ...fresh, join, play, progress };
 }
@@ -52,7 +55,8 @@ test("the server scores a play from its answers and stores every one", async (t)
 test("a score the browser sends is ignored", async (t) => {
   const { join, query } = await arcade(t);
   const em = await join("Em");
-  const sent = await request<PlayReply>(plays, "POST", "/", { playerId: em, gameId: "comet-cards", roundId: randomUUID(), level: "add-5", mode: "blitz", skill: "arcade", score: 999999, stars: 3, answers: [right("1+1")] }, APP);
+  const roundId = randomUUID();
+  const sent = await request<PlayReply>(plays, "POST", "/", { playerId: em, gameId: "comet-cards", roundId, clock: await playedClock(em, roundId, [right("1+1")]), level: "add-5", mode: "blitz", skill: "arcade", score: 999999, stars: 3, answers: [right("1+1")] }, APP);
   assert.equal(sent.body.score, 100);
   assert.deepEqual(await query("select score, stars from plays"), [{ score: 100, stars: 0 }]);
 });
@@ -172,4 +176,129 @@ test("the read routes refuse what does not exist", async (t) => {
   assert.equal(await get("/progress?player=nope&game=comet-cards"), 404);
   assert.equal(await get("/nothing"), 404);
   assert.equal((await request(plays, "GET", "/", undefined, APP)).status, 405);
+});
+
+// ---------- the server's clock for a round (clock.ts) ----------
+
+const COUNT = "select (select count(*)::int from plays) as plays, (select count(*)::int from ticket_events) as lines";
+const pause = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+async function clockArcade(t: { after: (fn: () => unknown) => void }) {
+  const a = await arcade(t);
+  const start = (playerId: string, roundId: string, gameId = "comet-cards") => request<{ clock: string } & ErrorReply>(plays, "POST", "/start", { playerId, gameId, roundId }, APP);
+  const send = (playerId: string, roundId: string, clock: unknown, answers: AnswerInput[], config: { mode?: string } = {}) =>
+    request<PlayReply & ErrorReply>(plays, "POST", "/", { playerId, gameId: "comet-cards", roundId, clock, level: "add-5", mode: "practice", skill: "easy", ...config, answers }, APP);
+  return { ...a, start, send };
+}
+
+test("a round started on the server and played honestly is saved", async (t) => {
+  const { join, start, send } = await clockArcade(t);
+  const em = await join("Em");
+  const id = randomUUID();
+  const begun = await start(em, id);
+  assert.equal(begun.status, 201);
+  assert.match(begun.body.clock, /^c1\.\d+\.0\./);
+  await pause(600);
+  const sent = await send(em, id, begun.body.clock, [right("1+1", 250), right("2+2", 300)]);
+  assert.equal(sent.status, 201, sent.body.error);
+  assert.equal(sent.body.right, 2);
+  // The next round's clock names that play as the latest; time spent paused, or asleep, only adds wall time.
+  const next = randomUUID();
+  const again = await start(em, next);
+  assert.match(again.body.clock, new RegExp(`^c1\\.\\d+\\.${sent.body.playId}\\.`));
+  await pause(400);
+  assert.equal((await send(em, next, again.body.clock, [right("1+1", 300)])).status, 201);
+});
+
+test("a play claiming more card time than has passed since its start is refused, and nothing is stored", async (t) => {
+  const { join, start, send, query } = await clockArcade(t);
+  const em = await join("Em");
+  const id = randomUUID();
+  const { clock } = (await start(em, id)).body;
+  // Sixteen cards of 2.5 seconds each, sent the moment the round began.
+  const sent = await send(em, id, clock, many(16, () => right("2+3")), { mode: "blitz" });
+  assert.equal(sent.status, 400);
+  assert.match(sent.body.error, /quicker than the clock/);
+  // Answers under the floor count as the floor: 4 × 250 ms is still more than has passed.
+  const instant = await send(em, id, clock, many(4, () => right("2+3", 0)));
+  assert.equal(instant.status, 400);
+  assert.deepEqual(await query(COUNT), [{ plays: 0, lines: 0 }]);
+  // The same play, once the time it claims has passed, is saved.
+  const earlier = await startClock(rawDb(), { playerId: em, gameId: "comet-cards", roundId: id }, Date.now() - 41_000);
+  assert.equal((await send(em, id, earlier, many(16, () => right("2+3")), { mode: "blitz" })).status, 201);
+});
+
+test("a round already saved is answered with its play whatever clock comes with it, and nothing is written", async (t) => {
+  const { join, start, send, query } = await clockArcade(t);
+  const em = await join("Em");
+  const id = randomUUID();
+  const { clock } = (await start(em, id)).body;
+  await pause(400);
+  const first = await send(em, id, clock, [right("1+1", 300)]);
+  assert.equal(first.status, 201);
+  // Another round is played and saved after it: this round's clock is now behind.
+  const other = randomUUID();
+  const later = (await start(em, other)).body.clock;
+  await pause(400);
+  assert.equal((await send(em, other, later, [right("1+1", 300)])).status, 201);
+  const written = await query(COUNT);
+  for (const sentAgain of [clock, later, "nonsense", undefined]) {
+    const retry = await send(em, id, sentAgain, [right("1+1", 300)]);
+    assert.deepEqual([retry.status, retry.body.playId, retry.body.tickets.total], [201, first.body.playId, first.body.tickets.total], String(sentAgain));
+  }
+  assert.deepEqual(await query(COUNT), written);
+});
+
+test("a clock is good only for the player, game and round it was given for, as it was given", async (t) => {
+  const { join, send, query } = await clockArcade(t);
+  const [em, al] = [await join("Em"), await join("Al")];
+  const id = randomUUID();
+  const old = Date.now() - 60_000;
+  const clock = await startClock(rawDb(), { playerId: em, gameId: "comet-cards", roundId: id }, old);
+  const [v, at, after, sig] = clock.split(".");
+  const refused = async (playerId: string, roundId: string, c: unknown) => {
+    const sent = await send(playerId, roundId, c, [right("1+1")]);
+    assert.equal(sent.status, 400, `${String(c)}: ${sent.body.error}`);
+    return sent.body.error;
+  };
+  assert.match(await refused(al, id, clock), /not started here/, "another player's");
+  assert.match(await refused(em, randomUUID(), clock), /not started here/, "another round's");
+  assert.match(await refused(em, id, await startClock(rawDb(), { playerId: em, gameId: "pinball", roundId: id }, old)), /not started here/, "another game's");
+  assert.match(await refused(em, id, [v, Number(at) - 600_000, after, sig].join(".")), /not started here/, "started earlier than it was");
+  for (const mangled of ["", "c1", `${clock}x`, `c2.${at}.${after}.${sig}`, 7, null]) await refused(em, id, mangled);
+  assert.match(await refused(em, id, undefined), /too old/, "a page from before clocks");
+  assert.deepEqual(await query(COUNT), [{ plays: 0, lines: 0 }]);
+  // The round id's case does not matter (a uuid is stored lower case).
+  assert.equal((await send(em, id.toUpperCase(), clock, [right("1+1")])).status, 201);
+  // And the key it is signed with is made once and kept: a restarted server still knows its clocks.
+  assert.equal((await query("select count(*)::int as n from settings where key = 'round_clock_key'"))[0].n, 1);
+});
+
+test("clocks fetched ahead cannot be spent together: a play is refused when another was saved since its start", async (t) => {
+  const { join, send, query } = await clockArcade(t);
+  const em = await join("Em");
+  const ids = [randomUUID(), randomUUID(), randomUUID()];
+  const ago = Date.now() - 60_000;
+  const clocks = await Promise.all(ids.map((roundId) => startClock(rawDb(), { playerId: em, gameId: "comet-cards", roundId }, ago)));
+  assert.equal((await send(em, ids[0], clocks[0], [right("1+1")])).status, 201);
+  for (const i of [1, 2]) {
+    const sent = await send(em, ids[i], clocks[i], [right("1+1")]);
+    assert.equal(sent.status, 409);
+    assert.match(sent.body.error, /Another round was saved/);
+  }
+  assert.equal((await query(COUNT))[0].plays, 1);
+});
+
+test("the start route: a known player and game, a round id, POST only, and the wall in front of it", async (t) => {
+  const { join, start } = await clockArcade(t);
+  const em = await join("Em");
+  assert.equal((await start("00000000-0000-4000-8000-000000000000", randomUUID())).status, 404);
+  assert.equal((await start(em, randomUUID(), "pinball")).status, 404);
+  const noId = await start(em, "nope");
+  assert.equal(noId.status, 400);
+  assert.match(noId.body.error, /Reload/);
+  assert.equal((await request(plays, "GET", "/start", undefined, APP)).status, 405);
+  assert.equal((await request(plays, "POST", "/start/more", { playerId: em }, APP)).status, 404);
+  const foreign = await request(plays, "POST", "/start", { playerId: em, gameId: "comet-cards", roundId: randomUUID() }, { host: "localhost:38900", origin: "http://evil.example" });
+  assert.equal(foreign.status, 403);
 });

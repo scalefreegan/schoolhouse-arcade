@@ -1,6 +1,7 @@
-// A round's id. The browser makes one when a round ends and sends it with
-// every try at saving that round, so a round whose reply was lost can be
-// sent again without being stored, or paid, twice. docs/DATA.md.
+// A round's id. The browser makes one when a round starts (the server's
+// clock for the round is signed for it) and sends it with every try at
+// saving that round, so a round whose reply was lost can be sent again
+// without being stored, or paid, twice. docs/DATA.md.
 //
 // Pure apart from the randomness it is handed, and run by Node as is.
 

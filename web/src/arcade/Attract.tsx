@@ -35,7 +35,7 @@ export function Attract() {
     <main className="screen items-center justify-center text-center">
       <div className="starfield" />
       <h1 className="m-0">
-        <span className="marquee block text-cyan text-[clamp(1.25rem,5.2vw,3rem)]" style={{ "--marquee-depth": "#0b6b70" } as React.CSSProperties}>
+        <span className="marquee block text-cyan text-[clamp(1.25rem,5.2vw,3rem)]" style={{ "--marquee-depth": "var(--cyan-depth)" } as React.CSSProperties}>
           Schoolhouse
         </span>
         <span className="marquee mt-4 block text-magenta text-[clamp(2.25rem,10vw,6rem)]">Arcade</span>

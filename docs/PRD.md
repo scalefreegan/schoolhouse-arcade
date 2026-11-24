@@ -92,7 +92,10 @@ grown-up can open any level from the grown-up area.
 | Practice | 15 cards are answered | not ranked |
 
 The clock counts only the time a card is waiting for an answer. It stops
-while a missed card's answer is shown, so reading it costs nothing.
+while a missed card's answer is shown, so reading it costs nothing. An
+answer is never counted as taking less than 250 ms (nobody reads a card and
+answers faster), so a round of instant answers still uses up its clock; this
+bounds a forged play, it does not make a time trustworthy.
 
 Survival's countdown per card starts at 10 seconds and loses 0.3 seconds for
 every right answer, down to 2.5.

@@ -46,7 +46,7 @@ export function Setup({ progress, config, onChange, onStart, onExit }: { progres
           Games
         </button>
       </Hud>
-      <h1 className="marquee mt-4 mb-0 text-center text-cyan text-[clamp(1.25rem,4.2vw,2.25rem)]" style={{ "--marquee-depth": "#0b6b70" } as React.CSSProperties}>
+      <h1 className="marquee mt-4 mb-0 text-center text-cyan text-[clamp(1.25rem,4.2vw,2.25rem)]" style={{ "--marquee-depth": "var(--cyan-depth)" } as React.CSSProperties}>
         Comet Cards
       </h1>
 

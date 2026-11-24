@@ -8,7 +8,7 @@
 import type { AnswerInput } from "../play.ts";
 import { choicesFor, deal, missed, newDeck, seeded, type Deck, type FactStat } from "./deck.ts";
 import { answerOf, factsOf, parseFact, type Level } from "./facts.ts";
-import { BLITZ_MS, cardLimit, pointsFor, startRound, stepRound, type Mode, type Round, type Skill } from "./rules.ts";
+import { BLITZ_MS, cardLimit, countedMs, pointsFor, startRound, stepRound, type Mode, type Round, type Skill } from "./rules.ts";
 
 export type Phase = "countdown" | "ask" | "right" | "wrong" | "paused" | "done";
 
@@ -93,7 +93,7 @@ export function cardAnswer(s: Session): number {
 function answer(s: Session, given: number | null, now: number): Session {
   if (s.phase !== "ask") return s;
   const limit = cardLimit(s.mode, s.round);
-  const ms = Math.round(limit === null ? waited(s, now) : Math.min(waited(s, now), limit));
+  const ms = countedMs(limit === null ? waited(s, now) : Math.min(waited(s, now), limit));
   const correct = given !== null && given === cardAnswer(s);
   return {
     ...s,

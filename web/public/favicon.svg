@@ -1,6 +1,39 @@
+<!-- The arcade's mark: a pixel arcade cabinet on a 16 x 16 grid. macos/icon.svg is the same drawing. Original art. -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" shape-rendering="crispEdges">
   <rect width="16" height="16" fill="#05030f"/>
-  <path fill="#2ff3e0" d="M2 12h2v1H2zM3 11h2v1H3zM4 10h2v1H4zM5 9h2v1H5zM6 8h2v1H6zM7 7h2v1H7z"/>
-  <path fill="#ffd23f" d="M9 4h4v4H9z"/>
-  <path fill="#fff" d="M9 3h4v1H9zM13 4h1v4h-1zM9 8h4v1H9zM8 4h1v4H8z"/>
+  <!-- marquee -->
+  <rect x="3" y="1" width="10" height="2" fill="#ffd23f"/>
+  <!-- marquee light -->
+  <rect x="4" y="1" width="8" height="1" fill="#ffffff"/>
+  <!-- cabinet -->
+  <rect x="3" y="3" width="10" height="6" fill="#ff2e9a"/>
+  <!-- screen -->
+  <rect x="4" y="4" width="8" height="4" fill="#0e0826"/>
+  <!-- on the screen -->
+  <rect x="5" y="6" width="1" height="1" fill="#2ff3e0"/>
+  <rect x="6" y="5" width="1" height="1" fill="#2ff3e0"/>
+  <rect x="9" y="6" width="2" height="1" fill="#2ff3e0"/>
+  <!-- on the screen, a prize -->
+  <rect x="8" y="5" width="1" height="1" fill="#ffd23f"/>
+  <!-- control panel -->
+  <rect x="2" y="9" width="12" height="1" fill="#2ff3e0"/>
+  <!-- its front edge -->
+  <rect x="2" y="10" width="12" height="1" fill="#18b5a6"/>
+  <!-- joystick -->
+  <rect x="5" y="9" width="1" height="1" fill="#ffffff"/>
+  <!-- its ball -->
+  <rect x="5" y="8" width="1" height="1" fill="#ffd23f"/>
+  <!-- a button -->
+  <rect x="9" y="9" width="1" height="1" fill="#ff2e9a"/>
+  <!-- button -->
+  <rect x="11" y="9" width="1" height="1" fill="#ffd23f"/>
+  <!-- lower cabinet -->
+  <rect x="3" y="11" width="10" height="4" fill="#c41f76"/>
+  <!-- coin door -->
+  <rect x="7" y="12" width="2" height="2" fill="#1a1140"/>
+  <!-- coin slot -->
+  <rect x="7" y="12" width="2" height="1" fill="#ffd23f"/>
+  <!-- feet -->
+  <rect x="3" y="15" width="2" height="1" fill="#3b2b7c"/>
+  <rect x="11" y="15" width="2" height="1" fill="#3b2b7c"/>
 </svg>

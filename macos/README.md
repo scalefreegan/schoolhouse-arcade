@@ -48,9 +48,10 @@ honours it and the tablet cannot reach it.
   runner puts Homebrew's directories (`/opt/homebrew/bin`, `/usr/local/bin`)
   after it, so node is found and a node chosen in the profile is not
   overridden.
-- **`icon.svg`** is the icon's source: the favicon's pixel comet (a yellow
-  head with a white rim, a cyan tail) on a black tile, on the same 16-cell
-  grid. `render-icon.sh` turns it into `icon-1024.png` with `sips`;
+- **`icon.svg`** is the icon's source: the favicon's pixel arcade cabinet (a
+  yellow marquee, a magenta cabinet with a dark screen, a cyan control
+  panel) on a black tile, on the same 16-cell grid. `render-icon.sh` turns
+  it into `icon-1024.png` with `sips`;
   `build-app.sh` makes the `.icns` from the PNG. Flat fills only, because
   `sips` draws SVG without filters or text.
 - **`com.schoolhousearcade.db-backup.plist.template`** is the optional daily

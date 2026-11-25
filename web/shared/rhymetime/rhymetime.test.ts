@@ -12,7 +12,7 @@ import { RULES } from "../rules.ts";
 import { SPEECH_DIR as SOUND_DIR, WORDS as SOUND_WORDS, LEVELS as SOUND_LEVELS, wordClip } from "../soundmachine/words.ts";
 import { pairKey, questionFor, roundPlan } from "./pick.ts";
 import { MAX_ANSWER_MS, MIN_ANSWER_MS, MODES, PICTURES, SKILLS, answerText, faultOf, pairOf, parseAnswer, pay, rhymeTimeRules, rightOf, settle, type Mode, type Question, type Skill } from "./rules.ts";
-import { PACE, REVEAL_WAIT_MS, advance, ready, revealDone, startSession, waited, type Session } from "./session.ts";
+import { PACE, READ_DELAY_MS, REVEAL_WAIT_MS, TAP_WAIT_MS, advance, readQuestion, ready, revealDone, startSession, waited, type Session } from "./session.ts";
 import { DOUBTFUL, LEVELS, LOOKALIKES, ROUND_QUESTIONS, SPEECH_DIR, WORDS, anchorsOf, doubtful, levelById, lookalike, nothingAlike, ownClips, partnersOf, rhymeOf, rhymes, sayUrl, tempting, wordById } from "./words.ts";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -201,6 +201,33 @@ test("an Easy question is not taken as Arcade's: every Easy Odd one out question
         assert.equal(settle({ level: l.id, mode, skill: "easy" }, answers).right, ROUND_QUESTIONS);
         assert.throws(() => settle({ level: l.id, mode, skill: "arcade" }, answers), mode === "find" ? /how many pictures Arcade/ : /On Arcade the odd one/, `${l.id} ${mode} ${seed}`);
       }
+});
+
+test("lookalike pictures are never dealt together, and the server refuses any question that shows them together", () => {
+  // The three added after the first review, by name, so a slip in the list fails here.
+  for (const [a, b] of [["bun", "chip"], ["bat", "moth"], ["hen", "duck"]]) assert.ok(lookalike(a, b) && lookalike(b, a), `${a}/${b}`);
+  const mix = level("mix");
+  const others = (x: string, y: string, n: number) => WORDS.filter((w) => w.id !== x && w.id !== y && !lookalike(w.id, x) && !lookalike(w.id, y)).slice(0, n).map((w) => w.id);
+  for (const [x, y] of LOOKALIKES) {
+    for (const [mode, skill] of SETUPS) {
+      const rest = others(x, y, PICTURES[mode][skill] - (mode === "find" ? 1 : 2));
+      const q = mode === "find" ? find(x, y, ...rest) : odd(x, y, ...rest);
+      assert.match(faultOf(q, mix, skill, x) ?? "", new RegExp(`"${x}" and "${y}" look too alike`), `${x}/${y} ${mode} ${skill}`);
+    }
+  }
+  let dealt = 0;
+  for (const l of LEVELS)
+    for (const [mode, skill] of SETUPS)
+      for (let seed = 0; seed < 40; seed++) {
+        const rng = seeded(seed * 31 + 7);
+        for (const p of roundPlan(l, mode, {}, rng)) {
+          const q = questionFor(mode, skill, l, p, rng);
+          const shown = q.call ? [q.call, ...q.choices] : q.choices;
+          for (const x of shown) for (const y of shown) assert.ok(!lookalike(x, y), `${l.id} ${mode} ${skill}: ${shown}`);
+          dealt++;
+        }
+      }
+  assert.equal(dealt, LEVELS.length * SETUPS.length * 40 * ROUND_QUESTIONS);
 });
 
 test("dealing: every word a level asks about makes a question on both skills of both games that the server would take", () => {
@@ -396,6 +423,23 @@ test("a pause before the first question does not lose the round: resuming starts
   s = advance(s, { type: "resume", now: 5000 });
   assert.deepEqual([s.phase, s.wantPause, s.seq > before], ["start", false, true]);
   assert.equal(advance(s, { type: "next", now: 5250, seed: 1 }).phase, "ask");
+});
+
+test("a question is said once, after the screen settles and after a picture pressed early has been heard, never past the limit, and never once the round has moved on", () => {
+  const at = { askSeq: 4, seq: 4, phase: "ask" as const, askedAt: 1000, tappedAt: null, speaking: false };
+  assert.equal(readQuestion({ ...at, now: 1000 + READ_DELAY_MS - 1 }), "wait");
+  assert.equal(readQuestion({ ...at, now: 1000 + READ_DELAY_MS }), "read");
+  // Pressed 60 ms in: its word is heard out, then the question is said.
+  const tapped = { ...at, tappedAt: 1060 };
+  assert.equal(readQuestion({ ...tapped, speaking: true, now: 1400 }), "wait");
+  assert.equal(readQuestion({ ...tapped, speaking: false, now: 1400 }), "read");
+  assert.equal(readQuestion({ ...tapped, speaking: true, now: 1060 + TAP_WAIT_MS }), "read", "a clip that never ends is not waited on past the limit");
+  // Speech nobody pressed for (none should be left: the step's hush() stopped it) does not hold the question.
+  assert.equal(readQuestion({ ...at, speaking: true, now: 1300 }), "read");
+  // The round moved on while it waited: a pause, the sound switched off, an answer, the next question.
+  for (const moved of [{ seq: 5, phase: "paused" as const }, { seq: 5, phase: "right" as const }, { seq: 5, phase: "ask" as const }, { seq: 4, phase: "done" as const }])
+    assert.equal(readQuestion({ ...tapped, ...moved, speaking: true, now: 1100 }), "drop", JSON.stringify(moved));
+  assert.ok(TAP_WAIT_MS <= 3000 && TAP_WAIT_MS > READ_DELAY_MS);
 });
 
 test("what follows an answer waits for its rhyme to be said, but never without a limit", () => {

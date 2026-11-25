@@ -6,7 +6,7 @@
 
 import { shuffled, weightOf, weightedPick, type FactStat, type Rng } from "../deal.ts";
 import { PICTURES, faultOf, type Mode, type Question, type Skill } from "./rules.ts";
-import { ROUND_QUESTIONS, anchorsOf, doubtful, lookalike, nothingAlike, partnersOf, rhymeOf, rhymes, tempting, type RhymeLevel, type RhymeWord } from "./words.ts";
+import { ROUND_QUESTIONS, anchorsOf, nothingAlike, partnersOf, rhymeOf, rhymes, standsBeside, tempting, type RhymeLevel, type RhymeWord } from "./words.ts";
 
 /** A pair of rhyming words as one key, the same either way round ("cat+hat"). */
 export const pairKey = (a: RhymeWord, b: RhymeWord): string => [a.id, b.id].sort().join("+");
@@ -48,9 +48,6 @@ export function roundPlan(level: RhymeLevel, mode: Mode, stats: Record<string, F
   return out;
 }
 
-/** Whether `w` may stand in a question beside every one of `with`: no lookalike, no doubtful rhyme. */
-const fits = (w: RhymeWord, others: RhymeWord[]) => others.every((o) => o.id !== w.id && !lookalike(o.id, w.id) && !doubtful(o, w));
-
 /** Those that `first` picks out (shuffled), then the rest (shuffled). */
 function firstThose(pool: RhymeWord[], first: (w: RhymeWord) => boolean, rng: Rng): RhymeWord[] {
   return [...shuffled(pool.filter(first), rng), ...shuffled(pool.filter((w) => !first(w)), rng)];
@@ -85,7 +82,7 @@ function findAround(skill: Skill, level: RhymeLevel, call: RhymeWord, rhyme: Rhy
   const wrong: RhymeWord[] = [];
   for (const w of firstThose(pool, (x) => skill === "arcade" && tempting(x, call), rng)) {
     if (wrong.length === PICTURES.find[skill] - 1) break;
-    if (fits(w, [call, rhyme, ...wrong]) && !wrong.some((x) => rhymeOf(x) === rhymeOf(w))) wrong.push(w);
+    if (standsBeside(w, [call, rhyme, ...wrong]) && !wrong.some((x) => rhymeOf(x) === rhymeOf(w))) wrong.push(w);
   }
   if (wrong.length < PICTURES.find[skill] - 1) return null;
   return { mode: "find", call: call.id, choices: shuffled([rhyme, ...wrong], rng).map((w) => w.id) };
@@ -94,7 +91,7 @@ function findAround(skill: Skill, level: RhymeLevel, call: RhymeWord, rhyme: Rhy
 function oddAround(skill: Skill, level: RhymeLevel, a: RhymeWord, b: RhymeWord, rng: Rng): Question | null {
   const pool = level.words.filter((w) => !rhymes(w, a) && w.id !== a.id && (skill === "arcade" || (nothingAlike(w, a) && nothingAlike(w, b))));
   const near = (w: RhymeWord) => skill === "arcade" && (tempting(w, a) || tempting(w, b));
-  const odd = firstThose(pool, near, rng).find((w) => fits(w, [a, b]));
+  const odd = firstThose(pool, near, rng).find((w) => standsBeside(w, [a, b]));
   if (!odd) return null;
   return { mode: "odd", call: null, choices: shuffled([a, b, odd], rng).map((w) => w.id) };
 }

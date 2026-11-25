@@ -182,7 +182,8 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
   /** The player is moving by keyboard: a Tab since the last tap or click. */
   const byKeys = useRef(false);
   const onKey = useEffectEvent((ev: KeyboardEvent) => {
-    if (ev.metaKey || ev.ctrlKey || ev.altKey) return;
+    // A held key repeating is not a new press (holding Enter on the box's button must not pull the lever underneath).
+    if (ev.repeat || ev.metaKey || ev.ctrlKey || ev.altKey) return;
     // While the sound-off box is up the round is not there to play: its keys are the box's own.
     if (muted) return;
     if (ev.key === "Tab") byKeys.current = true;

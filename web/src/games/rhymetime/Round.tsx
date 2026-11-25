@@ -2,10 +2,10 @@ import { useEffect, useEffectEvent, useReducer, useRef, useState } from "react";
 import type { FactStat } from "../../../shared/deal.ts";
 import type { AnswerInput } from "../../../shared/play.ts";
 import { rightOf, type Mode, type Skill } from "../../../shared/rhymetime/rules.ts";
-import { PACE, advance, ready, revealDone, startSession } from "../../../shared/rhymetime/session.ts";
+import { PACE, advance, readQuestion, ready, revealDone, startSession } from "../../../shared/rhymetime/session.ts";
 import { ROUND_QUESTIONS, rhymes, sayUrl, wordById, type RhymeLevel, type RhymeWord } from "../../../shared/rhymetime/words.ts";
 import { sfx } from "../../sound.ts";
-import { hush, say } from "../../speech.ts";
+import { hush, say, speaking } from "../../speech.ts";
 import { Picture, Sprite } from "../../sprites/Sprite.tsx";
 import { useArcade } from "../../state.tsx";
 import { fmtScore } from "../format.ts";
@@ -54,8 +54,8 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
   const [goAt, setGoAt] = useState(-1);
   const mayGo = goAt === s.seq;
 
-  /** The step of the round (s.seq) in which the player last pressed something to hear it. */
-  const heard = useRef(-1);
+  /** When the player last pressed a picture (or the word) to hear it, and in which step of the round (s.seq). */
+  const tapped = useRef<{ seq: number; at: number }>({ seq: -1, at: 0 });
   const next = () => send({ type: "next", now: performance.now(), seed: seed() });
 
   /** Say these words in order, each picture glowing as its word is said. */
@@ -76,6 +76,9 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
     return [...q.choices.filter((c) => c !== right), right];
   };
 
+  /** The step the round is at now, for a timer set in an earlier one. */
+  const stepNow = useEffectEvent(() => ({ seq: s.seq, phase: s.phase }));
+
   // What follows each change of phase: a sound now, the next thing later.
   const follow = useEffectEvent(() => {
     const timers: number[] = [];
@@ -86,17 +89,27 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
         break;
       case "ask":
         // A new question (or the same one after a pause): whatever was being
-        // said stops, then the question is said: the word, a breath, and each
-        // picture in turn; or the three pictures.
-        // A picture pressed before the question begins is not cut off by
-        // it: the player has started, and the question is not said over them.
+        // said stops (a press before now included: it is forgotten with it),
+        // then the question is said once: the word, a breath, and each picture
+        // in turn; or the three pictures. A picture pressed before then is
+        // heard out first (readQuestion has the limits), and nothing pending
+        // outlives this step: the timer goes when the step does, and the
+        // session is asked again before speaking.
         hush();
+        tapped.current = { seq: -1, at: 0 };
         if (q) {
           const ids = q.mode === "find" ? [q.call!, ...q.choices] : q.choices;
-          const seq = s.seq;
-          later(() => {
-            if (heard.current !== seq) void sayAll(ids, (i) => (q.mode === "find" && i === 0 ? BREATH : GAP));
-          }, 200);
+          const askSeq = s.seq;
+          const askedAt = performance.now();
+          const tick = window.setInterval(() => {
+            const t = tapped.current;
+            const now = performance.now();
+            const what = readQuestion({ askSeq, ...stepNow(), askedAt, tappedAt: t.seq === askSeq ? t.at : null, speaking: speaking(), now });
+            if (what === "wait") return;
+            window.clearInterval(tick);
+            if (what === "read") void sayAll(ids, (i) => (q.mode === "find" && i === 0 ? BREATH : GAP));
+          }, 50);
+          timers.push(tick);
         }
         break;
       case "right":
@@ -149,12 +162,12 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
   // Leaving the cabinet stops it talking.
   useEffect(() => hush, []);
 
-  /** Tap a picture: hear it, and (while asking) choose it. */
   /** Press a picture (or the word) to hear it. */
   const hear = (id: string) => {
-    heard.current = s.seq;
+    tapped.current = { seq: s.seq, at: performance.now() };
     void sayAll([id]);
   };
+  /** Tap a picture: hear it, and (while asking) choose it. */
   const choose = (id: string) => {
     hear(id);
     if (s.phase === "ask") send({ type: "choose", word: id });
@@ -164,7 +177,8 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
   /** The player is moving by keyboard: a Tab since the last tap or click. */
   const byKeys = useRef(false);
   const onKey = useEffectEvent((ev: KeyboardEvent) => {
-    if (ev.metaKey || ev.ctrlKey || ev.altKey) return;
+    // A held key repeating is not a new press (holding Enter on the box's button must not pull the lever underneath).
+    if (ev.repeat || ev.metaKey || ev.ctrlKey || ev.altKey) return;
     // While the sound-off box is up the round is not there to play: its keys are the box's own.
     if (muted) return;
     if (ev.key === "Tab") byKeys.current = true;

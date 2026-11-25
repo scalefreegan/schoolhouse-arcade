@@ -16,7 +16,7 @@
 
 import { RuleError, type AnswerInput, type GameRules, type JudgedAnswer, type PlayConfig, type Settled } from "../play.ts";
 import { MAX_ANSWER_MS, countedMs, startRound, starsFor, stepRound } from "../soundmachine/rules.ts";
-import { LEVELS, ROUND_QUESTIONS, anchorsOf, doubtful, levelById, lookalike, nothingAlike, rhymeOf, rhymes, tempting, wordById, type RhymeLevel, type RhymeWord } from "./words.ts";
+import { LEVELS, ROUND_QUESTIONS, anchorsOf, doubtful, levelById, lookalike, nothingAlike, rhymeOf, rhymes, standsBeside, tempting, wordById, type RhymeLevel, type RhymeWord } from "./words.ts";
 
 // Scoring, stars and the time floor are Sound Machine's, exactly: a round
 // of eight, 100 a right answer and 20 more for each right one before it in
@@ -151,11 +151,6 @@ export function faultOf(q: Question, level: RhymeLevel, skill: Skill, fact: stri
     if (could && !near(odd)) return "On Arcade the odd one starts like the pair or has their vowel.";
   }
   return null;
-}
-
-/** A word that may stand in a question beside these: none of them, nor a lookalike, nor a doubtful rhyme of one. */
-function standsBeside(w: RhymeWord, others: RhymeWord[]): boolean {
-  return others.every((o) => o.id !== w.id && !lookalike(o.id, w.id) && !doubtful(o, w));
 }
 
 /** The pair of an Odd one out question, as one key ("cat+hat", in order), so a round never asks the same pair twice. */

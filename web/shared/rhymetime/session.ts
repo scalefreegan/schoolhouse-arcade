@@ -41,6 +41,26 @@ export function revealDone(o: { said: boolean; shownAt: number; now: number }): 
   return o.said || o.now - o.shownAt >= REVEAL_WAIT_MS;
 }
 
+/** A question is said this long after it is drawn (the screen settles first). */
+export const READ_DELAY_MS = 200;
+/** A picture pressed before the question is said is heard out first, but not waited on longer than this after the press. */
+export const TAP_WAIT_MS = 2_500;
+
+/**
+ * Whether to say the question now, wait, or drop it. It is said once each
+ * time it comes up (`askSeq`, the step of the round it was drawn at):
+ * READ_DELAY_MS after it was drawn, and after a word the player pressed has
+ * been said (`speaking`), or TAP_WAIT_MS after that press if the clip never
+ * ends. Dropped once the round has moved on (a pause, the sound switched off,
+ * the answer, the next question): it is never said over another step.
+ */
+export function readQuestion(o: { askSeq: number; seq: number; phase: Phase; askedAt: number; tappedAt: number | null; speaking: boolean; now: number }): "read" | "wait" | "drop" {
+  if (o.seq !== o.askSeq || o.phase !== "ask") return "drop";
+  if (o.now - o.askedAt < READ_DELAY_MS) return "wait";
+  if (o.speaking && o.tappedAt !== null && o.now - o.tappedAt < TAP_WAIT_MS) return "wait";
+  return "read";
+}
+
 export interface Session {
   level: RhymeLevel;
   mode: Mode;

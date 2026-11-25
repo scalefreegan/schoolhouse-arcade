@@ -101,6 +101,11 @@ export function lookalike(a: string, b: string): boolean {
   return LOOKALIKES.some(([x, y]) => (x === a && y === b) || (x === b && y === a));
 }
 
+/** Whether `w` may stand in one question beside every one of `others`: it is none of them, and neither a lookalike nor a doubtful rhyme of any. The dealing and the server's check both use this. */
+export function standsBeside(w: RhymeWord, others: RhymeWord[]): boolean {
+  return others.every((o) => o.id !== w.id && !lookalike(o.id, w.id) && !doubtful(o, w));
+}
+
 /** No sound in the same place: a different first sound, vowel and last sound. Easy's wrong pictures share nothing with what they stand beside. */
 export function nothingAlike(a: RhymeWord, b: RhymeWord): boolean {
   return a.first !== b.first && a.vowel !== b.vowel && a.last !== b.last;

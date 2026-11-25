@@ -5,7 +5,7 @@ import { answerOf, gemsOf, type Mode, type Skill } from "../../../shared/soundma
 import { PACE, advance, built, cutEnough, full, startSession } from "../../../shared/soundmachine/session.ts";
 import { ROUND_WORDS, clipUrl, slowClip, tileClip, wordById, wordClip, type SoundLevel, type Word } from "../../../shared/soundmachine/words.ts";
 import { sfx } from "../../sound.ts";
-import { hush, say } from "../../speech.ts";
+import { hush, say, speaking } from "../../speech.ts";
 import { Picture, Sprite } from "../../sprites/Sprite.tsx";
 import { useArcade } from "../../state.tsx";
 import { fmtScore } from "../format.ts";
@@ -55,8 +55,6 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
   // What follows each change of phase: a sound now, the next thing later.
   const follow = useEffectEvent(() => {
     const timers: number[] = [];
-    /** False once this step is over: what a clip's end would start is not started then. */
-    let alive = true;
     const later = (fn: () => void, ms: number) => timers.push(window.setTimeout(fn, ms));
     switch (s.phase) {
       case "start":
@@ -64,8 +62,8 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
         break;
       case "ask":
         // A new word (or the same one after a pause): whatever was being said
-        // of the last one stops, in both games. Its sounds heard over this
-        // word's pictures would be a wrong answer said aloud.
+        // of the last one stops, in every game. Its sounds heard over this
+        // word's pictures, tiles or letters would be a wrong answer said aloud.
         hush();
         // Build begins by saying the word, and so does Split (where the
         // question is where its sounds part, not what it is: its picture is
@@ -76,31 +74,44 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
         sfx.right(Math.min(4, s.round.streak - 1));
         if (mode === "gems") {
           // A gem drops on each piece as its sound is said, then the word is
-          // said whole, then the gems fly to the tray (with their ping, after
-          // the speech, never over it). The next word comes once they have
-          // landed and the session will take it.
+          // said whole, then the gems fly to the tray with their ping. They
+          // fly once the reveal has begun and nothing at all is being said:
+          // not when the reveal's own say() settles, which, if a hear button
+          // cut it short, is long after (silence) or in the middle of what
+          // the button said (pings over the slow word). The next word comes
+          // once they have landed and the session will take it.
           const word = s.word;
           const seq = s.seq;
           const n = word?.tiles.length ?? 0;
-          let landed = word ? 0 : 1;
+          let begun = !word;
+          let landed = 0;
           later(() => {
             if (!word) return;
             void say([...soundsOf(word), wholeOf(word)], {
               gap: SLOW,
               onEach: (i) => {
+                begun = true;
                 setLitAt({ seq, tile: i < n ? i : null });
                 if (i < n) setGemAt({ seq, dropped: i + 1, flown: false });
               },
-            }).then(() => {
-              if (!alive) return;
-              // A clip that would not come is left out: its gem drops all the same.
-              setLitAt({ seq, tile: null });
-              setGemAt({ seq, dropped: n, flown: true });
-              sfx.gems(n);
-              landed = performance.now() + FLY_MS;
-            });
+              // Settled with no clip said (the sound off, or none would come): begun all the same.
+            }).then(() => (begun = true));
           }, 320);
-          later(() => timers.push(window.setInterval(() => landed && performance.now() >= landed && next(), 100)), PACE.right);
+          later(
+            () =>
+              timers.push(
+                window.setInterval(() => {
+                  if (!landed && begun && !speaking()) {
+                    // A clip that would not come is left out: its gem lands all the same.
+                    setLitAt({ seq, tile: null });
+                    setGemAt({ seq, dropped: n, flown: true });
+                    sfx.gems(n);
+                    landed = performance.now() + FLY_MS;
+                  } else if (landed && performance.now() >= landed) next();
+                }, 100),
+              ),
+            320,
+          );
           break;
         }
         // The word again, sound by sound and then whole, at its own pace.
@@ -141,7 +152,6 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
         break;
     }
     return () => {
-      alive = false;
       for (const t of timers) {
         window.clearTimeout(t);
         window.clearInterval(t);
@@ -159,6 +169,10 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
 
   const onKey = useEffectEvent((ev: KeyboardEvent) => {
     if (ev.metaKey || ev.ctrlKey || ev.altKey) return;
+    // Enter on a focused button is that button's own press: a gap cuts, the
+    // pause button pauses, a tile goes in a box. Only Enter with nothing
+    // pressable in focus is the lever (or the next word).
+    if (ev.key === "Enter" && ev.target instanceof HTMLButtonElement) return;
     if (ev.key === "Escape") send({ type: "toggle", now: performance.now() });
     else if (ev.key === "Enter" && s.phase === "wrong" && mayGo && !s.wantPause) next();
     else if (ev.key === "Enter" && s.phase === "ask" && mode !== "read") send({ type: "go", now: performance.now() });
@@ -450,8 +464,9 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
  * Split: the word as one block of letters, with a gap between each two that
  * the player taps to cut it there, or taps again to join it. The letters
  * themselves cannot be pressed: a tap on a letter's left or right half goes
- * to the gap on that side (each gap reaches half a letter either way), so a
- * five-letter word on a phone still has gaps a finger can hit.
+ * to the gap on that side, if there is one (each gap reaches half a letter
+ * either way; the outer half of the first and last letter does nothing), so
+ * a five-letter word on a phone still has gaps a finger can hit.
  */
 function SplitWord({ letters, cuts, onCut }: { letters: string; cuts: boolean[]; onCut: (at: number) => void }) {
   const n = letters.length;

@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import type { PlayConfig } from "../../shared/play.ts";
 import type { PlayReply } from "../../shared/wire.ts";
 import { Hud } from "../arcade/Hud.tsx";
@@ -29,6 +29,10 @@ export function Results({ game, config, reply, onAgain, onSetup, onExit, childre
   }, [cheer]);
   // The strip along the top shows the tickets as they now stand.
   useEffect(() => setTickets(reply.tickets.balance), [setTickets, reply.tickets.balance]);
+  // Play again has the keyboard (Enter plays again), but the screen opens at
+  // its top, on the score: autoFocus would scroll down to the button.
+  const again = useRef<HTMLButtonElement>(null);
+  useEffect(() => again.current?.focus({ preventScroll: true }), []);
 
   return (
     <main className="screen">
@@ -95,7 +99,7 @@ export function Results({ game, config, reply, onAgain, onSetup, onExit, childre
             <button type="button" className="btn btn-quiet" onClick={onSetup}>
               Change game
             </button>
-            <button type="button" className="btn btn-lg" onClick={onAgain} autoFocus>
+            <button type="button" className="btn btn-lg" onClick={onAgain} ref={again}>
               Play again
             </button>
           </div>

@@ -158,6 +158,11 @@ test("Split is judged on where the word is cut: a digraph is one piece, and noth
   assert.equal(one("sh", "ship", "sh|i|p"), true);
   assert.equal(one("sh", "ship", "s|h|i|p"), false, "four letters, three sounds: sh is one");
   assert.equal(one("sh", "ship", "sh|ip"), false);
+  // Three pieces, as many as its sounds, cut in the wrong places: still wrong.
+  assert.equal(one("sh", "ship", "s|hi|p"), false);
+  assert.equal(one("sh", "ship", "s|h|ip"), false);
+  assert.equal(one("mix", "chick", "c|hi|ck"), false);
+  assert.equal(one("th", "thick", "th|ic|k"), false);
   assert.equal(one("sh", "ship", "ship"), false, "not cut at all is an answer, and a wrong one");
   assert.equal(one("ck", "duck", "d|u|c|k"), false);
   assert.equal(one("mix", "chick", "ch|i|ck"), true);
@@ -380,9 +385,12 @@ function answerAt(s: Session, now: number, right: boolean): Session {
   const word = s.word!;
   if (s.mode === "read") return advance(s, { type: "pick", word: right ? word.id : s.pictures.find((id) => id !== word.id)!, now });
   if (s.mode === "gems") {
-    // Right: a cut after each tile but the last. Wrong: one cut, after the
-    // first letter (two pieces, and every word is three sounds).
-    const at = right ? word.tiles.slice(0, -1).map((_, i) => word.tiles.slice(0, i + 1).join("").length - 1) : [0];
+    // Right: a cut after each tile but the last. Wrong: as many pieces as it
+    // has sounds, cut in the wrong places ("s|h|ip", or "ri|c|h" where
+    // "r|i|ch" is right), where it has four letters or more; a three-letter
+    // word has only one way into three pieces, so it is cut once ("c|at").
+    const good = word.tiles.slice(0, -1).map((_, i) => word.tiles.slice(0, i + 1).join("").length - 1);
+    const at = right ? good : word.id.length === 3 ? [0] : good.join() === "0,1" ? [1, 2] : [0, 1];
     for (const gap of at) s = advance(s, { type: "cut", at: gap });
     return advance(s, { type: "go", now });
   }
@@ -465,6 +473,14 @@ test("Split: a word comes up whole; a tap on a gap cuts it there and another joi
   assert.ok(s.cuts.every((c) => !c));
   s = answerAt(s, 9000, false);
   assert.deepEqual([s.phase, s.last?.correct, s.round.score, s.round.streak, gemsOf("gems", s.answers)], ["wrong", false, 100, 0, 3]);
+  assert.equal(String(s.answers[1].given).split("|").length, 3, "the wrong split had as many pieces as the word has sounds");
+  // Every gap cut: one piece a letter. Every word here has th, so that is wrong.
+  s = advance(s, { type: "next", now: 9000 + PACE.wrong, seed: 5 });
+  const third = s.word!;
+  for (let g = 0; g < third.id.length - 1; g++) s = advance(s, { type: "cut", at: g });
+  assert.deepEqual(pieces(s), [...third.id]);
+  s = advance(s, { type: "go", now: 12_000 });
+  assert.deepEqual([s.phase, s.answers[2].given, s.round.score, gemsOf("gems", s.answers)], ["wrong", [...third.id].join("|"), 100, 3]);
   // Easy and Arcade play alike: the lever waits for a first cut, not for the right number of pieces.
   let a = advance(startSession(level("cvc"), "gems", "arcade", {}, 4), { type: "next", now: 0, seed: 1 });
   a = advance(a, { type: "cut", at: 0 });

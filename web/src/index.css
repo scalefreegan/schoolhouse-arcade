@@ -858,7 +858,9 @@ select.field {
     0 calc(var(--px) * -1) 0 0 var(--magenta),
     0 var(--px) 0 0 var(--magenta);
 }
-/* Each gap reaches half a letter either way, so the whole word is a place to tap. */
+/* Each gap reaches half a letter either way, so a tap anywhere between the
+   middle of the first letter and the middle of the last lands on a gap. (The
+   outer half of the first and last letter has no gap to go to, and does nothing.) */
 .gm-cut::after {
   content: "";
   position: absolute;
@@ -878,10 +880,17 @@ select.field {
 .gm-cut[data-cut="true"] .gm-cut-mark {
   background: repeating-linear-gradient(to bottom, var(--dim) 0 calc(var(--px) * 2), transparent calc(var(--px) * 2) calc(var(--px) * 4));
 }
-.gm-cut:hover .gm-cut-mark,
+/* Lit under a pointer or the keyboard. Not on touch: there :hover sticks to
+   the last gap tapped, and a gap just joined again would look cut. */
 .gm-cut:focus-visible .gm-cut-mark {
   width: calc(var(--px) * 2);
   background: var(--magenta);
+}
+@media (hover: hover) {
+  .gm-cut:hover .gm-cut-mark {
+    width: calc(var(--px) * 2);
+    background: var(--magenta);
+  }
 }
 /* Answered: the right pieces, each a box of its own with a place for its gem above. */
 .gm-piece-col {
@@ -970,6 +979,29 @@ select.field {
   flex: 1;
 }
 
+/* Split between a phone and a tablet on its side (an upright tablet, a
+   narrow window): a five-letter word does not fit beside the picture, so
+   the picture goes above it, as on a phone, and the letters are a size
+   between the two. Build keeps its own layout. */
+/* (Below 1024 px wide "thick" runs past the machine's edge beside the picture.) */
+@media (max-width: 63.9375rem) {
+  .sm-split {
+    --letter-w: 3.75rem;
+    --cut-w: 2rem;
+    --letter-h: 6rem;
+    --gem: 3rem;
+    grid-template-columns: minmax(0, 1fr);
+    gap: calc(var(--px) * 4);
+  }
+  .sm-split .sm-side {
+    flex-direction: row;
+    justify-content: center;
+    gap: calc(var(--px) * 5);
+  }
+  .sm-split .sm-glass { width: 12rem; }
+  .sm-split .sm-side .sm-hears { flex-direction: column; }
+}
+
 @media (max-width: 40rem) {
   .machine { padding: calc(var(--px) * 6) calc(var(--px) * 3); }
   .sm-build {
@@ -1013,6 +1045,7 @@ select.field {
     --letter-h: 4.5rem;
     --gem: 2.75rem;
   }
+  .sm-split .sm-glass { width: 9rem; }
   .gm-piece { padding: 0 var(--px); }
 }
 

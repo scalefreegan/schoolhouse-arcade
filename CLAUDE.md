@@ -53,7 +53,7 @@ web/src/games/soundmachine/  Sound Machine: SoundMachine (what it hands Cabinet)
 web/src/sprites/art.ts   every drawing, as rows of characters and palettes
 web/src/sprites/Sprite.tsx  <Sprite> and <AvatarSprite>
 web/src/sound.ts         every beep, synthesised, and the one audio context (woken on a tap, remade if it will not wake)
-web/src/speech.ts        spoken clips: preload(), say(), hush(); plays through sound.ts's context
+web/src/speech.ts        spoken clips: preload(), say(), hush(), speaking(); plays through sound.ts's context
 web/public/speech/       Sound Machine's clips and manifest (generated, committed)
 scripts/speech/          npm run speech:build: makes the clips (Azure text-to-speech; needs a key in the environment)
 web/src/index.css        the tokens and the pixel-box classes (.panel, .btn, .pick, .field)

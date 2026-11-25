@@ -1,8 +1,8 @@
-import { Fragment, useEffect, useEffectEvent, useReducer, useState } from "react";
+import { Fragment, useEffect, useEffectEvent, useReducer, useRef, useState } from "react";
 import type { FactStat } from "../../../shared/deal.ts";
 import type { AnswerInput } from "../../../shared/play.ts";
 import { answerOf, gemsOf, type Mode, type Skill } from "../../../shared/soundmachine/rules.ts";
-import { PACE, advance, built, cutEnough, full, startSession } from "../../../shared/soundmachine/session.ts";
+import { PACE, advance, built, cutEnough, full, gemsMayFly, startSession } from "../../../shared/soundmachine/session.ts";
 import { ROUND_WORDS, clipUrl, slowClip, tileClip, wordById, wordClip, type SoundLevel, type Word } from "../../../shared/soundmachine/words.ts";
 import { sfx } from "../../sound.ts";
 import { hush, say, speaking } from "../../speech.ts";
@@ -78,15 +78,23 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
           // fly once the reveal has begun and nothing at all is being said:
           // not when the reveal's own say() settles, which, if a hear button
           // cut it short, is long after (silence) or in the middle of what
-          // the button said (pings over the slow word). The next word comes
-          // once they have landed and the session will take it.
+          // the button said (pings over the slow word). But never later than
+          // GEM_WAIT_MS after that settles: a stopped audio context never
+          // ends a clip, and the round must not wait on it for good. The next
+          // word comes once they have landed and the session will take it.
           const word = s.word;
           const seq = s.seq;
           const n = word?.tiles.length ?? 0;
           let begun = !word;
+          let settledAt: number | null = word ? null : performance.now();
           let landed = 0;
           later(() => {
             if (!word) return;
+            // Settled with no clip said (the sound off, or none would come): begun all the same.
+            const settle = () => {
+              begun = true;
+              settledAt = performance.now();
+            };
             void say([...soundsOf(word), wholeOf(word)], {
               gap: SLOW,
               onEach: (i) => {
@@ -94,14 +102,17 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
                 setLitAt({ seq, tile: i < n ? i : null });
                 if (i < n) setGemAt({ seq, dropped: i + 1, flown: false });
               },
-              // Settled with no clip said (the sound off, or none would come): begun all the same.
-            }).then(() => (begun = true));
+            }).then(settle, settle);
           }, 320);
           later(
             () =>
               timers.push(
                 window.setInterval(() => {
-                  if (!landed && begun && !speaking()) {
+                  // Speech heard is the reveal begun, even if a hear button cut it
+                  // short before its first clip's onEach came.
+                  const talking = speaking();
+                  if (talking) begun = true;
+                  if (!landed && gemsMayFly({ begun, speaking: talking, settledAt, now: performance.now() })) {
                     // A clip that would not come is left out: its gem lands all the same.
                     setLitAt({ seq, tile: null });
                     setGemAt({ seq, dropped: n, flown: true });
@@ -167,12 +178,17 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
   // Leaving the machine stops it talking.
   useEffect(() => hush, []);
 
+  /** The player is moving by keyboard: a Tab since the last tap or click. */
+  const byKeys = useRef(false);
   const onKey = useEffectEvent((ev: KeyboardEvent) => {
     if (ev.metaKey || ev.ctrlKey || ev.altKey) return;
-    // Enter on a focused button is that button's own press: a gap cuts, the
-    // pause button pauses, a tile goes in a box. Only Enter with nothing
-    // pressable in focus is the lever (or the next word).
-    if (ev.key === "Enter" && ev.target instanceof HTMLButtonElement) return;
+    if (ev.key === "Tab") byKeys.current = true;
+    // Moving by keyboard (focus came by Tab), Enter on a button is that
+    // button's own press: a gap cuts, the pause button pauses, a tile goes in
+    // a box. Otherwise Enter is the lever (or the next word), whatever was
+    // last tapped or clicked; the handled key's preventDefault stops the
+    // focused button from being pressed as well.
+    if (ev.key === "Enter" && byKeys.current && ev.target instanceof HTMLButtonElement && !ev.target.disabled) return;
     if (ev.key === "Escape") send({ type: "toggle", now: performance.now() });
     else if (ev.key === "Enter" && s.phase === "wrong" && mayGo && !s.wantPause) next();
     else if (ev.key === "Enter" && s.phase === "ask" && mode !== "read") send({ type: "go", now: performance.now() });
@@ -181,13 +197,16 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
   });
   useEffect(() => {
     const key = (ev: KeyboardEvent) => onKey(ev);
+    const point = () => (byKeys.current = false);
     const hide = () => {
       if (document.hidden) send({ type: "pause", now: performance.now() });
     };
     window.addEventListener("keydown", key);
+    window.addEventListener("pointerdown", point, true);
     document.addEventListener("visibilitychange", hide);
     return () => {
       window.removeEventListener("keydown", key);
+      window.removeEventListener("pointerdown", point, true);
       document.removeEventListener("visibilitychange", hide);
     };
   }, []);

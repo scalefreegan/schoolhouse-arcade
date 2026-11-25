@@ -120,7 +120,9 @@ export async function preload(need: string[], want: string[] = []): Promise<void
 /**
  * Something is being said now, or is queued to be: whatever say() started
  * last, even if it cut short an earlier say() (whose promise still waits out
- * its own time). For a sound that must not land on speech.
+ * its own time). For a sound that must not land on speech. It has no limit
+ * of its own: a clip on a context that was suspended or closed never ends,
+ * so whoever waits on this puts a limit on the wait (as Split's gems do).
  */
 export function speaking(): boolean {
   return playing.length > 0;

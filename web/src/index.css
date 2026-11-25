@@ -1001,6 +1001,22 @@ select.field {
   .sm-split .sm-glass { width: 12rem; }
   .sm-split .sm-side .sm-hears { flex-direction: column; }
 }
+/* The same widths on their side and short (a small tablet held sideways, a
+   phone on its side): stacked, the word and the lever would go below the
+   screen. The picture stays beside the word, narrow, and the letters are the
+   phone's (gaps still 72 px tall). */
+@media (min-width: 40.0625rem) and (max-width: 63.9375rem) and (max-height: 44.9375rem) {
+  .sm-split {
+    --letter-w: 2.75rem;
+    --cut-w: 1.5rem;
+    --letter-h: 4.5rem;
+    --gem: 2.75rem;
+    grid-template-columns: 12rem minmax(0, 1fr);
+  }
+  .sm-split .sm-side { flex-direction: column; }
+  .sm-split .sm-glass { width: 100%; }
+  .sm-split .sm-side .sm-hears { flex-direction: row; }
+}
 
 @media (max-width: 40rem) {
   .machine { padding: calc(var(--px) * 6) calc(var(--px) * 3); }

@@ -9,6 +9,7 @@ import { hush, say, speaking } from "../../speech.ts";
 import { Picture, Sprite } from "../../sprites/Sprite.tsx";
 import { useArcade } from "../../state.tsx";
 import { fmtScore } from "../format.ts";
+import { SoundOff } from "../NeedsSound.tsx";
 import { GemTray, Jewel } from "./Gems.tsx";
 
 // One round on the machine, from the first word to the eighth. What happens
@@ -32,7 +33,7 @@ const FLY_MS = 500;
 
 export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { level: SoundLevel; mode: Mode; skill: Skill; stats: Record<string, FactStat>; onDone: (answers: AnswerInput[]) => void; onQuit: () => void }) {
   const [s, send] = useReducer(advance, null, () => startSession(level, mode, skill, stats, seed()));
-  const { muted, setMuted } = useArcade();
+  const { muted } = useArcade();
   // Both are remembered with the step of the round they belong to (s.seq),
   // so neither outlives its word and nothing has to reset them.
   /** The sound being said now: which of the word's tiles is lit. */
@@ -435,30 +436,7 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
       </section>
 
       {muted ? (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-tube/90 p-4" role="dialog" aria-modal="true" aria-label="The sound is off">
-          <div className="panel panel-cyan max-w-md text-center">
-            <p className="font-display glow m-0 text-base text-cyan">This game needs sound.</p>
-            <p className="mt-4">The sound is off.</p>
-            <div className="mt-4 flex flex-wrap justify-center gap-2">
-              <button type="button" className="btn btn-quiet" onClick={onQuit}>
-                Stop the round
-              </button>
-              <button
-                type="button"
-                className="btn btn-cyan"
-                autoFocus
-                onClick={() => {
-                  setMuted(false);
-                  sfx.coin();
-                  send({ type: "resume", now: performance.now() });
-                }}
-              >
-                <Sprite id="speaker" palette="ink" size={30} />
-                Turn sound on
-              </button>
-            </div>
-          </div>
-        </div>
+        <SoundOff onQuit={onQuit} onResume={() => send({ type: "resume", now: performance.now() })} />
       ) : s.wantPause && (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-tube/90 p-4" role="dialog" aria-modal="true" aria-label="Paused">
           <div className="panel panel-cyan max-w-md text-center">

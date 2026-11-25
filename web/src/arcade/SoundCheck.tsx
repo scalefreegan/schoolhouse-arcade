@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
+import { WORDS as RHYME_WORDS, sayUrl, type RhymeWord } from "../../shared/rhymetime/words.ts";
 import { LEVELS, SOUNDS, TILE_SOUND, clipUrl, slowClip, soundClip, wordClip, type Word } from "../../shared/soundmachine/words.ts";
 import { hush, preload, say } from "../speech.ts";
 import { Picture, Sprite } from "../sprites/Sprite.tsx";
 import { useArcade } from "../state.tsx";
 
 // The grown-up's Sound check: every sound and every word Sound Machine can
-// say, each with a button, so the pronunciation can be listened through in
-// one sitting. The clips are made by `npm run speech:build`; one that sounds
+// say, and the words only Rhyme Time has, each with a button, so the
+// pronunciation can be listened through in one sitting. The clips are made by `npm run speech:build`; one that sounds
 // wrong is fixed there and made again, never edited by hand.
 
 /** The tiles that make a sound: "c k ck" for k. */
@@ -33,12 +34,25 @@ function WordRow({ word }: { word: Word }) {
   );
 }
 
+/** One of Rhyme Time's own words: one clip, said plainly. */
+function RhymeRow({ word }: { word: RhymeWord }) {
+  return (
+    <li className="panel flex flex-wrap items-center justify-end gap-2">
+      <Picture id={word.picture} size={64} className="shrink-0" title={word.id} />
+      <span className="sm-letter flex-1 text-base">{word.id}</span>
+      <button type="button" className="btn btn-cyan" aria-label={`Hear ${word.id}`} onClick={() => void say([sayUrl(word)])}>
+        <Sprite id="speaker" palette="ink" size={30} />
+      </button>
+    </li>
+  );
+}
+
 export function SoundCheck({ onBack }: { onBack: () => void }) {
   const { muted, setMuted } = useArcade();
   const [missing, setMissing] = useState<string | null>(null);
 
   useEffect(() => {
-    const all = [...SOUNDS.map((s) => clipUrl(soundClip(s.id))), ...LEVELS.flatMap((l) => l.focus).map((w) => clipUrl(wordClip(w.id)))];
+    const all = [...SOUNDS.map((s) => clipUrl(soundClip(s.id))), ...LEVELS.flatMap((l) => l.focus).map((w) => clipUrl(wordClip(w.id))), ...RHYME_WORDS.filter((w) => !w.shared).map(sayUrl)];
     preload(all).catch((e: unknown) => setMissing(e instanceof Error ? e.message : String(e)));
     return hush;
   }, []);
@@ -51,7 +65,7 @@ export function SoundCheck({ onBack }: { onBack: () => void }) {
           Back
         </button>
       </header>
-      <p className="mt-3 mb-0 text-dim">Every sound and word Sound Machine says. A sound should be the pure sound a teacher says (mmm, sss, a clipped k), never the letter's name. One that is wrong is made again with npm run speech:build.</p>
+      <p className="mt-3 mb-0 text-dim">Every sound and word Sound Machine says, and the words only Rhyme Time has (its others are these). A sound should be the pure sound a teacher says (mmm, sss, a clipped k), never the letter's name. One that is wrong is made again with npm run speech:build.</p>
       {muted && (
         <p role="alert" className="panel panel-cyan mt-3 flex flex-wrap items-center gap-4">
           <span className="flex-1">The sound is off, so nothing will play.</span>
@@ -100,6 +114,14 @@ export function SoundCheck({ onBack }: { onBack: () => void }) {
             .map((w) => (
               <WordRow key={w.id} word={w} />
             ))}
+        </ul>
+      </section>
+      <section>
+        <h2 className="font-display mt-6 mb-0 text-xs text-dim">Rhyme Time's own words ({RHYME_WORDS.filter((w) => !w.shared).length})</h2>
+        <ul className="m-0 mt-1 grid list-none gap-x-3 p-0 sm:grid-cols-2">
+          {RHYME_WORDS.filter((w) => !w.shared).map((w) => (
+            <RhymeRow key={w.id} word={w} />
+          ))}
         </ul>
       </section>
     </main>

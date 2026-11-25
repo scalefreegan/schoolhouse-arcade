@@ -32,6 +32,14 @@ export const GAMES: GameInfo[] = [
     sprite: "machine",
     status: "live",
   },
+  {
+    id: "rhyme-time",
+    title: "Rhyme Time",
+    pitch: "Listen, and find the word that rhymes",
+    teaches: "Hearing rhyme: cat, hat, bat",
+    sprite: "jukebox",
+    status: "live",
+  },
 ];
 
 export function gameById(id: string): GameInfo | undefined {

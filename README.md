@@ -34,10 +34,10 @@ magenta and yellow. [`docs/PRD.md`](docs/PRD.md) has the whole design.
       <p>A player is a name and a pixel character: an alien, a dinosaur, a robot, a monster, a wizard, a dragon, a ghost, a rocket, a cat, an owl, a frog or a cupcake, each in six colours. Tickets, badges and unlocked levels belong to the player; the high score tables show everyone.</p>
     </td>
     <td width="50%" valign="top">
-      <img src="docs/screenshots/floor.png" alt="The arcade floor: the Comet Cards and Sound Machine cabinets side by side, with the Prize Counter and a crate marked with question marks below them" width="100%">
-      <br><sub><i>The floor: two cabinets so far, and more on the delivery truck.</i></sub>
+      <img src="docs/screenshots/floor.png" alt="The arcade floor: the Comet Cards and Sound Machine cabinets side by side, and below them the Rhyme Time jukebox and the Prize Counter" width="100%">
+      <br><sub><i>The floor: three cabinets so far, and more on the delivery truck.</i></sub>
       <h3>An arcade floor</h3>
-      <p>Each cabinet drills one idea until recall is fast. The first is <b>Comet Cards</b>: adding and taking away, 0 to 10. The second is <b>Sound Machine</b>: letter sounds and sounding out short words. New cabinets plug into the same players, tickets and badges.</p>
+      <p>Each cabinet drills one idea until recall is fast. The first is <b>Comet Cards</b>: adding and taking away, 0 to 10. The second is <b>Sound Machine</b>: letter sounds and sounding out short words. The third is <b>Rhyme Time</b>: hearing which words rhyme. New cabinets plug into the same players, tickets and badges.</p>
     </td>
   </tr>
   <tr>
@@ -66,6 +66,20 @@ magenta and yellow. [`docs/PRD.md`](docs/PRD.md) has the whole design.
       <br><sub><i>Split it: four letters, three sounds, a gem for each.</i></sub>
       <h3>A gem a sound</h3>
       <p>In <i>Split it</i> a word comes up whole. Tap between its letters to cut it where one sound ends and the next begins, then pull the lever. "Fish" is four letters but three sounds, so it earns three gems. The gems fill a tray for the round and are counted up on the results screen.</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="docs/screenshots/rhyme-time-find.png" alt="A Rhyme Time Find it round answered right: a map on the left, and of a pig, a cap and a pencil between two arrows, the cap lit green, with map and cap written under them and their ending ap lit" width="100%">
+      <br><sub><i>Find it: "map" rhymes with "cap".</i></sub>
+      <h3>Rhyme Time</h3>
+      <p>A jukebox that plays words. In <i>Find it</i> you hear a word and pick the picture that rhymes with it; in <i>Odd one out</i> two of three pictures rhyme and you pick the one that does not. Tap a picture to hear it, then pull the lever. No word is written until you answer: then the rhyme is written with its shared ending lit, and said.</p>
+    </td>
+    <td width="50%" valign="top">
+      <img src="docs/screenshots/rhyme-time-odd.png" alt="A Rhyme Time Odd one out round answered wrong: a pin marked red, a pencil between two arrows outlined in cyan, and a wig lit green as the odd one, with pin and thin written and their ending in lit" width="100%">
+      <br><sub><i>Odd one out: pin and thin rhyme, so the wig is the odd one.</i></sub>
+      <h3>Heard, not read</h3>
+      <p>Over 50 words in four levels, each a picture with a spoken clip. On Easy the wrong pictures sound nothing like the word; on Arcade they start the same or share its vowel. Rhymes an accent can blur (pin and pen) are never asked against each other, and the Mac checks every question was a fair one before it scores the answer.</p>
     </td>
   </tr>
   <tr>

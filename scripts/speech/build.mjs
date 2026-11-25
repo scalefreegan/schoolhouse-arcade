@@ -1,7 +1,9 @@
-// npm run speech:build: every clip Sound Machine can play, spoken by one
-// voice and written to web/public/speech/sound-machine/ with a manifest.
-// The clips are committed; the app only ever fetches them. Nothing at run
-// time needs a key or leaves the house.
+// npm run speech:build: every clip Sound Machine and Rhyme Time can play,
+// spoken by one voice and written with a manifest to
+// web/public/speech/sound-machine/ (Sound Machine's sounds and words, which
+// Rhyme Time says too) and web/public/speech/rhyme-time/ (the words only
+// Rhyme Time has). The clips are committed; the app only ever fetches them.
+// Nothing at run time needs a key or leaves the house.
 //
 //   node scripts/speech/build.mjs              make what is missing or out of date
 //   node scripts/speech/build.mjs --force      make everything again
@@ -35,12 +37,11 @@ import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { SPEECH_DIR as RHYME_DIR, WORDS as RHYME_WORDS, ownClips } from "../../web/shared/rhymetime/words.ts";
 import { SOUNDS, SPEECH_DIR, WORDS, allClips, slowClip, soundClip, wordClip } from "../../web/shared/soundmachine/words.ts";
 import { RATE, finish, measure, pcmOfS16, pcmOfWav, s16Of } from "./audio.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
-const OUT = path.join(ROOT, "web/public", SPEECH_DIR);
-const MANIFEST = path.join(OUT, "manifest.json");
 
 /** One voice for the whole game. Of the plain en-US voices that take
  *  <phoneme> and <prosody>, this one keeps its short vowels furthest apart
@@ -133,16 +134,18 @@ const SLOW_FIX = { bed: { tempo: 0.72 }, chip: { rate: -20 }, duck: { tempo: 0.7
 const WORD_IPA = { dog: "dɑɡ", log: "lɑɡ", moth: "mɑθ" };
 const asWord = (w) => `${WORD_IPA[w.id] ? ipa(WORD_IPA[w.id], w.id) : w.id}.`;
 
-/** What each clip is: the SSML sent, and what is done to what comes back. */
-function recipes() {
+/** A word said plainly, as a sentence of its own so it falls at the end. */
+const plainWord = (w) => ({ kind: "word", provider: "azure", voice: VOICE, ssml: speak(asWord(w)), post: { cut: "all", levelDb: LEVEL.word, ...FADES.all } });
+
+/** What each of Sound Machine's clips is: the SSML sent, and what is done to what comes back. */
+function soundMachineRecipes() {
   const out = {};
   for (const s of SOUNDS) {
     const r = SOUND_RECIPES[s.id];
     if (!r) throw new Error(`no recipe for the sound "${s.id}" (scripts/speech/build.mjs SOUND_RECIPES)`);
     out[soundClip(s.id)] = { kind: "sound", provider: "azure", voice: VOICE, ssml: speak(r.say(s)), post: { ...FADES[r.post.cut], ...r.post } };
   }
-  // A word: said plainly, as a sentence of its own so it falls at the end.
-  for (const w of WORDS) out[wordClip(w.id)] = { kind: "word", provider: "azure", voice: VOICE, ssml: speak(asWord(w)), post: { cut: "all", levelDb: LEVEL.word, ...FADES.all } };
+  for (const w of WORDS) out[wordClip(w.id)] = plainWord(w);
   // And slowly, as a teacher says it for a child: one word still, not sound by sound.
   for (const w of WORDS) {
     const fix = SLOW_FIX[w.id] ?? {};
@@ -156,6 +159,21 @@ function recipes() {
   }
   return out;
 }
+
+/** Rhyme Time's own clips: each word Sound Machine does not have, said plainly
+ *  the way Sound Machine's words are (a rhyme is heard best in one voice and
+ *  one way of saying). Its other words are Sound Machine's clips. */
+function rhymeTimeRecipes() {
+  const out = {};
+  for (const w of RHYME_WORDS.filter((x) => !x.shared)) out[wordClip(w.id)] = plainWord(w);
+  return out;
+}
+
+/** Each folder of clips: where it is, which clips belong there, and their recipes. */
+const SETS = [
+  { name: "Sound Machine", out: path.join(ROOT, "web/public", SPEECH_DIR), clips: allClips, recipes: soundMachineRecipes },
+  { name: "Rhyme Time", out: path.join(ROOT, "web/public", RHYME_DIR), clips: ownClips, recipes: rhymeTimeRecipes },
+];
 
 // ---------- the outside world ----------
 
@@ -239,12 +257,14 @@ async function heard(clip, file) {
 
 // ---------- the manifest ----------
 
-function readManifest() {
+const manifestOf = (set) => path.join(set.out, "manifest.json");
+
+function readManifest(set) {
   try {
-    return JSON.parse(fs.readFileSync(MANIFEST, "utf8"));
+    return JSON.parse(fs.readFileSync(manifestOf(set), "utf8"));
   } catch (e) {
     if (e.code === "ENOENT") return { voice: VOICE, format: FORMAT, clips: {} };
-    throw new Failed(`${path.relative(ROOT, MANIFEST)} cannot be read: ${e.message}`);
+    throw new Failed(`${path.relative(ROOT, manifestOf(set))} cannot be read: ${e.message}`);
   }
 }
 
@@ -255,11 +275,11 @@ function sorted(value) {
   return value;
 }
 
-function writeManifest(clips) {
-  fs.writeFileSync(MANIFEST, `${JSON.stringify({ voice: VOICE, format: FORMAT, clips: sorted(clips) }, null, 2)}\n`);
+function writeManifest(set, clips) {
+  fs.writeFileSync(manifestOf(set), `${JSON.stringify({ voice: VOICE, format: FORMAT, clips: sorted(clips) }, null, 2)}\n`);
 }
 
-const fileOf = (clip) => path.join(OUT, `${clip}.mp3`);
+const fileOf = (set, clip) => path.join(set.out, `${clip}.mp3`);
 const sha = (data) => createHash("sha256").update(data).digest("hex");
 /** A recipe in one line: the voice, what it is asked, what is done to the
  *  answer. Kept with each clip (`recipe`), beside the hash of the clip's own
@@ -269,40 +289,63 @@ const recipeHash = (r) => sha(JSON.stringify(sorted({ voice: r.voice, ssml: r.ss
 
 // ---------- the commands ----------
 
-/** Is every clip there, with its entry, and nothing else? No network. */
+/** Is every clip of every set there, with its entry, and nothing else? No network. */
 function check() {
-  const want = allClips();
-  const now = recipes();
-  const { clips } = readManifest();
   const wrong = [];
-  for (const clip of want) {
-    if (!Object.hasOwn(clips, clip)) wrong.push(`${clip}: not in the manifest`);
-    else if (clips[clip].recipe !== recipeHash(now[clip])) wrong.push(`${clip}: its recipe has changed since it was made (npm run speech:build)`);
-    const size = fs.statSync(fileOf(clip), { throwIfNoEntry: false })?.size ?? 0;
-    if (!size) wrong.push(`${clip}: no file, or an empty one`);
-    else if (clips[clip] && clips[clip].bytes !== size) wrong.push(`${clip}: the file is ${size} bytes, the manifest says ${clips[clip].bytes}`);
-    else if (clips[clip] && clips[clip].sha256 !== sha(fs.readFileSync(fileOf(clip)))) wrong.push(`${clip}: the file is not the one the manifest describes (made by hand, or by an older run?)`);
+  for (const set of SETS) {
+    const before = wrong.length;
+    const want = set.clips();
+    const now = set.recipes();
+    const { clips } = readManifest(set);
+    for (const clip of want) {
+      if (!Object.hasOwn(clips, clip)) wrong.push(`${clip}: not in the manifest`);
+      else if (clips[clip].recipe !== recipeHash(now[clip])) wrong.push(`${clip}: its recipe has changed since it was made (npm run speech:build)`);
+      const size = fs.statSync(fileOf(set, clip), { throwIfNoEntry: false })?.size ?? 0;
+      if (!size) wrong.push(`${clip}: no file, or an empty one`);
+      else if (clips[clip] && clips[clip].bytes !== size) wrong.push(`${clip}: the file is ${size} bytes, the manifest says ${clips[clip].bytes}`);
+      else if (clips[clip] && clips[clip].sha256 !== sha(fs.readFileSync(fileOf(set, clip)))) wrong.push(`${clip}: the file is not the one the manifest describes (made by hand, or by an older run?)`);
+    }
+    for (const clip of Object.keys(clips)) if (!want.includes(clip)) wrong.push(`${clip}: in the manifest, but no word or sound has it`);
+    const files = fs.existsSync(set.out) ? fs.readdirSync(set.out) : [];
+    for (const f of files) if (f !== "manifest.json" && !(f.endsWith(".mp3") && want.includes(f.slice(0, -4)))) wrong.push(`${f}: a stray file`);
+    if (wrong.length > before) {
+      wrong.push(`${wrong.length - before} thing(s) wrong under ${path.relative(ROOT, set.out)}.`);
+      continue;
+    }
+    const bytes = want.reduce((sum, clip) => sum + clips[clip].bytes, 0);
+    console.log(`${set.name}: ${want.length} clips, ${(bytes / 1024).toFixed(0)} KB, all there.`);
   }
-  for (const clip of Object.keys(clips)) if (!want.includes(clip)) wrong.push(`${clip}: in the manifest, but no word or sound has it`);
-  const files = fs.existsSync(OUT) ? fs.readdirSync(OUT) : [];
-  for (const f of files) if (f !== "manifest.json" && !(f.endsWith(".mp3") && want.includes(f.slice(0, -4)))) wrong.push(`${f}: a stray file`);
-  if (wrong.length) throw new Failed(`${wrong.join("\n")}\n${wrong.length} thing(s) wrong under ${path.relative(ROOT, OUT)}. npm run speech:build makes clips; a stray file is yours to remove.`);
-  const bytes = want.reduce((sum, clip) => sum + clips[clip].bytes, 0);
-  console.log(`${want.length} clips, ${(bytes / 1024).toFixed(0)} KB, all there.`);
+  if (wrong.length) throw new Failed(`${wrong.join("\n")}\nnpm run speech:build makes clips; a stray file is yours to remove.`);
+}
+
+/** Which set a clip named on the command line belongs to (a clip's name is unique across them). */
+function setsFor(only) {
+  for (const clip of only ?? []) if (!SETS.some((set) => Object.hasOwn(set.recipes(), clip))) throw new Failed(`there is no clip "${clip}"`);
+  return only ? SETS.filter((set) => only.some((clip) => Object.hasOwn(set.recipes(), clip))) : SETS;
 }
 
 async function build({ force, only }) {
-  const want = recipes();
-  for (const clip of only ?? []) if (!Object.hasOwn(want, clip)) throw new Failed(`there is no clip "${clip}"`);
-  const { clips } = readManifest();
-  fs.mkdirSync(OUT, { recursive: true });
+  let made = 0;
+  let total = 0;
+  for (const set of setsFor(only)) {
+    const r = await buildSet(set, { force, only });
+    made += r.made;
+    total += r.total;
+  }
+  console.log(`${made} made, ${total - made} already there.`);
+}
+
+async function buildSet(set, { force, only }) {
+  const want = set.recipes();
+  const { clips } = readManifest(set);
+  fs.mkdirSync(set.out, { recursive: true });
   let made = 0;
   for (const [clip, recipe] of Object.entries(want)) {
     const had = clips[clip];
-    const current = had && fs.existsSync(fileOf(clip)) && recipeHash(had) === recipeHash(recipe);
+    const current = had && fs.existsSync(fileOf(set, clip)) && recipeHash(had) === recipeHash(recipe);
     if (only ? !only.includes(clip) : current && !force) {
       // A clip from before the hashes were kept: it is the one this recipe made, so it is stamped as it stands.
-      if (current && !(had.recipe && had.sha256)) clips[clip] = { ...had, recipe: recipeHash(recipe), sha256: sha(fs.readFileSync(fileOf(clip))) };
+      if (current && !(had.recipe && had.sha256)) clips[clip] = { ...had, recipe: recipeHash(recipe), sha256: sha(fs.readFileSync(fileOf(set, clip))) };
       continue;
     }
     let done;
@@ -313,17 +356,17 @@ async function build({ force, only }) {
       throw new Failed(`${clip}: ${e.message}`);
     }
     const mp3 = encode(done.pcm);
-    fs.writeFileSync(fileOf(clip), mp3);
+    fs.writeFileSync(fileOf(set, clip), mp3);
     clips[clip] = { ...recipe, recipe: recipeHash(recipe), gainDb: done.gainDb, ms: Math.round((done.pcm.length / RATE) * 1000), bytes: mp3.length, sha256: sha(mp3) };
     // After every clip: a run that stops half way has lost nothing.
-    writeManifest(clips);
+    writeManifest(set, clips);
     made++;
     console.log(`made ${clip} (${clips[clip].ms} ms, ${mp3.length} bytes)`);
   }
   // An entry for a clip no word or sound has any more is dropped; its file is left for check to name.
   for (const clip of Object.keys(clips)) if (!Object.hasOwn(want, clip)) delete clips[clip];
-  writeManifest(clips);
-  console.log(`${made} made, ${Object.keys(want).length - made} already there.`);
+  writeManifest(set, clips);
+  return { made, total: Object.keys(want).length };
 }
 
 /** Letter names: what the voice must never say for a sound. */
@@ -341,23 +384,26 @@ const VOICELESS = ["f", "s", "sh", "th", "h", "k", "p", "t", "ch"];
  */
 async function verify({ only, match }) {
   check();
-  const { clips } = readManifest();
   const held = new Map(SOUNDS.map((s) => [soundClip(s.id), s]));
   const wrong = [];
   console.log("clip          ms  sounds voiced  level  heard        frames (v voiced, u unvoiced, . silent)");
-  for (const clip of allClips()) {
+  const every = SETS.flatMap((set) => {
+    const { clips } = readManifest(set);
+    return set.clips().map((clip) => ({ set, clip, entry: clips[clip] }));
+  });
+  for (const { set, clip, entry } of every) {
     if (only && !only.includes(clip)) continue;
     if (match && !clip.includes(match)) continue;
-    const m = measure(decode(fileOf(clip)));
-    const guesses = await heard(clip, fileOf(clip));
+    const m = measure(decode(fileOf(set, clip)));
+    const guesses = await heard(clip, fileOf(set, clip));
     const said = guesses[0] ?? "";
     const flags = [];
-    if (clips[clip].kind === "word") {
+    if (entry.kind === "word") {
       const word = clip.slice(5).replace(/-slow$/, "");
       // A clip that is the word's own sound slowed (`tempo`) has the sounds of
       // the plain clip, which is judged on its own line; speech-to-text takes
       // a long short vowel for another word ("bed" as "bad"), so it is not asked.
-      if (!clips[clip].post.tempo && !guesses.some((g) => g === word || SAME_SOUND[g] === word)) flags.push(`heard as "${said}"`);
+      if (!entry.post.tempo && !guesses.some((g) => g === word || SAME_SOUND[g] === word)) flags.push(`heard as "${said}"`);
       if (m.soundMs < 250 || m.soundMs > 1800) flags.push("an odd length for a word");
     } else {
       const s = held.get(clip);

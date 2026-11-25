@@ -9,6 +9,7 @@
 
 import { LEVELS } from "./comet/facts.ts";
 import { MAX_STARS } from "./play.ts";
+import { LEVELS as RHYME_LEVELS } from "./rhymetime/words.ts";
 import { LEVELS as SOUND_LEVELS } from "./soundmachine/words.ts";
 
 /** What a player has done, across every game. */
@@ -49,7 +50,10 @@ const everySoundLevel = (f: BadgeFacts, stars: number): boolean => SOUND_LEVELS.
 const SOUND_NAMES: Record<string, string> = { cvc: "3 Sounds", ch: "CH", ck: "CK", sh: "SH", th: "TH", mix: "Mix" };
 const BELLS = ["lime", "cyan", "rose", "violet", "gold", "orange"];
 
-const MEDALS = ["lime", "cyan", "rose", "violet", "gold"];
+const RHYME = "rhyme-time";
+const rhymeStars = (f: BadgeFacts, level: string): number => f.stars[RHYME]?.[level] ?? 0;
+
+const MEDALS =["lime", "cyan", "rose", "violet", "gold"];
 
 export const BADGES: Badge[] = [
   { id: "first-game", title: "First Game", how: "Finish a game", tickets: 10, sprite: "rocket", palette: "default", earned: (f) => f.plays >= 1 },
@@ -85,6 +89,9 @@ export const BADGES: Badge[] = [
   ),
   { id: "sound-builder", title: "Word Builder", how: "A star on every Sound Machine level", tickets: 100, sprite: "cog", palette: "default", earned: (f) => everySoundLevel(f, 1) },
   { id: "sound-champion", title: "Sound Champion", how: "3 stars on every Sound Machine level", tickets: 300, sprite: "megaphone", palette: "default", earned: (f) => everySoundLevel(f, MAX_STARS) },
+  // Rhyme Time's: a first star anywhere in it, and every level at three.
+  { id: "rhyme-ear", title: "Good Ear", how: "Get a star in Rhyme Time", tickets: 25, sprite: "ear", palette: "default", earned: (f) => RHYME_LEVELS.some((l) => rhymeStars(f, l.id) >= 1) },
+  { id: "rhyme-champion", title: "Rhyme Champion", how: "3 stars on every Rhyme Time level", tickets: 300, sprite: "jukebox", palette: "gold", earned: (f) => RHYME_LEVELS.every((l) => rhymeStars(f, l.id) >= MAX_STARS) },
 ];
 
 export function badgeById(id: string): Badge | undefined {

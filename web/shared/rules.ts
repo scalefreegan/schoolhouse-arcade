@@ -1,5 +1,6 @@
 import { cometRules } from "./comet/rules.ts";
 import type { GameRules } from "./play.ts";
+import { rhymeTimeRules } from "./rhymetime/rules.ts";
 import { soundMachineRules } from "./soundmachine/rules.ts";
 
 // Every live game's rules, by the game's id in shared/games.ts. The server
@@ -8,4 +9,5 @@ import { soundMachineRules } from "./soundmachine/rules.ts";
 export const RULES: Record<string, GameRules> = {
   "comet-cards": cometRules,
   "sound-machine": soundMachineRules,
+  "rhyme-time": rhymeTimeRules,
 };

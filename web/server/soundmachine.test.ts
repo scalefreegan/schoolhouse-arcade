@@ -24,7 +24,9 @@ const counter = wrap(handleCounter);
 
 const ok = (mode: Mode, id: string, ms = 3000): AnswerInput => ({ fact: id, given: answerOf(mode, wordById(id)!), ms });
 const round = (level: string, mode: Mode, right = 8): AnswerInput[] =>
-  LEVELS.find((l) => l.id === level)!.focus.slice(0, 8).map((w, i) => (i < right ? ok(mode, w.id) : { fact: w.id, given: mode === "read" ? (w.id === "cat" ? "hat" : "cat") : [...w.tiles].reverse().join("-"), ms: 3000 }));
+  LEVELS.find((l) => l.id === level)!.focus.slice(0, 8).map((w, i) => (i < right ? ok(mode, w.id) : { fact: w.id, given: wrongOf(mode, w.id), ms: 3000 }));
+/** A wrong answer of the right shape: another picture, the tiles backwards, or the word cut after its first letter only. */
+const wrongOf = (mode: Mode, id: string): string => (mode === "read" ? (id === "cat" ? "hat" : "cat") : mode === "gems" ? `${id[0]}|${id.slice(1)}` : [...wordById(id)!.tiles].reverse().join("-"));
 
 async function arcade(t: { after: (fn: () => unknown) => void }) {
   const fresh = await freshDb();
@@ -63,6 +65,55 @@ test("a Build round is scored from its tiles and a Read round from its words, an
     { game_id: GAME, level: "cvc", mode: "build", skill: "easy", score: 200 },
     { game_id: GAME, level: "cvc", mode: "read", skill: "easy", score: 100 },
   ]);
+});
+
+test("a Split round is judged by the server from where each word was cut: the split is stored as text beside its verdict", async (t) => {
+  const { join, play, query, progress } = await arcade(t);
+  const em = await join("Em");
+  const sh = { level: "sh", mode: "gems" };
+  // sh is open once 3 sounds has a star: a star won in any of the three games opens it.
+  assert.equal((await play(em, sh, [ok("gems", "ship")])).status, 403);
+  const opener = await play(em, { mode: "gems" }, round("cvc", "gems", 5));
+  assert.deepEqual([opener.status, opener.body.starsAfter, opener.body.opened], [201, 1, "ch"]);
+  assert.equal((await play(em, { level: "ch", mode: "gems" }, [...round("ch", "gems"), ok("gems", "cat"), ok("gems", "sun"), ok("gems", "pig")])).body.opened, "ck");
+  assert.equal((await play(em, { level: "ck", mode: "gems" }, round("ck", "gems"))).body.opened, "sh");
+  assert.ok((await progress(em)).open.includes("sh"));
+  const before = (await query("select count(*)::int as n from answers"))[0].n as number;
+  const split = await play(em, sh, [
+    ok("gems", "ship"),
+    { fact: "fish", given: "f|i|s|h", ms: 4000 },
+    { fact: "shed", given: "s|h|e|d", ms: 2500 },
+    ok("gems", "dish", 200),
+  ]);
+  assert.equal(split.status, 201, split.body.error);
+  assert.deepEqual([split.body.score, split.body.right, split.body.wrong, split.body.bestCombo], [200, 2, 2, 1]);
+  const stored = await query("select fact, given, given_text, correct, ms from answers where id > (select max(id) - 4 from answers) order by id");
+  assert.equal(before + 4, (await query("select count(*)::int as n from answers"))[0].n);
+  assert.deepEqual(stored, [
+    { fact: "ship", given: null, given_text: "sh|i|p", correct: true, ms: 3000 },
+    { fact: "fish", given: null, given_text: "f|i|s|h", correct: false, ms: 4000 },
+    { fact: "shed", given: null, given_text: "s|h|e|d", correct: false, ms: 2500 },
+    { fact: "dish", given: null, given_text: "d|i|sh", correct: true, ms: 1000 },
+  ]);
+  // A verdict or a number from the browser is not looked at: only the split.
+  const forged = await play(em, sh, [{ fact: "ship", given: "s|h|i|p", ms: 2000, correct: true, score: 9999 } as AnswerInput]);
+  assert.deepEqual([forged.status, forged.body.right, forged.body.score], [201, 0, 0]);
+  const bad = await play(em, sh, [{ fact: "ship", given: "sh|i|pp", ms: 2000 }]);
+  assert.equal(bad.status, 400);
+  assert.match(bad.body.error, /not "ship" cut into pieces/);
+});
+
+test("Split keeps its own high score tables, beside Build's and Read's", async (t) => {
+  const { join, play } = await arcade(t);
+  const em = await join("Em");
+  const built = await play(em, {}, round("cvc", "build", 8));
+  const split = await play(em, { mode: "gems" }, round("cvc", "gems", 6));
+  assert.deepEqual([split.body.rank, split.body.personalBest, split.body.board.rows.length, split.body.board.rows[0].score], [1, false, 1, split.body.score], "a Split round is not ranked against Build");
+  assert.equal(built.body.board.rows.length, 1);
+  const table = await request<BoardReply>(plays, "GET", `/board?game=${GAME}&level=cvc&mode=gems&skill=easy`, undefined, APP);
+  assert.deepEqual([table.status, table.body.kind, table.body.rows.length], [200, "score", 1]);
+  // 6 tickets for six right words: the gems are not paid on top.
+  assert.equal(split.body.tickets.lines.find((l) => l.reason === "play")?.amount, 6);
 });
 
 test("Comet Cards' answers are stored as they always were, and the two games do not take each other's", async (t) => {

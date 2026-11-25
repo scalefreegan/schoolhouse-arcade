@@ -7,7 +7,8 @@ drills one idea until recall is fast. Playing earns **tickets** and
 candy, a new video game). The list of cabinets is meant to grow; the first
 is **Comet Cards**, addition and subtraction flashcards against the clock,
 and the second is **Sound Machine**, letter sounds and sounding out short
-words, with nothing timed.
+words (build a word, read one, or split one into its sounds), with nothing
+timed.
 
 The name nods to the Saturday-morning idea that a lesson can be something
 you want to sit through. Everything in the app (names, characters, art,
@@ -44,7 +45,8 @@ all answers below are final for v1):
 | **Tile** | The letter or letters that write one sound: `c`, `a`, `ch`, `ck`. A digraph is one tile |
 | **Card** | A fact shown to be answered |
 | **Level** | A set of facts (add within 5, …). Levels unlock in order |
-| **Mode** | How a round is timed: Blitz, Sprint, Survival, Practice |
+| **Mode** | How a round is played: in Comet Cards how it is timed (Blitz, Sprint, Survival, Practice); in Sound Machine which game (Build it, Read it, Split it) |
+| **Gem** | In Split it, one sound of a word split right. Shown during the round and on its results only; never stored |
 | **Skill** | How an answer is given: Easy (four choices) or Arcade (number pad) |
 | **Play** | One finished round: a player, a level, a mode, a skill, and every answer in it |
 | **Combo** | Right answers in a row. Raises the points per card |
@@ -151,14 +153,17 @@ below 0, never repeated, in random order.
 
 A machine that builds words out of sound tiles. Decided 2026-11-24 by the
 grown-up: one cabinet, two ways to play, no clock anywhere, real spoken
-sounds, and a different kind of game from Comet Cards.
+sounds, and a different kind of game from Comet Cards. A third way to play,
+Split it, was added on 2026-11-25 after the classroom activity it copies (see
+a word, pull out its sounds, a gem on each).
 
-### Two games
+### Three games
 
-| Game | The player | The answer |
+| Game (mode id) | The player | The answer |
 |---|---|---|
-| **Build it** | sees a picture and hears its word, then puts sound tiles into boxes in order, one sound a box, and pulls the lever | the tiles, in order (`ch-i-ck`) |
-| **Read it** | sees the word, a button under each sound to hear it, sounds it out, and picks its picture | the word picked |
+| **Build it** (`build`) | sees a picture and hears its word, then puts sound tiles into boxes in order, one sound a box, and pulls the lever | the tiles, in order (`ch-i-ck`) |
+| **Read it** (`read`) | sees the word, a button under each sound to hear it, sounds it out, and picks its picture | the word picked |
+| **Split it** (`gems`) | sees the word as plain letters joined in one block, with its picture, and hears it; taps between letters to cut it where one sound ends and the next begins (a tap again joins them), and pulls the lever | the letters as cut (`sh\|i\|p`) |
 
 A digraph is one tile and one box. In Build, pressing a tile says its sound
 and puts it in the next empty box; pressing a box says it and takes it back
@@ -170,14 +175,32 @@ says them again run together. **Read never says the whole word before the
 answer**, plain or slow: hearing it would be the answer. Both buttons
 appear once it is answered.
 
+In Split, the point is that sh, ch, ck and th are one sound each: "ship" is
+four letters and three sounds. The word comes up whole and is said (as in
+Build: the question is where its sounds part, and its picture names it
+anyway). A letter is not a button and nothing says a piece before the
+answer, since a piece with no sound would give the answer away. A tap on
+either half of a letter goes to the gap on that side, so the gaps are easy
+to hit with a finger. The lever does nothing until the word has been cut at
+least once. Right: a gem drops on each piece as its sound is said, the
+word is said whole, and the gems fly into the round's tray. Wrong: the cut
+tried is crossed out above, the right pieces are shown in the game's cyan
+and sounded out the same way, and no gem is taken from the tray.
+
+**Gems are for the round only.** Each sound of a word split right is one
+gem (three a word). They fill the tray during the round and are counted on
+the results, where they stand for the same right words as the score, the
+stars and the tickets: they are not paid on top, and they are not stored.
+
 A sound on its own is said the way a teacher models it: one that can be
 held is held ("mmmm", "ssss", a long open "a"), and one that cannot (b, d,
 g, p, t, k, ch) is one clear burst with no "uh" hung on a quiet one.
 
-One try a word. Either way the word is then said sound by sound, unhurried,
-and whole. After a right answer the next word comes by itself when that has
+One try a word. In every game the word is then said sound by sound,
+unhurried, and whole. After a right answer the next word comes by itself when that has
 been said. A wrong one shows the right one (the word built in the boxes
-with the try crossed out above it, or the right picture lit); the next word
+with the try crossed out above it, the right picture lit, or the right
+pieces with the cut tried crossed out above them); the next word
 comes when the player presses the arrow, which lights when the word has
 been said. A new word always stops whatever was being said of the last.
 Nothing earned is ever taken away.
@@ -210,10 +233,14 @@ word they know) and the ones never seen (three times).
 
 ### Skills
 
-| Skill | Build it | Read it |
-|---|---|---|
-| Easy | exactly the tiles the word needs, mixed up | three pictures |
-| Arcade | up to three more tiles that tempt: another vowel, a consonant that looks or sounds like one of the word's, and, once ck is taught, another spelling of its k sound | four pictures, the wrong ones starting or ending with the same sound where the level has any |
+| Skill | Build it | Read it | Split it |
+|---|---|---|---|
+| Easy | exactly the tiles the word needs, mixed up | three pictures | an empty gem slot for each of the word's sounds, as a hint; the lever still takes any cut |
+| Arcade | up to three more tiles that tempt: another vowel, a consonant that looks or sounds like one of the word's, and, once ck is taught, another spelling of its k sound | four pictures, the wrong ones starting or ending with the same sound where the level has any | no slots |
+
+Split's lever does not wait on Easy for as many pieces as there are slots:
+a three-letter word has only one way into three pieces, so that would make
+every one of them right.
 
 A level never offers a digraph it has not taught. Two pictures that could
 be taken for each other (a bug and a moth, a shop and a shed) are never
@@ -223,23 +250,29 @@ not how duck is written.
 ### Scoring and stars
 
 A right word scores 100, and 20 more for each right word before it in a row.
-Both games rank by score, with a table for each level, game and skill. A
-finished round earns ★ for 5 right, ★★ for 7, ★★★ for all 8, on either
-skill. Tickets: one a right word on Easy, two on Arcade, and the arcade's
-own bonuses.
+All three games rank by score, with a table for each level, game and skill
+(Split's tables are its own). A finished round earns ★ for 5 right, ★★ for
+7, ★★★ for all 8, on either skill and in any of the three games: a level's
+stars are the level's, so a star won in Split opens the next level as one
+won in Build does, and the Sound Machine badges count it the same. Split
+adds no badge of its own. Tickets: one a right word on Easy, two on Arcade,
+and the arcade's own bonuses.
 
 The server judges every answer from what is posted (the word, and the word
-picked or the tiles placed) with `web/shared/soundmachine/rules.ts`. It
-refuses a word the level does not hold, a word twice in a round, more than
-eight, more old words than the level leaves room for, and an answer that is
-not a word (Read) or not a box-full of tiles (Build).
+picked, the tiles placed or the letters as cut) with
+`web/shared/soundmachine/rules.ts`; a verdict or a number from the browser
+is not read. It refuses a word the level does not hold, a word twice in a
+round, more than eight, more old words than the level leaves room for, and
+an answer that is not a word (Read), not a box-full of tiles (Build) or not
+the word's own letters cut into pieces (Split). Split's answer is stored as
+text, like the others (`answers.given_text`).
 
 There is no clock for the player. The time a word waited is kept, to be
 looked at, and counted as at least one second, so that the server's round
 clock means the same here as in Comet Cards: a hand-made round has to wait
 the eight seconds it claims. A real round always takes longer than its
 words, because each answer stays up (1.7 seconds when right, at least 1.4
-when wrong) before the next word can come.
+when wrong) before the next word can come. Split keeps the same times.
 
 ### Speech
 

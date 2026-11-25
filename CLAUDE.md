@@ -26,9 +26,9 @@ web/shared/comet/rules.ts    modes, scoring, stars, and settle(): a play scored 
 web/shared/comet/deck.ts     which card comes next (weighted by the player's misses), Easy's four choices
 web/shared/comet/session.ts  a round as events: countdown, deal, key, clock, pause (the screen's reducer); PACE
 web/shared/soundmachine/words.ts    Sound Machine: the sounds, the tiles, every word and its level, the clip names
-web/shared/soundmachine/rules.ts    its two games (build, read), scoring, stars, and settle()
+web/shared/soundmachine/rules.ts    its three games (build, read, gems: Split it), scoring, stars, gemsOf(), and settle()
 web/shared/soundmachine/pick.ts     a round's eight words, Build's tray of tiles, Read's pictures
-web/shared/soundmachine/session.ts  a round as events: next, place, take, go, pick, pause (the screen's reducer)
+web/shared/soundmachine/session.ts  a round as events: next, place, take, cut, go, pick, pause (the screen's reducer)
 web/server/api.ts        wrap() and the route table (ROUTES)
 web/server/origin.ts     who may call the API: this Mac or the home network, from the app
 web/server/tailnet.ts    ARCADE_TAILNET_HOST: the Mac's Tailscale name, the one name beyond those
@@ -49,11 +49,11 @@ web/src/games/index.ts   each live cabinet's screen, by game id
 web/src/games/Cabinet.tsx  any cabinet's flow: set up, the server's clock, the round, saving, results
 web/src/games/           Setup, Results, Scores, format: the screens every cabinet shares
 web/src/games/comet/     Comet Cards: CometCards (what it hands Cabinet), Round
-web/src/games/soundmachine/  Sound Machine: SoundMachine (what it hands Cabinet), Round
+web/src/games/soundmachine/  Sound Machine: SoundMachine (what it hands Cabinet), Round, Gems (Split's tray and tally)
 web/src/sprites/art.ts   every drawing, as rows of characters and palettes
 web/src/sprites/Sprite.tsx  <Sprite> and <AvatarSprite>
 web/src/sound.ts         every beep, synthesised, and the one audio context (woken on a tap, remade if it will not wake)
-web/src/speech.ts        spoken clips: preload(), say(), hush(); plays through sound.ts's context
+web/src/speech.ts        spoken clips: preload(), say(), hush(), speaking(); plays through sound.ts's context
 web/public/speech/       Sound Machine's clips and manifest (generated, committed)
 scripts/speech/          npm run speech:build: makes the clips (Azure text-to-speech; needs a key in the environment)
 web/src/index.css        the tokens and the pixel-box classes (.panel, .btn, .pick, .field)
@@ -130,8 +130,10 @@ macos/                   the Dock app (build-app.sh, the launcher, the server he
   (its spelling) and a tile are stored on answers and never change either,
   and a sound's id names its clip.
 - **An answer is a number or text**, never both: `answers.given` for Comet
-  Cards, `answers.given_text` for Sound Machine (the word picked, or the
-  tiles placed, `ch-i-ck`). A game's `settle()` refuses the other kind.
+  Cards, `answers.given_text` for Sound Machine (the word picked, the
+  tiles placed, `ch-i-ck`, or the letters as cut, `ch|i|ck`). A game's
+  `settle()` refuses the other kind. Split's gems are counted from the
+  answers for the round's screens and never stored.
 - **Sound Machine has no clock the player sees**, and nothing in it is
   scored on time. A word's time is still counted (at least `MIN_ANSWER_MS`)
   and each answer stays up for its `PACE` before the session lets the next

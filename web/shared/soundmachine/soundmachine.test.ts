@@ -9,9 +9,9 @@ import { GAMES } from "../games.ts";
 import type { AnswerInput, PlayConfig } from "../play.ts";
 import { RULES } from "../rules.ts";
 import { DISTRACTORS, PICTURES, picturesFor, roundWords, trayFor } from "./pick.ts";
-import { MAX_ANSWER_MS, MIN_ANSWER_MS, MODES, SKILLS, answerOf, pay, poolOf, settle, soundMachineRules, type Mode, type Skill } from "./rules.ts";
-import { PACE, advance, built, full, startSession, waited, type Session } from "./session.ts";
-import { DIGRAPHS, LEVELS, LOOKALIKES, ROUND_WORDS, SOUNDS, SPEECH_DIR, TILE_SOUND, VOWELS, WORDS, allClips, levelById, lookalike, reviewOf, reviewRoom, slowClip, soundClip, soundOf, tileClip, tilesKey, wordById, wordClip } from "./words.ts";
+import { MAX_ANSWER_MS, MIN_ANSWER_MS, MODES, SKILLS, answerOf, gemsOf, pay, poolOf, settle, soundMachineRules, type Mode, type Skill } from "./rules.ts";
+import { GEM_WAIT_MS, PACE, advance, built, gemsMayFly, cutEnough, full, pieces, startSession, waited, type Session } from "./session.ts";
+import { DIGRAPHS, LEVELS, LOOKALIKES, ROUND_WORDS, SOUNDS, SPEECH_DIR, TILE_SOUND, VOWELS, WORDS, allClips, levelById, lookalike, piecesOf, reviewOf, reviewRoom, slowClip, soundClip, soundOf, splitKey, tileClip, tilesKey, wordById, wordClip } from "./words.ts";
 
 const level = (id: string) => levelById(id)!;
 const cfg = (levelId: string, mode: Mode = "build", skill: Skill = "easy") => ({ level: levelId, mode, skill });
@@ -124,7 +124,7 @@ test("every sound has a clip and every word has two (plain and slow), on disk an
 test("the game is listed, live, with rules; its ids are the ones stored on plays", () => {
   assert.equal(RULES["sound-machine"], soundMachineRules);
   assert.equal(GAMES.find((g) => g.id === "sound-machine")?.status, "live");
-  assert.deepEqual(MODES.map((m) => [m.id, m.board]), [["build", "score"], ["read", "score"]]);
+  assert.deepEqual(MODES.map((m) => [m.id, m.board]), [["build", "score"], ["read", "score"], ["gems", "score"]]);
   assert.deepEqual(SKILLS.map((s) => s.id), ["easy", "arcade"]);
 });
 
@@ -145,6 +145,51 @@ test("Build is judged on the tiles in order, Read on the word picked; the spelli
   assert.equal(settle(cfg("ck"), [{ fact: "duck", given: "ck-u-d", ms: 2000 }]).right, 0);
   assert.equal(settle(cfg("mix", "read"), [{ fact: "chick", given: "chick", ms: 2000 }]).right, 1);
   assert.equal(settle(cfg("mix", "read"), [{ fact: "chick", given: "check", ms: 2000 }]).right, 0);
+});
+
+test("Split is judged on where the word is cut: a digraph is one piece, and nothing but the word's own letters is taken", () => {
+  assert.equal(answerOf("gems", wordById("ship")!), "sh|i|p");
+  assert.equal(answerOf("gems", wordById("chick")!), "ch|i|ck");
+  assert.equal(answerOf("gems", wordById("cat")!), "c|a|t");
+  assert.deepEqual(piecesOf("ship", [true, false, true]), ["s", "hi", "p"]);
+  assert.deepEqual(piecesOf("ship", [false, false, false]), ["ship"]);
+  assert.equal(splitKey(piecesOf("thick", [false, true, true, false])), "th|i|ck");
+  const one = (level: string, fact: string, given: string) => settle(cfg(level, "gems"), [{ fact, given, ms: 2000 }]).answers[0].correct;
+  assert.equal(one("sh", "ship", "sh|i|p"), true);
+  assert.equal(one("sh", "ship", "s|h|i|p"), false, "four letters, three sounds: sh is one");
+  assert.equal(one("sh", "ship", "sh|ip"), false);
+  // Three pieces, as many as its sounds, cut in the wrong places: still wrong.
+  assert.equal(one("sh", "ship", "s|hi|p"), false);
+  assert.equal(one("sh", "ship", "s|h|ip"), false);
+  assert.equal(one("mix", "chick", "c|hi|ck"), false);
+  assert.equal(one("th", "thick", "th|ic|k"), false);
+  assert.equal(one("sh", "ship", "ship"), false, "not cut at all is an answer, and a wrong one");
+  assert.equal(one("ck", "duck", "d|u|c|k"), false);
+  assert.equal(one("mix", "chick", "ch|i|ck"), true);
+  assert.equal(one("mix", "chick", "c|h|i|ck"), false);
+  assert.equal(one("cvc", "cat", "c|a|t"), true);
+  assert.equal(one("cvc", "cat", "c|at"), false);
+  const no = (given: unknown, why: RegExp) => assert.throws(() => settle(cfg("sh", "gems"), [{ fact: "ship", given, ms: 2000 } as AnswerInput]), why);
+  for (const given of ["sh|i|pp", "s||hip", "|ship", "ship|", "p|i|sh", "sh-i-p", "shop", "SH|I|P", ""]) no(given, /not "ship" cut into pieces/);
+  no(5, /a word, its tiles or its pieces/);
+  // Each game's answers are its own.
+  assert.throws(() => settle(cfg("sh", "build"), [{ fact: "ship", given: "sh|i|p", ms: 2000 }]), /does not fit the boxes/);
+  assert.throws(() => settle(cfg("sh", "read"), [{ fact: "ship", given: "sh|i|p", ms: 2000 }]), /not a picture/);
+});
+
+test("gems: three for each word split right, none for one split wrong, and only a right split in its own game counts", () => {
+  const answers = [
+    { fact: "ship", given: "sh|i|p" },
+    { fact: "fish", given: "f|i|s|h" },
+    { fact: "cat", given: "c|a|t" },
+    { fact: "zebra", given: "z|e|b" },
+  ];
+  assert.equal(gemsOf("gems", answers), 6);
+  assert.equal(gemsOf("gems", []), 0);
+  assert.equal(gemsOf("build", answers), 0, "a Build answer is tiles, not pieces");
+  // The gems are the right words' sounds: three for every right word, since every word is three sounds.
+  const s = settle(cfg("sh", "gems"), answers.slice(0, 2).map((a) => ({ ...a, ms: 2000 })));
+  assert.equal(gemsOf("gems", s.answers), 3 * s.right);
 });
 
 test("stars: a finished round with 5 right is one, 7 is two, all 8 is three; an unfinished round has none", () => {
@@ -171,8 +216,8 @@ test("a play that cannot be is refused", () => {
   no(cfg("cvc"), [{ fact: "constructor", given: "c-a-t", ms: 2000 }], /not a word in/);
   no(cfg("cvc"), [ok("build", "cat"), ok("build", "cat")], /once in a round/);
   no(cfg("cvc"), level("cvc").focus.slice(0, 9).map((w) => ok("build", w.id)), /not a round/);
-  no(cfg("cvc"), [{ fact: "cat", given: 3, ms: 2000 }], /a word or its tiles/);
-  no(cfg("cvc"), [{ fact: "cat", given: null, ms: 2000 }], /a word or its tiles/);
+  no(cfg("cvc"), [{ fact: "cat", given: 3, ms: 2000 }], /a word, its tiles or its pieces/);
+  no(cfg("cvc"), [{ fact: "cat", given: null, ms: 2000 }], /a word, its tiles or its pieces/);
   no(cfg("cvc"), [{ fact: "cat", given: "c-a", ms: 2000 }], /does not fit the boxes/);
   no(cfg("cvc"), [{ fact: "cat", given: "c-a-zz", ms: 2000 }], /does not fit the boxes/);
   no(cfg("cvc"), [{ fact: "cat", given: "cat", ms: 2000 }], /does not fit the boxes/);
@@ -194,7 +239,7 @@ test("a time under the floor is counted as the floor", () => {
 });
 
 test("the session counts a word's time between the floor and the longest a word can take, so its round can always be saved", () => {
-  for (const mode of ["build", "read"] as Mode[]) {
+  for (const mode of ["build", "read", "gems"] as Mode[]) {
     let s = startSession(level("cvc"), mode, "easy", {}, 3);
     s = advance(s, { type: "next", now: 1000, seed: 1 });
     // Answered the moment it came up: the floor, in the session as in settle().
@@ -339,6 +384,16 @@ test("Read's pictures: the word's own among 3 on Easy and 4 on Arcade, no two al
 function answerAt(s: Session, now: number, right: boolean): Session {
   const word = s.word!;
   if (s.mode === "read") return advance(s, { type: "pick", word: right ? word.id : s.pictures.find((id) => id !== word.id)!, now });
+  if (s.mode === "gems") {
+    // Right: a cut after each tile but the last. Wrong: as many pieces as it
+    // has sounds, cut in the wrong places ("s|h|ip", or "ri|c|h" where
+    // "r|i|ch" is right), where it has four letters or more; a three-letter
+    // word has only one way into three pieces, so it is cut once ("c|at").
+    const good = word.tiles.slice(0, -1).map((_, i) => word.tiles.slice(0, i + 1).join("").length - 1);
+    const at = right ? good : word.id.length === 3 ? [0] : good.join() === "0,1" ? [1, 2] : [0, 1];
+    for (const gap of at) s = advance(s, { type: "cut", at: gap });
+    return advance(s, { type: "go", now });
+  }
   const order = right ? word.tiles : [...word.tiles].reverse();
   for (const tile of order) s = advance(s, { type: "place", tile: s.tray.findIndex((t, i) => t === tile && !s.boxes.includes(i)) });
   return advance(s, { type: "go", now });
@@ -387,6 +442,92 @@ test("Read: one tap on a picture is the answer; a wrong one is shown, never puni
   s = answerAt(s, 9000, false);
   assert.deepEqual([s.phase, s.last?.correct, s.last?.gained, s.round.score, s.round.streak], ["wrong", false, 0, 100, 0], "the points already won are kept");
   assert.equal(advance(s, { type: "pick", word: s.word!.id, now: 9100 }), s, "one try");
+});
+
+test("Split: a word comes up whole; a tap on a gap cuts it there and another joins it; the lever works once it is cut; one try", () => {
+  let s = startSession(level("th"), "gems", "easy", {}, 4);
+  assert.equal(advance(s, { type: "cut", at: 0 }), s, "no word yet");
+  s = advance(s, { type: "next", now: 1000, seed: 3 });
+  const word = s.word!;
+  assert.deepEqual([s.phase, s.cuts.length, s.cuts.every((c) => !c), s.tray, s.boxes, s.pictures], ["ask", word.id.length - 1, true, [], [], []]);
+  assert.deepEqual(pieces(s), [word.id]);
+  assert.equal(cutEnough(s), false);
+  assert.equal(advance(s, { type: "go", now: 1500 }), s, "a word that is not cut is not an answer");
+  for (const at of [-1, word.id.length - 1, 0.5, Number.NaN]) assert.equal(advance(s, { type: "cut", at }), s, `gap ${at}`);
+  assert.equal(advance(s, { type: "place", tile: 0 }), s, "there are no tiles in Split");
+  assert.equal(advance(s, { type: "pick", word: word.id, now: 1500 }), s, "nor pictures");
+  s = advance(s, { type: "cut", at: 0 });
+  assert.deepEqual([pieces(s), cutEnough(s)], [[word.id[0], word.id.slice(1)], true]);
+  s = advance(s, { type: "cut", at: 0 });
+  assert.deepEqual([pieces(s), cutEnough(s)], [[word.id], false], "a second tap joins it again");
+  // Cut into its tiles, and pulled.
+  let at = -1;
+  for (const t of word.tiles.slice(0, -1)) s = advance(s, { type: "cut", at: (at += t.length) });
+  assert.deepEqual(pieces(s), word.tiles);
+  s = advance(s, { type: "go", now: 4000 });
+  assert.deepEqual([s.phase, s.last, s.answers], ["right", { given: splitKey(word.tiles), correct: true, gained: 100 }, [{ fact: word.id, given: splitKey(word.tiles), ms: 3000 }]]);
+  assert.equal(advance(s, { type: "go", now: 4100 }), s, "one try per word");
+  assert.equal(advance(s, { type: "cut", at: 0 }), s, "the answer on show cannot be cut");
+  // A wrong split is shown, the points and gems already won are kept, and the next word comes up whole.
+  s = advance(s, { type: "next", now: 4000 + PACE.right, seed: 4 });
+  assert.ok(s.cuts.every((c) => !c));
+  s = answerAt(s, 9000, false);
+  assert.deepEqual([s.phase, s.last?.correct, s.round.score, s.round.streak, gemsOf("gems", s.answers)], ["wrong", false, 100, 0, 3]);
+  assert.equal(String(s.answers[1].given).split("|").length, 3, "the wrong split had as many pieces as the word has sounds");
+  // Every gap cut: one piece a letter. Every word here has th, so that is wrong.
+  s = advance(s, { type: "next", now: 9000 + PACE.wrong, seed: 5 });
+  const third = s.word!;
+  for (let g = 0; g < third.id.length - 1; g++) s = advance(s, { type: "cut", at: g });
+  assert.deepEqual(pieces(s), [...third.id]);
+  s = advance(s, { type: "go", now: 12_000 });
+  assert.deepEqual([s.phase, s.answers[2].given, s.round.score, gemsOf("gems", s.answers)], ["wrong", [...third.id].join("|"), 100, 3]);
+  // Easy and Arcade play alike: the lever waits for a first cut, not for the right number of pieces.
+  let a = advance(startSession(level("cvc"), "gems", "arcade", {}, 4), { type: "next", now: 0, seed: 1 });
+  a = advance(a, { type: "cut", at: 0 });
+  assert.equal(advance(a, { type: "go", now: 2000 }).phase, "wrong");
+  let e = advance(startSession(level("cvc"), "gems", "easy", {}, 4), { type: "next", now: 0, seed: 1 });
+  e = advance(e, { type: "cut", at: 1 });
+  assert.equal(advance(e, { type: "go", now: 2000 }).phase, "wrong", "on Easy too a three-letter word can be cut wrong");
+  // Build and Read take no cuts.
+  for (const mode of ["build", "read"] as Mode[]) {
+    const o = advance(startSession(level("cvc"), mode, "easy", {}, 4), { type: "next", now: 0, seed: 1 });
+    assert.deepEqual(o.cuts, []);
+    assert.equal(advance(o, { type: "cut", at: 0 }), o, mode);
+  }
+});
+
+test("a pause during a Split answer on show holds the next word, and a pause while cutting keeps the cuts", () => {
+  let s = startSession(level("sh"), "gems", "easy", {}, 4);
+  s = advance(s, { type: "next", now: 0, seed: 1 });
+  s = advance(s, { type: "cut", at: 0 });
+  s = advance(s, { type: "pause", now: 1000 });
+  assert.equal(advance(s, { type: "cut", at: 1 }), s, "nothing is cut behind the box");
+  assert.equal(advance(s, { type: "go", now: 1100 }), s);
+  s = advance(s, { type: "resume", now: 50_000 });
+  assert.deepEqual([s.phase, s.cuts[0]], ["ask", true]);
+  s = advance(s, { type: "go", now: 51_000 });
+  assert.equal(s.answers[0].ms, 2000);
+  // Paused 100 ms into the answer on show: the next word waits however long the box is up.
+  const shown = s.shownAt;
+  s = advance(s, { type: "pause", now: shown + 100 });
+  assert.equal(advance(s, { type: "next", now: shown + 100_000, seed: 2 }), s);
+  s = advance(s, { type: "resume", now: shown + 100_000 });
+  assert.equal(advance(s, { type: "next", now: shown + 100_000, seed: 2 }).phase, "ask");
+});
+
+test("Split's gems wait for speech to stop, but never without a limit", () => {
+  const fly = (begun: boolean, talking: boolean, settledAt: number | null, now: number) => gemsMayFly({ begun, speaking: talking, settledAt, now });
+  assert.equal(fly(false, false, null, 0), false, "not before the reveal has begun");
+  assert.equal(fly(true, false, null, 0), true, "at once when nothing is being said");
+  assert.equal(fly(true, true, null, 1e9), false, "speech goes on and the reveal is still being said");
+  assert.equal(fly(true, true, 4000, 4000 + GEM_WAIT_MS - 1), false, "a clip still playing after the reveal (a hear button) is waited for");
+  assert.equal(fly(true, true, 4000, 4000 + GEM_WAIT_MS), true, "a clip that never ends (the audio stopped) is not waited for past the limit");
+  // A hear button pressed just before the reveal settles says a word that may outlast it by the
+  // word's own length: the limit leaves room for the longest clip there is, and is a few seconds at most.
+  const dir = path.join(path.dirname(fileURLToPath(import.meta.url)), "../../public", SPEECH_DIR);
+  const manifest = JSON.parse(fs.readFileSync(path.join(dir, "manifest.json"), "utf8")) as { clips: Record<string, { ms: number }> };
+  const longest = Math.max(...Object.values(manifest.clips).map((c) => c.ms));
+  assert.ok(GEM_WAIT_MS >= longest + 250 && GEM_WAIT_MS <= 3000, `${GEM_WAIT_MS} ms against the longest clip, ${longest} ms`);
 });
 
 test("the next word does not come until the answer has had its time on show", () => {
@@ -442,7 +583,7 @@ test("only the time a word waits is counted: the answer on show and the pause bo
 
 test("what the screen plays is what the server scores: a whole round's answers settle to the same numbers", () => {
   for (const l of LEVELS) {
-    for (const [mode, skill] of [["build", "easy"], ["build", "arcade"], ["read", "easy"], ["read", "arcade"]] as [Mode, Skill][]) {
+    for (const [mode, skill] of [["build", "easy"], ["build", "arcade"], ["read", "easy"], ["read", "arcade"], ["gems", "easy"], ["gems", "arcade"]] as [Mode, Skill][]) {
       let s = startSession(l, mode, skill, {}, 11);
       let now = 0;
       for (let i = 0; i < 20 && s.phase !== "done"; i++) {
@@ -458,12 +599,14 @@ test("what the screen plays is what the server scores: a whole round's answers s
       assert.deepEqual([settled.score, settled.right, settled.wrong, settled.bestCombo, settled.timeMs, settled.answers.length], [s.round.score, s.round.right, s.round.wrong, s.round.bestStreak, s.round.ms, ROUND_WORDS], `${l.id} ${mode} ${skill}`);
       assert.deepEqual([settled.right, settled.finished, settled.stars], [6, true, 1]);
       assert.deepEqual(settled.answers.map((a) => a.ms), s.answers.map((a) => a.ms));
+      // The gems the tray shows are the server's right words, three sounds each.
+      if (mode === "gems") assert.equal(gemsOf(mode, s.answers), 3 * settled.right);
     }
   }
 });
 
 test("a round played as fast as the screen allows still takes longer on the wall than its words claim (the server's clock check)", () => {
-  for (const [mode, skill] of [["build", "easy"], ["read", "arcade"]] as [Mode, Skill][]) {
+  for (const [mode, skill] of [["build", "easy"], ["read", "arcade"], ["gems", "easy"], ["gems", "arcade"]] as [Mode, Skill][]) {
     for (const how of ["right", "wrong"] as const) {
       let s = startSession(level("ck"), mode, skill, {}, 2);
       let wall = 0;

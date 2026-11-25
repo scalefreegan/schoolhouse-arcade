@@ -36,10 +36,12 @@ worked out from a player's latest `answers`.
 **An answer is a number or text.** Comet Cards answers in numbers
 (`answers.given`); Sound Machine answers in text (`answers.given_text`,
 added by migration `0005_answers_given_text`): the word picked in Read
-(`chick`), or the tiles placed in Build, in order (`ch-i-ck`). `fact` is
-the sum or the word asked. Each row has one or neither (a card that timed
-out), never both; the column added is nullable and no row from before was
-touched.
+(`chick`), the tiles placed in Build, in order (`ch-i-ck`), or the word's
+letters as cut in Split (`ch|i|ck`; `correct` is the server's verdict on
+the cut). `fact` is the sum or the word asked. Split's gems are not stored:
+they are the sounds of its right words, counted again from these rows.
+Each row has one or neither (a card that timed out), never both; the
+column added is nullable and no row from before was touched.
 
 **Tickets are a ledger.** A balance is the sum of a player's
 `ticket_events`; rows are added and never changed or deleted, so every

@@ -1,7 +1,8 @@
 // Sound Machine's words: what each is built from, which level teaches it,
 // and what it sounds like. A word's id is its spelling; it is what an answer
 // is recorded against ("chick") and a tile is what a Build answer is made of
-// ("ch-i-ck"), so neither ever changes once live. docs/PRD.md has the list.
+// ("ch-i-ck") and where a Split answer is cut ("ch|i|ck"), so neither ever
+// changes once live. docs/PRD.md has the list.
 //
 // Pure, and run by Node as is.
 
@@ -86,6 +87,26 @@ const word = (spelt: string): Word => {
 /** What a Build answer is stored as: the tiles placed, in order ("ch-i-ck"). */
 export function tilesKey(tiles: string[]): string {
   return tiles.join("-");
+}
+
+/** What a Split answer is stored as: the word's letters, cut where the
+ *  player cut them ("sh|i|p"). The right one cuts it into its tiles. */
+export function splitKey(pieces: string[]): string {
+  return pieces.join("|");
+}
+
+/** A word's letters cut into pieces: `cuts[i]` is a cut between letter i and letter i + 1. */
+export function piecesOf(spelt: string, cuts: boolean[]): string[] {
+  const pieces: string[] = [];
+  let piece = "";
+  for (let i = 0; i < spelt.length; i++) {
+    piece += spelt[i];
+    if (i === spelt.length - 1 || cuts[i]) {
+      pieces.push(piece);
+      piece = "";
+    }
+  }
+  return pieces;
 }
 
 export interface SoundLevel {

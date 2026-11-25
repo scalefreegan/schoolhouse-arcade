@@ -72,6 +72,9 @@ something that could be read as "this one" (the tick in `w_check` is blue):
 in Read the pictures are the choices. `arrow`, `blend` and `snail` (say it
 slowly) are what the machine's buttons show; `bell`, `cog` and `megaphone` are its badges, and `machine` its
 cabinet on the floor (a game names its drawing in `web/shared/games.ts`).
+`jewel` is Split it's gem, a cushion-cut stone (not the 100 Club's
+diamond), in a palette for each place of a sound in its word (`gold`,
+`violet`, `blue`): never the green or red of right and wrong.
 
 ## Replacing a drawing with made art
 

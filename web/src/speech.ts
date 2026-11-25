@@ -117,6 +117,17 @@ export async function preload(need: string[], want: string[] = []): Promise<void
   throw new Error(CLIP_TROUBLE[troubles.includes("away") ? "away" : troubles.includes("slow") ? "slow" : "missing"]);
 }
 
+/**
+ * Something is being said now, or is queued to be: whatever say() started
+ * last, even if it cut short an earlier say() (whose promise still waits out
+ * its own time). For a sound that must not land on speech. It has no limit
+ * of its own: a clip on a context that was suspended or closed never ends,
+ * so whoever waits on this puts a limit on the wait (as Split's gems do).
+ */
+export function speaking(): boolean {
+  return playing.length > 0;
+}
+
 /** Stop whatever is being said. */
 export function hush(): void {
   turn++;
@@ -161,6 +172,10 @@ export async function say(urls: string[], opts: { gap?: number | ((index: number
       const delay = Math.max(0, (at - ac.currentTime) * 1000);
       if (opts.onEach) window.setTimeout(() => mine === turn && opts.onEach?.(index), delay);
       if (i === clips.length - 1) node.onended = () => done();
+      // A clip that has finished is no longer being said (speaking()).
+      node.addEventListener("ended", () => {
+        playing = playing.filter((n) => n !== node);
+      });
       playing.push(node);
       at += buffer.duration + gapAfter(index);
     });

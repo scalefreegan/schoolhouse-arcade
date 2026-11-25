@@ -1,5 +1,5 @@
 import type { AnswerInput, PlayConfig } from "../../../shared/play.ts";
-import { answerOf, poolOf, soundMachineRules, type Mode, type Skill } from "../../../shared/soundmachine/rules.ts";
+import { answerOf, gemsOf, poolOf, soundMachineRules, type Mode, type Skill } from "../../../shared/soundmachine/rules.ts";
 import { LEVELS, SOUNDS, clipUrl, levelById, slowClip, soundClip, wordById, wordClip, type Word } from "../../../shared/soundmachine/words.ts";
 import { sfx } from "../../sound.ts";
 import { preload, say } from "../../speech.ts";
@@ -7,6 +7,7 @@ import { Picture, Sprite } from "../../sprites/Sprite.tsx";
 import { useArcade } from "../../state.tsx";
 import { Cabinet, type CabinetGame } from "../Cabinet.tsx";
 import type { GameProps } from "../index.ts";
+import { GemTally } from "./Gems.tsx";
 import { RoundScreen } from "./Round.tsx";
 
 const GAME: CabinetGame = {
@@ -27,7 +28,8 @@ function clipsFor(config: PlayConfig): string[] {
 }
 
 /** A Build round cannot be played without its words said (the word is the
- *  question); everything else is fetched too, but a round starts without a
+ *  question; in Split and Read the word is written, so its clip is wanted,
+ *  not needed); everything else is fetched too, but a round starts without a
  *  clip that will not come: that tile, or the snail, is silent. If nothing
  *  comes at all the Mac is not there, and starting the round says so. */
 const prepare = (config: PlayConfig) => {
@@ -36,7 +38,14 @@ const prepare = (config: PlayConfig) => {
   return preload(words, clipsFor(config));
 };
 
-/** The words missed in a round, to look at and hear again. */
+/** Split: the round's gems, counted, out of all its words' sounds. Judged by
+ *  the same rule the server used for its score; never stored. */
+function Gems({ answers }: { answers: AnswerInput[] }) {
+  const of = answers.reduce((n, a) => n + (wordById(a.fact)?.tiles.length ?? 0), 0);
+  return <GemTally gems={gemsOf("gems", answers)} of={of} />;
+}
+
+/** The words missed in a round, to look at and hear again. In Split, cut into their sounds. */
 function Missed({ answers, mode }: { answers: AnswerInput[]; mode: Mode }) {
   const missed = answers.map((a) => ({ word: wordById(a.fact), a })).filter((x): x is { word: Word; a: AnswerInput } => !!x.word && x.a.given !== answerOf(mode, x.word));
   if (!missed.length) return null;
@@ -48,7 +57,15 @@ function Missed({ answers, mode }: { answers: AnswerInput[]; mode: Mode }) {
           <li key={word.id}>
             <button type="button" className="sm-again" aria-label={`Hear ${word.id}`} onClick={() => void say([clipUrl(wordClip(word.id))])}>
               <Picture id={word.picture} size={48} />
-              <span className="sm-letter">{word.id}</span>
+              {mode === "gems" ? (
+                <span className="sm-letter flex gap-3" aria-label={word.tiles.join(" ")}>
+                  {word.tiles.map((t, i) => (
+                    <span key={i}>{t}</span>
+                  ))}
+                </span>
+              ) : (
+                <span className="sm-letter">{word.id}</span>
+              )}
             </button>
           </li>
         ))}
@@ -97,7 +114,12 @@ export function SoundMachine(props: GameProps) {
       blocked={muted}
       setup={{ levelFace: (l) => <span className="sm-letter text-base">{l.blurb}</span>, ...(muted ? { notice: <NeedsSound /> } : {}) }}
       round={({ key, config, stats, onDone, onQuit }) => <RoundScreen key={key} level={levelById(config.level)!} mode={config.mode as Mode} skill={config.skill as Skill} stats={stats} onDone={onDone} onQuit={onQuit} />}
-      missed={(answers, config) => <Missed answers={answers} mode={config.mode as Mode} />}
+      missed={(answers, config) => (
+        <>
+          {config.mode === "gems" && <Gems answers={answers} />}
+          <Missed answers={answers} mode={config.mode as Mode} />
+        </>
+      )}
     />
   );
 }

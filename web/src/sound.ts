@@ -124,4 +124,11 @@ export const sfx = {
   fanfare: () => play([...run([523, 659, 784, 1047], 0.09), { f: 1319, at: 0.36, len: 0.3 }]),
   /** Tickets counting up; call once per step. */
   ticket: () => play([{ f: 1568, at: 0, len: 0.03 }], "square", 0.05),
+  /** One gem, a glassy ping. `step` raises it a little each time (a count, a row of gems). */
+  gem: (step = 0) => {
+    const f = 1319 * 2 ** ((step % 8) / 12);
+    play([{ f, at: 0, len: 0.05 }, { f: f * 2, at: 0.04, len: 0.09 }], "triangle", 0.1);
+  },
+  /** `n` gems dropping into the tray, one ping each, climbing. Never over speech: after the word is said. */
+  gems: (n: number) => play(Array.from({ length: Math.max(0, Math.min(n, 8)) }, (_, i) => ({ f: 1047 * 2 ** ((i * 4) / 12), at: i * 0.09, len: 0.08 })), "triangle", 0.1),
 };

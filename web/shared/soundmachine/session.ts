@@ -1,5 +1,6 @@
 // A round as it is played, one event at a time: a word comes up, tiles go
-// into boxes and come back out, the lever is pulled, a picture is picked.
+// into boxes and come back out, the lever is pulled, a picture is picked, a
+// word is cut into its sounds and joined again.
 // The screen (web/src/games/soundmachine/Round.tsx) sends events and draws
 // the Session; scoring is rules.ts and is not repeated here.
 //
@@ -9,7 +10,7 @@ import { seeded, type FactStat } from "../deal.ts";
 import type { AnswerInput } from "../play.ts";
 import { picturesFor, roundWords, trayFor } from "./pick.ts";
 import { answerOf, countedMs, pointsFor, startRound, stepRound, type Mode, type Round, type Skill } from "./rules.ts";
-import { tilesKey, type SoundLevel, type Word } from "./words.ts";
+import { piecesOf, splitKey, tilesKey, type SoundLevel, type Word } from "./words.ts";
 
 /** start: before the first word. ask: a word is waiting. right / wrong: its
  *  answer is being shown. done: the round is over. */
@@ -25,6 +26,27 @@ export type Phase = "start" | "ask" | "right" | "wrong" | "paused" | "done";
  * its words claim, even when every answer was quicker than the floor.
  */
 export const PACE = { right: 1_700, wrong: 1_400, done: 900 } as const;
+
+/**
+ * Split, after a right answer: how long past the moment the reveal's own
+ * say() settled the gems still wait for speech to stop (ms). A clip on an
+ * audio context that was suspended or closed never ends, so "nothing is
+ * being said" may never come; the gems fly at this limit all the same, and
+ * the next word's hush() stops whatever is left.
+ */
+export const GEM_WAIT_MS = 1_500;
+
+/**
+ * Whether Split's gems may fly to the tray: the reveal has begun, and either
+ * nothing is being said or the reveal settled GEM_WAIT_MS ago. `settledAt`
+ * is when the reveal's say() settled (null until it has); times are ms on
+ * one clock.
+ */
+export function gemsMayFly(o: { begun: boolean; speaking: boolean; settledAt: number | null; now: number }): boolean {
+  if (!o.begun) return false;
+  if (!o.speaking) return true;
+  return o.settledAt !== null && o.now - o.settledAt >= GEM_WAIT_MS;
+}
 
 export interface Session {
   level: SoundLevel;
@@ -43,6 +65,9 @@ export interface Session {
   boxes: (number | null)[];
   /** Read: the words whose pictures are offered. */
   pictures: string[];
+  /** Gems: where the word is cut. `cuts[i]` is the gap between letter i and
+   *  letter i + 1; a word comes up whole (no cuts). */
+  cuts: boolean[];
   phase: Phase;
   /** When the word on the machine started waiting, on the events' clock (ms). */
   wordStart: number;
@@ -66,7 +91,10 @@ export type SessionEvent =
   | { type: "place"; tile: number }
   /** Build: take the tile back out of this box. */
   | { type: "take"; box: number }
-  /** Build: pull the lever. Nothing happens until every box is full. */
+  /** Gems: cut the word at this gap (between letter `at` and the next), or join it again if it is cut. */
+  | { type: "cut"; at: number }
+  /** Build and Gems: pull the lever. Nothing happens until every box is full
+   *  (Build) or the word has a cut in it (Gems: `cutEnough`). */
   | { type: "go"; now: number }
   /** Read: this picture (a word id) is the answer. */
   | { type: "pick"; word: string; now: number }
@@ -87,6 +115,7 @@ export function startSession(level: SoundLevel, mode: Mode, skill: Skill, stats:
     tray: [],
     boxes: [],
     pictures: [],
+    cuts: [],
     phase: "start",
     wordStart: 0,
     held: 0,
@@ -110,6 +139,23 @@ export function built(s: Session): string[] {
 /** Every box has a tile: the lever will work. */
 export function full(s: Session): boolean {
   return s.boxes.length > 0 && s.boxes.every((i) => i !== null);
+}
+
+/** Gems: the word on the machine in the pieces the player has cut it into. */
+export function pieces(s: Session): string[] {
+  return s.word ? piecesOf(s.word.id, s.cuts) : [];
+}
+
+/**
+ * Gems: the lever will work, once the word has been cut at least once (a
+ * word whole is not an answer anyone meant). On either skill: Easy's gem
+ * slots say how many sounds there are, but do not hold the lever until the
+ * pieces match them, or every three-letter word would have one answer the
+ * lever allowed, the right one. The pieces may be wrong: that is the
+ * player's answer.
+ */
+export function cutEnough(s: Session): boolean {
+  return s.phase === "ask" && s.mode === "gems" && s.cuts.some(Boolean);
 }
 
 function answer(s: Session, given: string, now: number): Session {
@@ -160,6 +206,7 @@ export function advance(s: Session, ev: SessionEvent): Session {
         tray: s.mode === "build" ? trayFor(word, s.skill, s.level, rng) : [],
         boxes: s.mode === "build" ? word.tiles.map(() => null) : [],
         pictures: s.mode === "read" ? picturesFor(word, s.skill, s.level, rng) : [],
+        cuts: s.mode === "gems" ? Array.from({ length: word.id.length - 1 }, () => false) : [],
         last: null,
         held: 0,
         wordStart: ev.now,
@@ -179,8 +226,14 @@ export function advance(s: Session, ev: SessionEvent): Session {
       if (s.phase !== "ask" || s.mode !== "build" || s.boxes[ev.box] == null) return s;
       return { ...s, boxes: s.boxes.map((b, i) => (i === ev.box ? null : b)) };
 
+    case "cut":
+      if (s.phase !== "ask" || s.mode !== "gems" || !Number.isInteger(ev.at) || ev.at < 0 || ev.at >= s.cuts.length) return s;
+      return { ...s, cuts: s.cuts.map((c, i) => (i === ev.at ? !c : c)) };
+
     case "go":
-      return s.mode === "build" && full(s) ? answer(s, tilesKey(built(s)), ev.now) : s;
+      if (s.mode === "build") return full(s) ? answer(s, tilesKey(built(s)), ev.now) : s;
+      if (s.mode === "gems") return cutEnough(s) ? answer(s, splitKey(pieces(s)), ev.now) : s;
+      return s;
 
     case "pick":
       return s.mode === "read" && s.pictures.includes(ev.word) ? answer(s, ev.word, ev.now) : s;

@@ -34,10 +34,10 @@ magenta and yellow. [`docs/PRD.md`](docs/PRD.md) has the whole design.
       <p>A player is a name and a pixel character: an alien, a dinosaur, a robot, a monster, a wizard, a dragon, a ghost, a rocket, a cat, an owl, a frog or a cupcake, each in six colours. Tickets, badges and unlocked levels belong to the player; the high score tables show everyone.</p>
     </td>
     <td width="50%" valign="top">
-      <img src="docs/screenshots/floor.png" alt="The arcade floor: the Comet Cards cabinet, the Prize Counter, and a crate marked with question marks" width="100%">
-      <br><sub><i>The floor: one cabinet so far, and more on the delivery truck.</i></sub>
+      <img src="docs/screenshots/floor.png" alt="The arcade floor: the Comet Cards and Sound Machine cabinets side by side, with the Prize Counter and a crate marked with question marks below them" width="100%">
+      <br><sub><i>The floor: two cabinets so far, and more on the delivery truck.</i></sub>
       <h3>An arcade floor</h3>
-      <p>Each cabinet drills one idea until recall is fast. The first is <b>Comet Cards</b>: adding and taking away, 0 to 10. The second is <b>Sound Machine</b>, for letter sounds and the digraphs ch, ck, sh and th, with nothing timed and every sound spoken: <i>Build it</i> (hear a word, put its sound tiles in order), <i>Read it</i> (sound out a word, find its picture) and <i>Split it</i> (cut a word into its sounds, a gem for each: "ship" is four letters but three gems). New cabinets plug into the same players, tickets and badges.</p>
+      <p>Each cabinet drills one idea until recall is fast. The first is <b>Comet Cards</b>: adding and taking away, 0 to 10. The second is <b>Sound Machine</b>: letter sounds and sounding out short words. New cabinets plug into the same players, tickets and badges.</p>
     </td>
   </tr>
   <tr>
@@ -52,6 +52,20 @@ magenta and yellow. [`docs/PRD.md`](docs/PRD.md) has the whole design.
       <br><sub><i>Five levels, four ways to play, two skills.</i></sub>
       <h3>Levels and modes</h3>
       <p>Five levels from Add to 5 up to Big Sums; a star on one opens the next. Blitz is 60 seconds, Sprint is 20 cards, Survival is three lives, and Practice has no clock at all. Every combination keeps its own high score table.</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="docs/screenshots/sound-machine-build.png" alt="A Sound Machine Build it round: a picture of an axe chopping a log, buttons to hear the word and hear it slowly, the tiles ch and o in the first two of three boxes, and the tile p left in the tray" width="100%">
+      <br><sub><i>Build it: hear "chop", put its sounds in the boxes.</i></sub>
+      <h3>Sound Machine</h3>
+      <p>Letter sounds and the digraphs ch, ck, sh and th, over six levels. Every word has three sounds, and a digraph is one tile. In <i>Build it</i> you hear a word and put its sound tiles in order. In <i>Read it</i> you sound out a word and find its picture. Every sound is spoken and nothing is timed. A wrong answer shows the right one and takes nothing away.</p>
+    </td>
+    <td width="50%" valign="top">
+      <img src="docs/screenshots/sound-machine-split.png" alt="A Split it round on the sh level: a picture of a fish, the word fish cut once into f and ish, three empty gem slots, and a tray holding six gems from the words before" width="100%">
+      <br><sub><i>Split it: four letters, three sounds, a gem for each.</i></sub>
+      <h3>A gem a sound</h3>
+      <p>In <i>Split it</i> a word comes up whole. Tap between its letters to cut it where one sound ends and the next begins, then pull the lever. "Fish" is four letters but three sounds, so it earns three gems. The gems fill a tray for the round and are counted up on the results screen.</p>
     </td>
   </tr>
   <tr>

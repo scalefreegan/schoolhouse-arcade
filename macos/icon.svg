@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Schoolhouse Arcade app icon: the pixel comet of web/public/favicon.svg
-     (a yellow #ffd23f head with a white rim, a cyan #2ff3e0 tail) on the
-     tube's black glass, drawn on the same 16-cell grid at 56 px a cell,
-     with a few dim stars. Flat rects only; sips rasterizes via CoreGraphics'
-     basic SVG support, so no filters, no text. Rendered to icon-1024.png by
-     render-icon.sh. Original art. -->
+<!-- Schoolhouse Arcade app icon: the pixel arcade cabinet of
+     web/public/favicon.svg (a yellow marquee, a magenta cabinet with a dark
+     screen, a cyan control panel with a joystick and two buttons, a coin
+     door) on the tube's black glass, drawn on the same 16-cell grid at 56 px
+     a cell, with a few dim stars. Flat rects only; sips rasterizes via
+     CoreGraphics' basic SVG support, so no filters, no text. Rendered to
+     icon-1024.png by render-icon.sh. Original art. -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024" shape-rendering="crispEdges">
   <defs>
     <clipPath id="tile"><rect x="0" y="0" width="1024" height="1024" rx="230" ry="230"/></clipPath>
@@ -15,24 +16,45 @@
     <!-- the favicon's 16 x 16 grid, one cell = 56 px, centred -->
     <g transform="translate(64 64) scale(56)">
       <!-- dim stars -->
-      <rect x="3" y="3" width="1" height="1" fill="#3b3563"/>
-      <rect x="12" y="11" width="1" height="1" fill="#3b3563"/>
-      <rect x="6" y="1" width="1" height="1" fill="#3b3563"/>
+      <rect x="1" y="3" width="1" height="1" fill="#3b3563"/>
+      <rect x="14" y="5" width="1" height="1" fill="#3b3563"/>
+      <rect x="1" y="12" width="1" height="1" fill="#3b3563"/>
       <rect x="14" y="13" width="1" height="1" fill="#3b3563"/>
-      <!-- tail -->
-      <rect x="2" y="12" width="2" height="1" fill="#2ff3e0"/>
-      <rect x="3" y="11" width="2" height="1" fill="#2ff3e0"/>
-      <rect x="4" y="10" width="2" height="1" fill="#2ff3e0"/>
-      <rect x="5" y="9" width="2" height="1" fill="#2ff3e0"/>
-      <rect x="6" y="8" width="2" height="1" fill="#2ff3e0"/>
-      <rect x="7" y="7" width="2" height="1" fill="#2ff3e0"/>
-      <!-- head -->
-      <rect x="9" y="4" width="4" height="4" fill="#ffd23f"/>
-      <!-- white rim -->
-      <rect x="9" y="3" width="4" height="1" fill="#ffffff"/>
-      <rect x="13" y="4" width="1" height="4" fill="#ffffff"/>
-      <rect x="9" y="8" width="4" height="1" fill="#ffffff"/>
-      <rect x="8" y="4" width="1" height="4" fill="#ffffff"/>
+      <!-- marquee -->
+      <rect x="3" y="1" width="10" height="2" fill="#ffd23f"/>
+      <!-- marquee light -->
+      <rect x="4" y="1" width="8" height="1" fill="#ffffff"/>
+      <!-- cabinet -->
+      <rect x="3" y="3" width="10" height="6" fill="#ff2e9a"/>
+      <!-- screen -->
+      <rect x="4" y="4" width="8" height="4" fill="#0e0826"/>
+      <!-- on the screen -->
+      <rect x="5" y="6" width="1" height="1" fill="#2ff3e0"/>
+      <rect x="6" y="5" width="1" height="1" fill="#2ff3e0"/>
+      <rect x="9" y="6" width="2" height="1" fill="#2ff3e0"/>
+      <!-- on the screen, a prize -->
+      <rect x="8" y="5" width="1" height="1" fill="#ffd23f"/>
+      <!-- control panel -->
+      <rect x="2" y="9" width="12" height="1" fill="#2ff3e0"/>
+      <!-- its front edge -->
+      <rect x="2" y="10" width="12" height="1" fill="#18b5a6"/>
+      <!-- joystick -->
+      <rect x="5" y="9" width="1" height="1" fill="#ffffff"/>
+      <!-- its ball -->
+      <rect x="5" y="8" width="1" height="1" fill="#ffd23f"/>
+      <!-- a button -->
+      <rect x="9" y="9" width="1" height="1" fill="#ff2e9a"/>
+      <!-- button -->
+      <rect x="11" y="9" width="1" height="1" fill="#ffd23f"/>
+      <!-- lower cabinet -->
+      <rect x="3" y="11" width="10" height="4" fill="#c41f76"/>
+      <!-- coin door -->
+      <rect x="7" y="12" width="2" height="2" fill="#1a1140"/>
+      <!-- coin slot -->
+      <rect x="7" y="12" width="2" height="1" fill="#ffd23f"/>
+      <!-- feet -->
+      <rect x="3" y="15" width="2" height="1" fill="#3b2b7c"/>
+      <rect x="11" y="15" width="2" height="1" fill="#3b2b7c"/>
     </g>
   </g>
 </svg>

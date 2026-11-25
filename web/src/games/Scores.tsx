@@ -1,5 +1,5 @@
-import type { BoardReply } from "../../../shared/wire.ts";
-import { AvatarSprite } from "../../sprites/Sprite.tsx";
+import type { BoardReply } from "../../shared/wire.ts";
+import { AvatarSprite } from "../sprites/Sprite.tsx";
 import { fmtScore, fmtStopwatch } from "./format.ts";
 
 /** A high score table: ten lines, best first. `mine` lights the play just made. */

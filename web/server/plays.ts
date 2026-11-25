@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { newBadges } from "../shared/badges.ts";
-import { factStats } from "../shared/comet/deck.ts";
+import { factStats } from "../shared/deal.ts";
 import { RuleError, openLevels, type GameRules, type PlayConfig, type Settled } from "../shared/play.ts";
 import { RULES } from "../shared/rules.ts";
 import { ticketLines, totalOf } from "../shared/tickets.ts";
@@ -151,8 +151,8 @@ async function startRound(req: IncomingMessage, res: ServerResponse): Promise<vo
  * its cards claim no more time than has passed since then on this server's
  * clock. That last needs no slack: the browser spends time it never counts
  * on every round (the countdown, each answer shown, the pause before the
- * results; shared/comet/session.ts PACE), and that is far more than the
- * little it can count over (an answer quicker than MIN_ANSWER_MS).
+ * results; each game's session.ts PACE), and that is far more than the
+ * little it can count over (an answer quicker than its MIN_ANSWER_MS).
  */
 function clockCheck(round: RoundOf, clock: unknown, settled: Settled) {
   return async (tx: Db): Promise<void> => {

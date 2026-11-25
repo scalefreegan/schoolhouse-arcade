@@ -9,6 +9,8 @@ export interface GameInfo {
   pitch: string;
   /** What it practises, for the grown-up reading over a shoulder. */
   teaches: string;
+  /** The drawing on its screen on the floor (web/src/sprites/art.ts). */
+  sprite: string;
   /** `soon` cabinets are shown dark and cannot be started. */
   status: "live" | "soon";
 }
@@ -19,6 +21,15 @@ export const GAMES: GameInfo[] = [
     title: "Comet Cards",
     pitch: "Answer the card before the comet burns out",
     teaches: "Adding and taking away, 0 to 10",
+    sprite: "comet",
+    status: "live",
+  },
+  {
+    id: "sound-machine",
+    title: "Sound Machine",
+    pitch: "Put the sounds in and make the word",
+    teaches: "Letter sounds, ch ck sh th, and sounding out",
+    sprite: "machine",
     status: "live",
   },
 ];

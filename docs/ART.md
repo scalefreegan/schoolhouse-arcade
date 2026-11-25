@@ -57,6 +57,20 @@ it in `art.ts` with a `default` palette and add its id to `PRIZE_ICONS`.
 yet earned is the same drawing unlit (`<Sprite off />`), so a badge needs a
 shape that reads as a silhouette.
 
+## Sound Machine's pictures
+
+Each word in `web/shared/soundmachine/words.ts` has a 16 × 16 drawing named
+`w_<word>` (`w_cat`, `w_chick`) with a `default` palette; `npm test` checks
+there is one for every word and that no two words share one. In Read the
+picture is the answer, so a picture has to be named at a glance by a
+six-year-old, and two that could be taken for each other are listed in
+`LOOKALIKES` there, which keeps them from being offered side by side. A
+word that cannot be drawn clearly does not belong in the list. Where the
+word is a part or a quality rather than a thing (chin, neck, thin, thick) a
+cyan arrow points at it. `arrow` and `blend` are what the machine's buttons
+show; `bell`, `cog` and `megaphone` are its badges, and `machine` its
+cabinet on the floor (a game names its drawing in `web/shared/games.ts`).
+
 ## Replacing a drawing with made art
 
 The rest of the app only knows a sprite's id, so art made elsewhere (ArtCraft,

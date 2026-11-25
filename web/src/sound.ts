@@ -27,7 +27,9 @@ export function setMuted(next: boolean): void {
   }
 }
 
-function audio(): AudioContext | null {
+/** The one audio context, awake, or null when the sound is off. Speech
+ *  (speech.ts) plays through it too, so one tap wakes both. */
+export function audio(): AudioContext | null {
   if (muted) return null;
   try {
     ctx ??= new AudioContext();

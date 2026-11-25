@@ -2,7 +2,7 @@ import { GAMES, type GameInfo } from "../../shared/games.ts";
 import { GAME_SCREENS } from "../games/index.ts";
 import { go, href } from "../router.ts";
 import { sfx } from "../sound.ts";
-import { Sprite } from "../sprites/Sprite.tsx";
+import { Picture, Sprite } from "../sprites/Sprite.tsx";
 import { useArcade } from "../state.tsx";
 import { Hud } from "./Hud.tsx";
 
@@ -21,7 +21,7 @@ function Cabinet({ game }: { game: GameInfo }) {
     >
       <span className={`font-display text-base ${live ? "glow text-cyan" : "text-dim"}`}>{game.title}</span>
       <span className={`flex h-36 w-full items-center justify-center bg-tube ${live ? "" : "opacity-40"}`}>
-        <Sprite id="comet" size={96} className={live ? "hop" : ""} />
+        <Picture id={game.sprite} size={96} className={live ? "hop" : ""} />
       </span>
       <span>{game.pitch}</span>
       <span className="text-dim">{game.teaches}</span>

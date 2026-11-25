@@ -1,0 +1,924 @@
+{
+  "voice": "en-US-SaraNeural",
+  "format": "mp3, 24 kHz, mono, 64 kbit/s",
+  "clips": {
+    "sound-a": {
+      "bytes": 3456,
+      "gainDb": -1,
+      "kind": "sound",
+      "ms": 370,
+      "post": {
+        "cut": "voice",
+        "fadeInMs": 15,
+        "fadeOutMs": 50,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-35%\">at.</prosody></voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "sound-b": {
+      "bytes": 1536,
+      "gainDb": 4.4,
+      "kind": "sound",
+      "ms": 135,
+      "post": {
+        "cut": "voiced-stop",
+        "fadeInMs": 3,
+        "fadeOutMs": 40,
+        "keepVoicedMs": 70,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><phoneme alphabet=\"ipa\" ph=\"bʌ\">buh</phoneme></voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "sound-ch": {
+      "bytes": 2304,
+      "gainDb": 3.4,
+      "kind": "sound",
+      "ms": 230,
+      "post": {
+        "cut": "before-voice",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -24
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-20%\"><phoneme alphabet=\"ipa\" ph=\"tʃʌ\">chuh</phoneme></prosody></voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "sound-d": {
+      "bytes": 1728,
+      "gainDb": 1.6,
+      "kind": "sound",
+      "ms": 155,
+      "post": {
+        "cut": "voiced-stop",
+        "fadeInMs": 3,
+        "fadeOutMs": 40,
+        "keepVoicedMs": 70,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><phoneme alphabet=\"ipa\" ph=\"dʌ\">duh</phoneme></voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "sound-e": {
+      "bytes": 2880,
+      "gainDb": -2.3,
+      "kind": "sound",
+      "ms": 300,
+      "post": {
+        "cut": "voice",
+        "fadeInMs": 15,
+        "fadeOutMs": 50,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-35%\">etch.</prosody></voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "sound-f": {
+      "bytes": 4224,
+      "gainDb": 19.8,
+      "kind": "sound",
+      "ms": 460,
+      "post": {
+        "cut": "after-voice",
+        "fadeInMs": 20,
+        "fadeOutMs": 20,
+        "levelDb": -27
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-50%\"><phoneme alphabet=\"ipa\" ph=\"ʌf\">uff</phoneme></prosody></voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "sound-g": {
+      "bytes": 1728,
+      "gainDb": 2.8,
+      "kind": "sound",
+      "ms": 155,
+      "post": {
+        "cut": "voiced-stop",
+        "fadeInMs": 3,
+        "fadeOutMs": 40,
+        "keepVoicedMs": 70,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><phoneme alphabet=\"ipa\" ph=\"ɡʌ\">guh</phoneme></voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "sound-h": {
+      "bytes": 2304,
+      "gainDb": 7.4,
+      "kind": "sound",
+      "ms": 220,
+      "post": {
+        "cut": "before-voice",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -30
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-50%\"><phoneme alphabet=\"ipa\" ph=\"hʌ\">huh</phoneme></prosody></voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "sound-i": {
+      "bytes": 3072,
+      "gainDb": -3.5,
+      "kind": "sound",
+      "ms": 320,
+      "post": {
+        "cut": "voice",
+        "fadeInMs": 15,
+        "fadeOutMs": 50,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-35%\">it.</prosody></voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "sound-k": {
+      "bytes": 2112,
+      "gainDb": 12.5,
+      "kind": "sound",
+      "ms": 210,
+      "post": {
+        "cut": "before-voice",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -24
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-50%\"><phoneme alphabet=\"ipa\" ph=\"kʌ\">kuh</phoneme></prosody></voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "sound-l": {
+      "bytes": 4992,
+      "gainDb": -2.1,
+      "kind": "sound",
+      "ms": 555,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-35%\"><phoneme alphabet=\"ipa\" ph=\"l\">l</phoneme></prosody></voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "sound-m": {
+      "bytes": 4992,
+      "gainDb": -0.1,
+      "kind": "sound",
+      "ms": 555,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-50%\"><phoneme alphabet=\"ipa\" ph=\"m\">m</phoneme></prosody></voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "sound-n": {
+      "bytes": 4608,
+      "gainDb": 0.2,
+      "kind": "sound",
+      "ms": 525,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-35%\"><phoneme alphabet=\"ipa\" ph=\"n\">n</phoneme></prosody></voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "sound-o": {
+      "bytes": 3072,
+      "gainDb": -2.8,
+      "kind": "sound",
+      "ms": 320,
+      "post": {
+        "cut": "voice",
+        "fadeInMs": 15,
+        "fadeOutMs": 50,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-35%\"><phoneme alphabet=\"ipa\" ph=\"ɑt\">ot</phoneme></prosody></voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "sound-p": {
+      "bytes": 1536,
+      "gainDb": 14.5,
+      "kind": "sound",
+      "ms": 140,
+      "post": {
+        "cut": "before-voice",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -24
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-50%\"><phoneme alphabet=\"ipa\" ph=\"pʌ\">puh</phoneme></prosody></voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "sound-r": {
+      "bytes": 4800,
+      "gainDb": -3.2,
+      "kind": "sound",
+      "ms": 535,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-40%\"><phoneme alphabet=\"ipa\" ph=\"ɹ\">r</phoneme></prosody></voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "sound-s": {
+      "bytes": 4800,
+      "gainDb": 2.6,
+      "kind": "sound",
+      "ms": 550,
+      "post": {
+        "cut": "after-voice",
+        "fadeInMs": 20,
+        "fadeOutMs": 20,
+        "levelDb": -27
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-50%\"><phoneme alphabet=\"ipa\" ph=\"ʌs\">us</phoneme></prosody></voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "sound-sh": {
+      "bytes": 4992,
+      "gainDb": 3.9,
+      "kind": "sound",
+      "ms": 570,
+      "post": {
+        "cut": "after-voice",
+        "fadeInMs": 20,
+        "fadeOutMs": 20,
+        "levelDb": -27
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-50%\"><phoneme alphabet=\"ipa\" ph=\"ʌʃ\">ush</phoneme></prosody></voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "sound-t": {
+      "bytes": 2304,
+      "gainDb": 11.6,
+      "kind": "sound",
+      "ms": 220,
+      "post": {
+        "cut": "before-voice",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -24
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-50%\"><phoneme alphabet=\"ipa\" ph=\"tʌ\">tuh</phoneme></prosody></voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "sound-th": {
+      "bytes": 3648,
+      "gainDb": 17.4,
+      "kind": "sound",
+      "ms": 400,
+      "post": {
+        "cut": "after-voice",
+        "fadeInMs": 20,
+        "fadeOutMs": 20,
+        "levelDb": -30
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-50%\"><phoneme alphabet=\"ipa\" ph=\"ʌθ\">uth</phoneme></prosody></voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "sound-u": {
+      "bytes": 2880,
+      "gainDb": -3,
+      "kind": "sound",
+      "ms": 300,
+      "post": {
+        "cut": "voice",
+        "fadeInMs": 15,
+        "fadeOutMs": 50,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-35%\">up.</prosody></voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "sound-w": {
+      "bytes": 4416,
+      "gainDb": 3.4,
+      "kind": "sound",
+      "ms": 485,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-50%\"><phoneme alphabet=\"ipa\" ph=\"w\">w</phoneme></prosody></voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-bath": {
+      "bytes": 4416,
+      "gainDb": -0.2,
+      "kind": "word",
+      "ms": 485,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">bath.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-bed": {
+      "bytes": 4224,
+      "gainDb": -0.4,
+      "kind": "word",
+      "ms": 475,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">bed.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-bug": {
+      "bytes": 4416,
+      "gainDb": -1.5,
+      "kind": "word",
+      "ms": 495,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">bug.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-cash": {
+      "bytes": 5568,
+      "gainDb": 1.9,
+      "kind": "word",
+      "ms": 635,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">cash.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-cat": {
+      "bytes": 4608,
+      "gainDb": 1.5,
+      "kind": "word",
+      "ms": 525,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">cat.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-chat": {
+      "bytes": 4992,
+      "gainDb": 0.7,
+      "kind": "word",
+      "ms": 565,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">chat.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-check": {
+      "bytes": 5184,
+      "gainDb": 0.5,
+      "kind": "word",
+      "ms": 585,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">check.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-chick": {
+      "bytes": 5184,
+      "gainDb": -2,
+      "kind": "word",
+      "ms": 595,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">chick.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-chin": {
+      "bytes": 4992,
+      "gainDb": -0.7,
+      "kind": "word",
+      "ms": 555,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">chin.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-chip": {
+      "bytes": 4608,
+      "gainDb": -0.6,
+      "kind": "word",
+      "ms": 515,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">chip.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-chop": {
+      "bytes": 4992,
+      "gainDb": -2.6,
+      "kind": "word",
+      "ms": 575,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">chop.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-cup": {
+      "bytes": 4224,
+      "gainDb": -1.5,
+      "kind": "word",
+      "ms": 475,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">cup.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-dish": {
+      "bytes": 4992,
+      "gainDb": -0.8,
+      "kind": "word",
+      "ms": 575,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">dish.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-dog": {
+      "bytes": 4608,
+      "gainDb": -0.3,
+      "kind": "word",
+      "ms": 525,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">dog.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-duck": {
+      "bytes": 4800,
+      "gainDb": -3.8,
+      "kind": "word",
+      "ms": 545,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">duck.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-fish": {
+      "bytes": 5760,
+      "gainDb": -1.8,
+      "kind": "word",
+      "ms": 665,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">fish.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-hat": {
+      "bytes": 5184,
+      "gainDb": 0.4,
+      "kind": "word",
+      "ms": 585,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">hat.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-kick": {
+      "bytes": 4800,
+      "gainDb": -1.8,
+      "kind": "word",
+      "ms": 535,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">kick.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-lick": {
+      "bytes": 5376,
+      "gainDb": -5.9,
+      "kind": "word",
+      "ms": 605,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">lick.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-lock": {
+      "bytes": 5760,
+      "gainDb": -4.9,
+      "kind": "word",
+      "ms": 665,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">lock.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-log": {
+      "bytes": 5376,
+      "gainDb": -2.5,
+      "kind": "word",
+      "ms": 615,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">log.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-math": {
+      "bytes": 4992,
+      "gainDb": -1.5,
+      "kind": "word",
+      "ms": 555,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">math.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-moth": {
+      "bytes": 4992,
+      "gainDb": -3.3,
+      "kind": "word",
+      "ms": 575,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">moth.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-neck": {
+      "bytes": 5184,
+      "gainDb": -5.8,
+      "kind": "word",
+      "ms": 595,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">neck.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-path": {
+      "bytes": 4608,
+      "gainDb": 0.9,
+      "kind": "word",
+      "ms": 525,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">path.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-pig": {
+      "bytes": 4800,
+      "gainDb": -2.6,
+      "kind": "word",
+      "ms": 535,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">pig.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-pin": {
+      "bytes": 4992,
+      "gainDb": -1.5,
+      "kind": "word",
+      "ms": 565,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">pin.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-rich": {
+      "bytes": 5568,
+      "gainDb": -4.6,
+      "kind": "word",
+      "ms": 635,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">rich.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-rock": {
+      "bytes": 5568,
+      "gainDb": -4.5,
+      "kind": "word",
+      "ms": 645,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">rock.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-sack": {
+      "bytes": 5568,
+      "gainDb": -1,
+      "kind": "word",
+      "ms": 645,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">sack.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-shed": {
+      "bytes": 5376,
+      "gainDb": 0.9,
+      "kind": "word",
+      "ms": 605,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">shed.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-ship": {
+      "bytes": 4992,
+      "gainDb": -1.5,
+      "kind": "word",
+      "ms": 565,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">ship.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-shock": {
+      "bytes": 5952,
+      "gainDb": -1.9,
+      "kind": "word",
+      "ms": 675,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">shock.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-shop": {
+      "bytes": 5376,
+      "gainDb": -2.4,
+      "kind": "word",
+      "ms": 615,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">shop.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-sock": {
+      "bytes": 5760,
+      "gainDb": -2,
+      "kind": "word",
+      "ms": 665,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">sock.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-sun": {
+      "bytes": 5760,
+      "gainDb": -0.9,
+      "kind": "word",
+      "ms": 655,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">sun.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-thick": {
+      "bytes": 5184,
+      "gainDb": -4.5,
+      "kind": "word",
+      "ms": 585,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">thick.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-thin": {
+      "bytes": 4800,
+      "gainDb": -1.7,
+      "kind": "word",
+      "ms": 545,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">thin.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-web": {
+      "bytes": 4608,
+      "gainDb": -1.7,
+      "kind": "word",
+      "ms": 525,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">web.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    }
+  }
+}

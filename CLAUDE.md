@@ -14,7 +14,8 @@ game, the schema or the artwork.
 web/shared/games.ts      the cabinets on the floor (id, title, status)
 web/shared/avatars.ts    the characters a player can be, their colours, the old ids, and what a legal name is
 web/shared/wire.ts       request and reply types shared by server and client
-web/shared/play.ts       what every game shares: a play, GameRules, Settled, openLevels()
+web/shared/play.ts       what every game shares: a play, an answer (a number or text), GameRules, Settled, openLevels()
+web/shared/deal.ts       what every game's dealing shares: a seeded Rng, FactStat, a draw weighted by misses
 web/shared/roundid.ts    newRoundId(): the id a round keeps through every try at saving it
 web/shared/rules.ts      each live game's rules, by game id (the server scores with these)
 web/shared/tickets.ts    what a play pays: the arcade's bonuses, the reasons on a ledger row
@@ -24,6 +25,10 @@ web/shared/comet/facts.ts    Comet Cards: a fact ("7+5"), the five levels and wh
 web/shared/comet/rules.ts    modes, scoring, stars, and settle(): a play scored from its answers
 web/shared/comet/deck.ts     which card comes next (weighted by the player's misses), Easy's four choices
 web/shared/comet/session.ts  a round as events: countdown, deal, key, clock, pause (the screen's reducer); PACE
+web/shared/soundmachine/words.ts    Sound Machine: the sounds, the tiles, every word and its level, the clip names
+web/shared/soundmachine/rules.ts    its two games (build, read), scoring, stars, and settle()
+web/shared/soundmachine/pick.ts     a round's eight words, Build's tray of tiles, Read's pictures
+web/shared/soundmachine/session.ts  a round as events: next, place, take, go, pick, pause (the screen's reducer)
 web/server/api.ts        wrap() and the route table (ROUTES)
 web/server/origin.ts     who may call the API: this Mac or the home network, from the app
 web/server/tailnet.ts    ARCADE_TAILNET_HOST: the Mac's Tailscale name, the one name beyond those
@@ -39,12 +44,18 @@ web/server/testhttp.ts   call a route handler without a socket (tests)
 web/src/App.tsx          the routes: title, players, the floor, a game
 web/src/state.tsx        ArcadeProvider: the players, who is playing, the sound switch
 web/src/arcade/          the shell: Attract (title), Players, Lobby (the floor), Hud,
-                         PrizeCounter, Grownups, PinPad, TicketsWon
+                         PrizeCounter, Grownups, PinPad, TicketsWon, SoundCheck
 web/src/games/index.ts   each live cabinet's screen, by game id
-web/src/games/comet/     Comet Cards: CometCards (the cabinet), Setup, Round, Results, Scores
+web/src/games/Cabinet.tsx  any cabinet's flow: set up, the server's clock, the round, saving, results
+web/src/games/           Setup, Results, Scores, format: the screens every cabinet shares
+web/src/games/comet/     Comet Cards: CometCards (what it hands Cabinet), Round
+web/src/games/soundmachine/  Sound Machine: SoundMachine (what it hands Cabinet), Round
 web/src/sprites/art.ts   every drawing, as rows of characters and palettes
 web/src/sprites/Sprite.tsx  <Sprite> and <AvatarSprite>
-web/src/sound.ts         every sound, synthesised (no audio files)
+web/src/sound.ts         every beep, synthesised (no audio files), and the one audio context
+web/src/speech.ts        spoken clips: preload(), say(), hush(); plays through sound.ts's context
+web/public/speech/       Sound Machine's clips and manifest (generated, committed)
+scripts/speech/          npm run speech:build: makes the clips (Azure text-to-speech; needs a key in the environment)
 web/src/index.css        the tokens and the pixel-box classes (.panel, .btn, .pick, .field)
 scripts/db/schema.ts     the whole schema (Drizzle)
 scripts/db/players.ts    the only code that touches the players table
@@ -113,8 +124,27 @@ macos/                   the Dock app (build-app.sh, the launcher, the server he
 - The real database holds tickets a child has earned. Tests never touch a
   Postgres server: `freshDb()`. A worktree never uses the real database
   (`scripts/db/config.mjs` refuses to start without a `DATABASE_URL`).
-- Never change a game id, a level id, a badge id, an avatar id or a colour
-  id once live: rows are keyed on them.
+- Never change a game id, a level id, a mode or skill id, a badge id, an
+  avatar id or a colour id once live: rows are keyed on them. In Sound
+  Machine a word's id
+  (its spelling) and a tile are stored on answers and never change either,
+  and a sound's id names its clip.
+- **An answer is a number or text**, never both: `answers.given` for Comet
+  Cards, `answers.given_text` for Sound Machine (the word picked, or the
+  tiles placed, `ch-i-ck`). A game's `settle()` refuses the other kind.
+- **Sound Machine has no clock the player sees**, and nothing in it is
+  scored on time. A word's time is still counted (at least `MIN_ANSWER_MS`)
+  and each answer stays up for its `PACE` before the session lets the next
+  word come, so the server's round clock holds as it does for Comet Cards;
+  a test proves a round as fast as the screen allows still fits.
+- **Speech clips are generated, never hand-edited**: `npm run speech:build`
+  (`scripts/speech/`) makes them from the words and sounds in
+  `web/shared/soundmachine/words.ts` and records each recipe in the
+  manifest. The key lives only in the environment; the app at run time
+  fetches static files and calls nowhere. Read never says the whole word
+  before the answer. Sound Machine will not start with the sound off.
+- **Letters to be read are lower case in `--font-letters`** (`.sm-letter`):
+  the display face has no true small letters.
 - Each table is read and written by one module under `scripts/db/`, whose
   functions take the player id.
 - Files under `web/shared/` and `scripts/db/*.ts` are run directly by Node
@@ -145,6 +175,8 @@ npm test                    # node --test: shared rules, routes, database (PGlit
 npm run typecheck && npm run lint
 npm run db:generate -- --name <what_changed>   # after editing scripts/db/schema.ts; commit the SQL
 npm run pin:reset           # forget the grown-up PIN
+npm run speech:build        # make Sound Machine's missing clips (AZURE_SPEECH_KEY and _REGION in the environment; ffmpeg)
+npm run speech:check        # every clip is there (no key, no network)
 ```
 `ARCADE_LOCAL_ONLY=1 npm run dev` keeps the server to this machine.
 

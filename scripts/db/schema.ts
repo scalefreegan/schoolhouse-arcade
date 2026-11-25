@@ -83,8 +83,12 @@ export const answers = pgTable(
     gameId: text("game_id").notNull(),
     /** In the game's notation: "7+5". */
     fact: text("fact").notNull(),
-    /** Null when the card timed out. */
+    /** A number answered (Comet Cards). Null when the card timed out, and
+     *  for a game whose answers are not numbers. */
     given: integer("given"),
+    /** An answer that is text: the word picked, or the tiles placed
+     *  ("ch-i-ck"), in Sound Machine. Null for a game that answers in numbers. */
+    givenText: text("given_text"),
     correct: boolean("correct").notNull(),
     ms: integer("ms").notNull(),
     createdAt: tz("created_at").notNull().defaultNow(),

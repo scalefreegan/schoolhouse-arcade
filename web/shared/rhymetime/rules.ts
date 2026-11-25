@@ -16,7 +16,7 @@
 
 import { RuleError, type AnswerInput, type GameRules, type JudgedAnswer, type PlayConfig, type Settled } from "../play.ts";
 import { MAX_ANSWER_MS, countedMs, startRound, starsFor, stepRound } from "../soundmachine/rules.ts";
-import { LEVELS, ROUND_QUESTIONS, anchorsOf, doubtful, levelById, lookalike, nothingAlike, rhymeOf, rhymes, wordById, type RhymeLevel, type RhymeWord } from "./words.ts";
+import { LEVELS, ROUND_QUESTIONS, anchorsOf, doubtful, levelById, lookalike, nothingAlike, rhymeOf, rhymes, tempting, wordById, type RhymeLevel, type RhymeWord } from "./words.ts";
 
 // Scoring, stars and the time floor are Sound Machine's, exactly: a round
 // of eight, 100 a right answer and 20 more for each right one before it in
@@ -105,6 +105,14 @@ export function rightOf(q: Question): string | null {
  * others share no sound in the same place with it. In Odd one out `fact` is
  * one of the pair; on Easy the odd one shares no sound in the same place
  * with either of them.
+ *
+ * On Arcade a question has to tempt where it can: if any word on the level
+ * could stand in it as a near miss (`tempting()`: the same first sound or
+ * vowel, and neither a lookalike nor a doubtful rhyme of what it stands
+ * beside), at least one shown is one. In Find it that is a wrong picture
+ * tempting beside the word; in Odd one out, the odd one beside either of the
+ * pair. So an Easy question is not taken as Arcade's (more tickets, the
+ * other table) where the level could have made it harder.
  */
 export function faultOf(q: Question, level: RhymeLevel, skill: Skill, fact: string): string | null {
   const on = new Set(level.words.map((w) => w.id));
@@ -126,12 +134,28 @@ export function faultOf(q: Question, level: RhymeLevel, skill: Skill, fact: stri
     if (new Set(choices.map(rhymeOf)).size !== choices.length) return "No two of the pictures rhyme with each other.";
     const call = wordById(q.call)!;
     if (skill === "easy" && choices.some((c) => c.id !== right && !nothingAlike(c, call))) return "On Easy the wrong pictures sound nothing like the word.";
+    if (skill === "arcade") {
+      const rhyme = wordById(right)!;
+      const could = level.words.some((w) => tempting(w, call) && standsBeside(w, [call, rhyme]));
+      if (could && !choices.some((c) => c.id !== right && tempting(c, call))) return "On Arcade a wrong picture starts like the word or has its vowel.";
+    }
     return null;
   }
   if (!q.choices.includes(fact) || fact === right) return "The question was not for one of its pair.";
   const odd = wordById(right)!;
   if (skill === "easy" && choices.some((c) => c.id !== right && !nothingAlike(odd, c))) return "On Easy the odd one sounds nothing like the pair.";
+  if (skill === "arcade") {
+    const pair = choices.filter((c) => c.id !== right);
+    const near = (w: RhymeWord) => pair.some((p) => tempting(w, p));
+    const could = level.words.some((w) => !rhymes(w, pair[0]) && near(w) && standsBeside(w, pair));
+    if (could && !near(odd)) return "On Arcade the odd one starts like the pair or has their vowel.";
+  }
   return null;
+}
+
+/** A word that may stand in a question beside these: none of them, nor a lookalike, nor a doubtful rhyme of one. */
+function standsBeside(w: RhymeWord, others: RhymeWord[]): boolean {
+  return others.every((o) => o.id !== w.id && !lookalike(o.id, w.id) && !doubtful(o, w));
 }
 
 /** The pair of an Odd one out question, as one key ("cat+hat", in order), so a round never asks the same pair twice. */

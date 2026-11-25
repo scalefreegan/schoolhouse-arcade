@@ -172,6 +172,35 @@ test("a question that could not have been put is refused, with why", () => {
   assert.match(fault(odd("cat", "bat", "hat"))!, /Two pictures rhyme/);
   assert.match(fault(odd("cat", "hat", "pig"), "easy", "pig")!, /not for one of its pair/);
   assert.match(fault(odd("cat", "hat", "pig", "ship"), "arcade")!, /how many pictures Arcade/);
+  // Arcade has to tempt where the level could: nothing in pig, ship or thin
+  // starts like cat or has its a, and van or pan could have stood there.
+  assert.match(fault(find("cat", "hat", "pig", "ship", "thin"), "arcade")!, /On Arcade a wrong picture starts like the word/);
+  assert.equal(fault(find("cat", "hat", "pig", "ship", "van"), "arcade"), null, "one tempting wrong picture is enough");
+  assert.match(fault(odd("cat", "hat", "pig"), "arcade")!, /On Arcade the odd one starts like the pair/);
+  assert.equal(fault(odd("pig", "wig", "pin"), "arcade"), null, "pin starts like pig");
+});
+
+test("an Easy question is not taken as Arcade's: every Easy Odd one out question dealt, posted as Arcade, is refused, and an Easy round is refused as Arcade in both games", () => {
+  let tried = 0;
+  for (const l of LEVELS)
+    for (const a of anchorsOf(l))
+      for (const partner of partnersOf(a, l))
+        for (let seed = 0; seed < 4; seed++) {
+          const q = questionFor("odd", "easy", l, { anchor: a, partner }, seeded(seed));
+          assert.ok(faultOf(q, l, "arcade", a.id), `${l.id} ${q.choices}`);
+          tried++;
+        }
+  assert.ok(tried > 300);
+  for (const l of LEVELS)
+    for (const mode of ["find", "odd"] as Mode[])
+      for (let seed = 0; seed < 10; seed++) {
+        const answers = roundPlan(l, mode, {}, seeded(seed)).map((p, i) => {
+          const q = questionFor(mode, "easy", l, p, seeded(seed * 100 + i));
+          return { fact: p.anchor.id, given: answerText(q, rightOf(q)!), ms: 3000 };
+        });
+        assert.equal(settle({ level: l.id, mode, skill: "easy" }, answers).right, ROUND_QUESTIONS);
+        assert.throws(() => settle({ level: l.id, mode, skill: "arcade" }, answers), mode === "find" ? /how many pictures Arcade/ : /On Arcade the odd one/, `${l.id} ${mode} ${seed}`);
+      }
 });
 
 test("dealing: every word a level asks about makes a question on both skills of both games that the server would take", () => {

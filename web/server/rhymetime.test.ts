@@ -86,6 +86,10 @@ test("a question that could not have been put, or a pick that is not one of its 
     [{ mode: "odd" }, [{ fact: "cat", given: "cat|hat|cap=cap", ms: 2000 }], /look too alike/],
     [{ mode: "odd" }, [{ fact: "cat", given: "cat|hat|pig=pig", ms: 2000 }, { fact: "hat", given: "hat|cat|chip=chip", ms: 2000 }], /pair comes up once/],
     [{ skill: "arcade" }, [{ fact: "cat", given: "cat>hat|pig|ship=hat", ms: 2000 }], /how many pictures Arcade/],
+    [{ skill: "arcade" }, [{ fact: "cat", given: "cat>hat|pig|ship|thin=hat", ms: 2000 }], /On Arcade a wrong picture starts like the word/],
+    // An Easy round sent as Arcade's (double tickets, the Arcade table), in both games.
+    [{ skill: "arcade" }, round("a-i", "find", "easy"), /how many pictures Arcade/],
+    [{ mode: "odd", skill: "arcade" }, round("a-i", "odd", "easy"), /On Arcade the odd one starts like the pair/],
   ];
   for (const [config, answers, why] of cases) {
     const sent = await play(pip, config, answers);

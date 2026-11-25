@@ -53,7 +53,7 @@ const BELLS = ["lime", "cyan", "rose", "violet", "gold", "orange"];
 const RHYME = "rhyme-time";
 const rhymeStars = (f: BadgeFacts, level: string): number => f.stars[RHYME]?.[level] ?? 0;
 
-const MEDALS =["lime", "cyan", "rose", "violet", "gold"];
+const MEDALS = ["lime", "cyan", "rose", "violet", "gold"];
 
 export const BADGES: Badge[] = [
   { id: "first-game", title: "First Game", how: "Finish a game", tickets: 10, sprite: "rocket", palette: "default", earned: (f) => f.plays >= 1 },

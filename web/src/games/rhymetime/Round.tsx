@@ -54,6 +54,8 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
   const [goAt, setGoAt] = useState(-1);
   const mayGo = goAt === s.seq;
 
+  /** The step of the round (s.seq) in which the player last pressed something to hear it. */
+  const heard = useRef(-1);
   const next = () => send({ type: "next", now: performance.now(), seed: seed() });
 
   /** Say these words in order, each picture glowing as its word is said. */
@@ -86,10 +88,15 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
         // A new question (or the same one after a pause): whatever was being
         // said stops, then the question is said: the word, a breath, and each
         // picture in turn; or the three pictures.
+        // A picture pressed before the question begins is not cut off by
+        // it: the player has started, and the question is not said over them.
         hush();
         if (q) {
           const ids = q.mode === "find" ? [q.call!, ...q.choices] : q.choices;
-          later(() => void sayAll(ids, (i) => (q.mode === "find" && i === 0 ? BREATH : GAP)), 200);
+          const seq = s.seq;
+          later(() => {
+            if (heard.current !== seq) void sayAll(ids, (i) => (q.mode === "find" && i === 0 ? BREATH : GAP));
+          }, 200);
         }
         break;
       case "right":
@@ -143,8 +150,13 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
   useEffect(() => hush, []);
 
   /** Tap a picture: hear it, and (while asking) choose it. */
-  const choose = (id: string) => {
+  /** Press a picture (or the word) to hear it. */
+  const hear = (id: string) => {
+    heard.current = s.seq;
     void sayAll([id]);
+  };
+  const choose = (id: string) => {
+    hear(id);
     if (s.phase === "ask") send({ type: "choose", word: id });
   };
   const go = () => send({ type: "go", now: performance.now() });
@@ -153,6 +165,8 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
   const byKeys = useRef(false);
   const onKey = useEffectEvent((ev: KeyboardEvent) => {
     if (ev.metaKey || ev.ctrlKey || ev.altKey) return;
+    // While the sound-off box is up the round is not there to play: its keys are the box's own.
+    if (muted) return;
     if (ev.key === "Tab") byKeys.current = true;
     // Moving by keyboard, Enter on a button is that button's own press.
     // Otherwise Enter is the lever (or the next question), and 1 to 4 choose a picture.
@@ -230,7 +244,7 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
           <div className="rt-board" data-mode={q.mode} data-n={q.choices.length}>
             {q.mode === "find" && (
               <div className="rt-call-side">
-                <button type="button" className="rt-call" data-lit={lit === q.call} aria-label={judged ? `Hear ${q.call}` : "Hear the word"} onClick={() => void sayAll([q.call!])}>
+                <button type="button" className="rt-call" data-lit={lit === q.call} aria-label={judged ? `Hear ${q.call}` : "Hear the word"} onClick={() => hear(q.call!)}>
                   <Picture id={wordOf(q.call!).picture} size={176} className="rt-pic" />
                   <span className="rt-written">{judged ? <Written word={wordOf(q.call!)} lit /> : <Sprite id="speaker" size={32} />}</span>
                 </button>

@@ -80,7 +80,8 @@ export function doubtful(a: RhymeWord, b: RhymeWord): boolean {
  * Pictures that could be taken for one another: never shown in one question.
  * Sound Machine's, and those of the new pictures: a cap and a hat, a mug and
  * a cup, a net and a web, a pen and a pin, a hen and a chick, a map and a
- * path, the number ten and the sum on the board.
+ * path, the number ten and the sum on the board, a bun and a chip, a bat
+ * and a moth, a hen and a duck.
  */
 export const LOOKALIKES: [string, string][] = [
   ...SOUND_LOOKALIKES,
@@ -91,6 +92,9 @@ export const LOOKALIKES: [string, string][] = [
   ["hen", "chick"],
   ["map", "path"],
   ["ten", "math"],
+  ["bun", "chip"],
+  ["bat", "moth"],
+  ["hen", "duck"],
 ];
 
 export function lookalike(a: string, b: string): boolean {

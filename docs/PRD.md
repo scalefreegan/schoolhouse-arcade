@@ -343,7 +343,8 @@ Kept out of each other's questions:
   there would be right to the ear that hears it.
 - **Lookalike pictures.** Sound Machine's pairs, and a cap and a hat, a mug
   and a cup, a net and a web, a pen and a pin, a hen and a chick, a map and
-  a path, the number ten and the sum.
+  a path, the number ten and the sum, a bun and a chip, a bat and a moth, a
+  hen and a duck.
 
 ### Levels
 
@@ -369,7 +370,7 @@ a pair is never asked twice in a round.
 | Skill | Find it | Odd one out |
 |---|---|---|
 | Easy | three pictures; the two wrong ones share no sound in the same place with the word (not the first sound, the vowel or the last sound) | three pictures; the odd one shares no sound in the same place with either of the pair |
-| Arcade | four pictures; the wrong ones start with the same sound or have the same vowel, where the level has any | three pictures; the odd one starts with the same sound as one of the pair or has their vowel, where the level has any |
+| Arcade | four pictures; the wrong ones are near misses where the level has them (the same first sound as the word, or its vowel), and at least one always is when the level has a word that could be | three pictures; the odd one is a near miss (the same first sound as one of the pair, or their vowel) whenever the level has a word that could be |
 
 In Find it, no two wrong pictures rhyme with each other, so there is one
 answer and the others are not a second pair.
@@ -389,8 +390,10 @@ question about a word with no rhyme on the level, a word asked about twice,
 a picture not on the level, a picture twice in a question, the wrong number
 of pictures for the skill, lookalike pictures together, a doubtful rhyme,
 a question with no single answer, an Easy question whose wrong pictures
-share a sound with the word, an Odd one out pair asked twice, and a pick that
-is not one of the pictures. Whether the pick is right is the server's
+(or odd one) share a sound in the same place with the word (or the pair),
+an Arcade question with no near miss where the level had one to show (so an
+Easy round cannot be sent as Arcade's, for its tickets or its table), an Odd
+one out pair asked twice, and a pick that is not one of the pictures. Whether the pick is right is the server's
 finding, not the browser's.
 
 Nothing is timed for the player. As in Sound Machine, each question's time

@@ -162,7 +162,10 @@ macos/                   the Dock app (build-app.sh, the launcher, the server he
   only. A rhyme is data (`rhymeOf()`, the vowel and last sound), never the
   spelling; the pin/pen families (`DOUBTFUL`) and lookalike pictures never
   stand in one question, and the server refuses a question that breaks a
-  rule of its skill (`faultOf()`).
+  rule of its skill (`faultOf()`): Easy's wrong pictures share no sound in
+  the same place, and Arcade's include a near miss whenever the level has
+  one, so an Easy round is never taken as Arcade's. A test deals every
+  question on every level, mode and skill and `faultOf()` takes them all.
 - **Letters to be read are lower case in `--font-letters`** (`.sm-letter`):
   the display face has no true small letters.
 - Each table is read and written by one module under `scripts/db/`, whose

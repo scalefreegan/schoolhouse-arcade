@@ -6,7 +6,7 @@ import { PACE, advance, cardAnswer, startSession, waited } from "../../../shared
 import type { AnswerInput } from "../../../shared/play.ts";
 import { sfx } from "../../sound.ts";
 import { Sprite } from "../../sprites/Sprite.tsx";
-import { fmtClock, fmtScore, fmtStopwatch } from "./format.ts";
+import { fmtClock, fmtScore, fmtStopwatch } from "../format.ts";
 
 // One round on screen, from "3, 2, 1" to the last card. What happens is
 // decided by the session (shared/comet/session.ts): this file sends it

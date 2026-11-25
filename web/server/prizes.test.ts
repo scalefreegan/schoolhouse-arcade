@@ -459,9 +459,13 @@ test("a grown-up can open a level early: it shows as open and a play on it is ac
   assert.deepEqual(await progress(), ["add-5"]);
   assert.equal((await play(em, { level: "sub-10" }, [right("5-2")])).status, 403);
   assert.equal((await request(grownup, "POST", "/levels", { playerId: em, gameId: "comet-cards", level: "nope" }, withPin())).status, 404);
-  const opened = await request<{ levels: { level: string; open: boolean }[] }>(grownup, "POST", "/levels", { playerId: em, gameId: "comet-cards", level: "sub-10" }, withPin());
+  const opened = await request<{ levels: { gameId: string; level: string; open: boolean }[] }>(grownup, "POST", "/levels", { playerId: em, gameId: "comet-cards", level: "sub-10" }, withPin());
   assert.equal(opened.status, 201);
-  assert.deepEqual(opened.body.levels.filter((l) => l.open).map((l) => l.level), ["add-5", "sub-10"]);
+  // Each game's levels are its own: opening one of Comet Cards' opens nothing in Sound Machine.
+  assert.deepEqual(opened.body.levels.filter((l) => l.open).map((l) => `${l.gameId}/${l.level}`), ["comet-cards/add-5", "comet-cards/sub-10", "sound-machine/cvc"]);
+  assert.equal((await request(grownup, "POST", "/levels", { playerId: em, gameId: "sound-machine", level: "sub-10" }, withPin())).status, 404, "a level of another game");
+  const sound = await request<{ levels: { gameId: string; level: string; open: boolean }[] }>(grownup, "POST", "/levels", { playerId: em, gameId: "sound-machine", level: "ck" }, withPin());
+  assert.deepEqual(sound.body.levels.filter((l) => l.open && l.gameId === "sound-machine").map((l) => l.level), ["cvc", "ck"]);
   assert.equal((await request(grownup, "POST", "/levels", { playerId: em, gameId: "comet-cards", level: "sub-10" }, withPin())).status, 201, "twice is harmless");
   assert.deepEqual(await progress(), ["add-5", "sub-10"]);
   const played = await play(em, { level: "sub-10" }, [right("5-2"), right("9-4")]);
@@ -491,7 +495,8 @@ test("the grown-up page shows every player's tickets and levels, the shelf, the 
   const named = (name: string) => page.players.find((p) => p.name === name)!;
   assert.equal(page.players.length, 2);
   assert.deepEqual([named("Em").tickets, named("Al").tickets], [16 + 20 + 10 + 25 + 20, 20]);
-  assert.deepEqual(named("Em").levels.map((l) => [l.level, l.stars, l.open]), [["add-5", 1, true], ["add-10", 0, true], ["sub-10", 0, false], ["mix-10", 0, false], ["big-20", 0, false]]);
+  assert.deepEqual(named("Em").levels.filter((l) => l.gameId === "comet-cards").map((l) => [l.level, l.stars, l.open]), [["add-5", 1, true], ["add-10", 0, true], ["sub-10", 0, false], ["mix-10", 0, false], ["big-20", 0, false]]);
+  assert.deepEqual(named("Em").levels.filter((l) => l.gameId === "sound-machine").map((l) => [l.game, l.level, l.open]), [["Sound Machine", "cvc", true], ...["ch", "ck", "sh", "th", "mix"].map((id) => ["Sound Machine", id, false])]);
   assert.equal(named("Em").levels[0].game, "Comet Cards");
   assert.equal(page.prizes.length, 3);
   assert.deepEqual(page.handed.map((h) => [h.player, h.name, h.cost]), [["Al", "A candy", 100]]);

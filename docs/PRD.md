@@ -5,7 +5,9 @@ the grown-up playing alongside. Each cabinet is one standalone game that
 drills one idea until recall is fast. Playing earns **tickets** and
 **badges**, and a grown-up trades those for **real prizes** (an ice cream, a
 candy, a new video game). The list of cabinets is meant to grow; the first
-is **Comet Cards**, addition and subtraction flashcards against the clock.
+is **Comet Cards**, addition and subtraction flashcards against the clock,
+and the second is **Sound Machine**, letter sounds and sounding out short
+words, with nothing timed.
 
 The name nods to the Saturday-morning idea that a lesson can be something
 you want to sit through. Everything in the app (names, characters, art,
@@ -37,7 +39,9 @@ all answers below are final for v1):
 | **Cabinet** | One game on the arcade floor. Listed in `web/shared/games.ts` |
 | **Player** | A row picked on the "Who is playing?" screen: a name, an avatar and its colour. No logins |
 | **Avatar** | The pixel character a player is, in one of its colours (`web/shared/avatars.ts`). The first colour is the character's own look |
-| **Fact** | One sum, written `7+5` or `10-2`. The unit everything is counted in |
+| **Fact** | What a game asks: one sum, written `7+5` or `10-2`, in Comet Cards; one word, `chick`, in Sound Machine. The unit everything is counted in |
+| **Sound** | One spoken sound (a phoneme): the k of cat, kick and duck is one sound |
+| **Tile** | The letter or letters that write one sound: `c`, `a`, `ch`, `ck`. A digraph is one tile |
 | **Card** | A fact shown to be answered |
 | **Level** | A set of facts (add within 5, …). Levels unlock in order |
 | **Mode** | How a round is timed: Blitz, Sprint, Survival, Practice |
@@ -143,6 +147,117 @@ Four buttons: the answer and three wrong ones chosen to be tempting (one
 off, two off, and the answer to the opposite operation when it fits), never
 below 0, never repeated, in random order.
 
+## Sound Machine
+
+A machine that builds words out of sound tiles. Decided 2026-11-24 by the
+grown-up: one cabinet, two ways to play, no clock anywhere, real spoken
+sounds, and a different kind of game from Comet Cards.
+
+### Two games
+
+| Game | The player | The answer |
+|---|---|---|
+| **Build it** | sees a picture and hears its word, then puts sound tiles into boxes in order, one sound a box, and pulls the lever | the tiles, in order (`ch-i-ck`) |
+| **Read it** | sees the word, a button under each sound to hear it, sounds it out, and picks its picture | the word picked |
+
+A digraph is one tile and one box. In Build, pressing a tile says its sound
+and puts it in the next empty box; pressing a box says it and takes it back
+out; a button says the whole word again, and the snail beside it says it
+slowly (one word still, the way a teacher says it for a child); the lever
+does nothing until every box is full. In Read, pressing a sound says it,
+and the blend button says the sounds one at a time, takes a breath, and
+says them again run together. **Read never says the whole word before the
+answer**, plain or slow: hearing it would be the answer. Both buttons
+appear once it is answered.
+
+A sound on its own is said the way a teacher models it: one that can be
+held is held ("mmmm", "ssss", a long open "a"), and one that cannot (b, d,
+g, p, t, k, ch) is one clear burst with no "uh" hung on a quiet one.
+
+One try a word. Either way the word is then said sound by sound, unhurried,
+and whole. After a right answer the next word comes by itself when that has
+been said. A wrong one shows the right one (the word built in the boxes
+with the try crossed out above it, or the right picture lit); the next word
+comes when the player presses the arrow, which lights when the word has
+been said. A new word always stops whatever was being said of the last.
+Nothing earned is ever taken away.
+
+### Levels
+
+Every word is three sounds: a consonant, a short vowel, a consonant, where a
+digraph counts as one consonant. No blends, no long vowels, no silent
+letters, no x, no doubled letters, and th is always the quiet one of *bath*.
+A level's words need only what it and the levels before it teach, and each
+has a picture a six-year-old can name.
+
+| Level | Its words |
+|---|---|
+| 1 3 sounds (`cvc`) | cat hat bed web pig pin dog log sun bug cup |
+| 2 ch | chip chin chop chat rich |
+| 3 ck | duck sock rock lock kick neck sack lick |
+| 4 sh | ship shop shed fish dish cash |
+| 5 th | bath moth path math thin thick |
+| 6 Mix | every word of levels 2 to 5, and chick check shock |
+
+Level 1 is open; a star on a level opens the next; a grown-up can open any.
+
+**A round is eight different words.** It takes as many of the level's own
+words as it can hold and, where a level has fewer than eight (ch has five,
+sh and th six), fills up with words from the levels before, so ch is
+practised beside the c and h it is mistaken for. Which words come up leans
+towards the ones the player has missed lately (five times as likely as a
+word they know) and the ones never seen (three times).
+
+### Skills
+
+| Skill | Build it | Read it |
+|---|---|---|
+| Easy | exactly the tiles the word needs, mixed up | three pictures |
+| Arcade | up to three more tiles that tempt: another vowel, a consonant that looks or sounds like one of the word's, and, once ck is taught, another spelling of its k sound | four pictures, the wrong ones starting or ending with the same sound where the level has any |
+
+A level never offers a digraph it has not taught. Two pictures that could
+be taken for each other (a bug and a moth, a shop and a shed) are never
+offered together. Build is judged on spelling: `d-u-k` sounds right and is
+not how duck is written.
+
+### Scoring and stars
+
+A right word scores 100, and 20 more for each right word before it in a row.
+Both games rank by score, with a table for each level, game and skill. A
+finished round earns ★ for 5 right, ★★ for 7, ★★★ for all 8, on either
+skill. Tickets: one a right word on Easy, two on Arcade, and the arcade's
+own bonuses.
+
+The server judges every answer from what is posted (the word, and the word
+picked or the tiles placed) with `web/shared/soundmachine/rules.ts`. It
+refuses a word the level does not hold, a word twice in a round, more than
+eight, more old words than the level leaves room for, and an answer that is
+not a word (Read) or not a box-full of tiles (Build).
+
+There is no clock for the player. The time a word waited is kept, to be
+looked at, and counted as at least one second, so that the server's round
+clock means the same here as in Comet Cards: a hand-made round has to wait
+the eight seconds it claims. A real round always takes longer than its
+words, because each answer stays up (1.7 seconds when right, at least 1.4
+when wrong) before the next word can come.
+
+### Speech
+
+Every sound and every word is a recorded clip, made ahead of time by
+`npm run speech:build` (Azure text-to-speech, one voice) and served by the
+Mac as a static file: the game calls nowhere outside the house and needs no
+key to run. A word has two clips, plain and slow. A round's clips are
+fetched before it starts, and none is waited on for more than eight
+seconds. Build cannot ask a word it cannot say, so a Build round does not
+start without its words' clips (the screen says so, with a way back and a
+way to try again); any other clip that will not come is left out, and that
+tile or button is silent. The game needs sound: with the sound switch off
+it says so and offers to turn it on rather than start in silence, from the
+set-up screen and from Play again alike, and a round in which the sound is
+switched off stops and says the same. *Grown-ups → Sound check* plays
+every sound and every word, plain and slow, so the pronunciation can be
+listened through in one place.
+
 ## Tickets, badges, prizes
 
 **Tickets per play.** One per right answer on Easy, two on Arcade. Practice
@@ -166,8 +281,15 @@ already deserves it the next time they play.
 | 100 Club | 100 right answers | 30 |
 | 1000 Club | 1000 right answers | 150 |
 | Clean Sweep | a Sprint with no misses | 40 |
-| Arcade Ace | two stars on every level | 200 |
-| Comet Champion | three stars on every level | 500 |
+| Arcade Ace | two stars on every Comet Cards level | 200 |
+| Comet Champion | three stars on every Comet Cards level | 500 |
+| *Level* Star (six of them, Sound Machine's) | a first star on that Sound Machine level | 25 each |
+| Word Builder | a star on every Sound Machine level | 100 |
+| Sound Champion | three stars on every Sound Machine level | 300 |
+
+Arcade Ace and Comet Champion mean Comet Cards' levels, as they always
+have; the counting badges (First Game, the Clubs, the streaks) count every
+game.
 
 **Prizes** are a list the grown-up edits: a name, one of eight pictures, a
 ticket price, and optionally a badge that must be held. The arcade starts
@@ -211,7 +333,11 @@ out; it is not a safe. A forgotten PIN is reset at the Mac:
    legal play is, and how a play is scored from its answers.
 3. Register its screen in `web/src/games/index.ts`.
 4. Plays, high scores, tickets and badges are the arcade's, not the game's:
-   the game posts a play and the arcade does the rest.
+   the game posts a play and the arcade does the rest. So are the set-up,
+   saving and results screens (`web/src/games/Cabinet.tsx`): a game supplies
+   its round and what it has to say about the words or cards missed.
+5. An answer is a number or a piece of text (`AnswerInput.given`); the
+   game's rules decide which they take.
 
 ## Trust and safety
 
@@ -234,7 +360,9 @@ out; it is not a safe. A forgotten PIN is reset at the Mac:
 
 - Logins, accounts, or play away from home (a later sync could add it).
 - Multiplication, division or numbers past 20 in Comet Cards.
-- Spoken questions or speech input.
+- Speech input, or speech made while the game runs (Sound Machine's clips
+  are made ahead of time).
+- Blends, long vowels and longer words in Sound Machine.
 - A native app. Added to an iPad's home screen it opens full screen.
 
 ## Architecture

@@ -47,7 +47,7 @@ export async function recordPlay(db: Db, playerId: string, key: BoardKey, s: Set
       .values({ playerId, gameId: key.gameId, level: key.level, mode: key.mode, skill: key.skill, score: s.score, rightCount: s.right, wrongCount: s.wrong, bestCombo: s.bestCombo, timeMs: s.timeMs, finished: s.finished, stars: s.stars, roundId })
       .returning({ id: plays.id });
     if (s.answers.length) {
-      await tx.insert(answers).values(s.answers.map((a) => ({ playId, playerId, gameId: key.gameId, fact: a.fact, given: a.given, correct: a.correct, ms: a.ms })));
+      await tx.insert(answers).values(s.answers.map((a) => ({ playId, playerId, gameId: key.gameId, fact: a.fact, given: typeof a.given === "number" ? a.given : null, givenText: typeof a.given === "string" ? a.given : null, correct: a.correct, ms: a.ms })));
     }
     const mine = and(eq(levelStars.playerId, playerId), eq(levelStars.gameId, key.gameId), eq(levelStars.level, key.level));
     const [had] = await tx.select({ stars: levelStars.stars }).from(levelStars).where(mine);

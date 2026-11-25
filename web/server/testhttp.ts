@@ -1,6 +1,5 @@
 import { Readable } from "node:stream";
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { countedMs } from "../shared/comet/rules.ts";
 import type { AnswerInput } from "../shared/play.ts";
 import { startClock } from "./clock.ts";
 import { rawDb } from "./db.ts";
@@ -37,14 +36,15 @@ export async function request<T = unknown>(handler: Handler, method: string, url
   return { status: sent.status, body: (sent.text ? JSON.parse(sent.text) : null) as T };
 }
 
-/** The clock (clock.ts) of a Comet Cards round started long enough ago to
+/** The clock (clock.ts) of a round (Comet Cards', unless `gameId` says) started long enough ago to
  *  have played these answers and its countdown, as a real screen's would
  *  be. "" for a player id the database cannot look up: such a play is
  *  refused before its clock is read. */
-export async function playedClock(playerId: unknown, roundId: unknown, answers: AnswerInput[]): Promise<string> {
-  const ms = Array.isArray(answers) ? answers.reduce((sum, a) => sum + countedMs(a.ms), 0) : 0;
+export async function playedClock(playerId: unknown, roundId: unknown, answers: AnswerInput[], gameId = "comet-cards"): Promise<string> {
+  // Each answer counted as at least a second: more than either game's floor.
+  const ms = Array.isArray(answers) ? answers.reduce((sum, a) => sum + Math.max(1_000, Number(a?.ms) || 0), 0) : 0;
   try {
-    return await startClock(rawDb(), { playerId: String(playerId), gameId: "comet-cards", roundId: String(roundId).toLowerCase() }, Date.now() - ms - 3_000);
+    return await startClock(rawDb(), { playerId: String(playerId), gameId, roundId: String(roundId).toLowerCase() }, Date.now() - ms - 3_000);
   } catch {
     return "";
   }

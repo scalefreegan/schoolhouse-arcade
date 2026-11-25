@@ -1,7 +1,7 @@
 // Request and reply types shared by the server and the client. Types only:
 // nothing here runs.
 
-import type { FactStat } from "./comet/deck.ts";
+import type { FactStat } from "./deal.ts";
 import type { AnswerInput, BoardKind, PlayConfig } from "./play.ts";
 import type { PrizeFields } from "./prizes.ts";
 import type { TicketLine } from "./tickets.ts";

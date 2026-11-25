@@ -8,9 +8,10 @@ uses, which is why an id never changes once live. Mirrors Lean Into It's `docs/D
 | What | Where | Tracked by git |
 |---|---|---|
 | The games' rules, the avatars, the sprites | `web/shared/`, `web/src/sprites/` | yes |
+| Sound Machine's spoken clips (one mp3 a sound, two a word: plain and slow) and their manifest | `web/public/speech/sound-machine/` | yes (generated: `npm run speech:build`) |
 | Players; every play and every answer in it; stars per level; tickets, badges, prizes and hand-overs; the grown-up PIN's hash | Postgres `schoolhouse_arcade` | no |
 | `DATABASE_URL`, local overrides | `.env.local` | no |
-| Which player this device is, whether sound is off, the set-up each player used last | the browser's localStorage (`arcade.player`, `arcade.muted`, `arcade.comet.setup.<player>`) | no, and not in the database |
+| Which player this device is, whether sound is off, the set-up each player used last | the browser's localStorage (`arcade.player`, `arcade.muted`, `arcade.comet.setup.<player>`, `arcade.sound-machine.setup.<player>`) | no, and not in the database |
 | `npm run db:backup`'s dumps of the database, the newest 14, readable only by you | `backups/` (`SCHOOLHOUSE_ARCADE_BACKUPS_DIR` moves it) | no (`backups/` is ignored) |
 | The Mac app's server log, and the daily backup's | `~/Library/Logs/SchoolhouseArcade.log` (`.old`: the run before), `SchoolhouseArcadeBackup.log` | no |
 
@@ -20,7 +21,7 @@ uses, which is why an id never changes once live. Mirrors Lean Into It's `docs/D
 |---|---|---|
 | `players` | someone on the "Who is playing?" screen: a name, a character (`avatar`) and its `colour` (null: its own look) | `scripts/db/players.ts` |
 | `plays` | one finished round, scored by the server; `round_id` is the round's own id | `scripts/db/plays.ts` |
-| `answers` | one card of a play: the fact, what was answered, how long it took | `scripts/db/plays.ts` |
+| `answers` | one card or word of a play: the fact, what was answered (`given`, a number, or `given_text`), how long it took | `scripts/db/plays.ts` |
 | `level_stars` | the most stars a player has on one level | `scripts/db/plays.ts` |
 | `level_opens` | a level a grown-up opened early for a player | `scripts/db/plays.ts` |
 | `ticket_events` | one change to a player's tickets: earned, spent, or adjusted by hand | `scripts/db/tickets.ts` |
@@ -31,6 +32,14 @@ uses, which is why an id never changes once live. Mirrors Lean Into It's `docs/D
 
 The high score tables are queries over `plays`. Which card comes next is
 worked out from a player's latest `answers`.
+
+**An answer is a number or text.** Comet Cards answers in numbers
+(`answers.given`); Sound Machine answers in text (`answers.given_text`,
+added by migration `0005_answers_given_text`): the word picked in Read
+(`chick`), or the tiles placed in Build, in order (`ch-i-ck`). `fact` is
+the sum or the word asked. Each row has one or neither (a card that timed
+out), never both; the column added is nullable and no row from before was
+touched.
 
 **Tickets are a ledger.** A balance is the sum of a player's
 `ticket_events`; rows are added and never changed or deleted, so every
@@ -62,6 +71,34 @@ Migration `0002_prizes` also puts the three example prizes on the shelf.
 
 `npm run pin:reset` forgets the grown-up PIN (and nothing else). The next
 one is chosen on the Mac, like the first.
+
+## Speech clips
+
+Sound Machine's sounds and words are static files, made once and committed:
+`web/public/speech/sound-machine/<clip>.mp3`, where a clip is `sound-<id>`
+(a sound in `SOUNDS`, `web/shared/soundmachine/words.ts`), `word-<word>`
+or `word-<word>-slow` (the word said slowly, still as one word).
+`manifest.json` beside them records, per clip, the voice, the SSML it was
+made from and anything done to the audio afterwards (`post`), so any clip
+can be made again; and two hashes, of that recipe (`recipe`) and of the
+file's bytes (`sha256`). `npm test` checks that every sound has a clip and
+every word its two, each with a manifest entry, and that nothing else is
+there. `npm run speech:check` goes further: a clip whose recipe in
+`scripts/speech/build.mjs` has changed since it was made, or whose file is
+not the one the manifest describes, fails it.
+
+```sh
+# needs AZURE_SPEECH_KEY and AZURE_SPEECH_REGION in the environment, and ffmpeg
+npm run speech:build              # makes what is missing or whose recipe changed
+npm run speech:build -- --force   # makes everything again
+npm run speech:build -- --only sound-k,word-chick
+npm run speech:check              # no key, no network: every clip is there, and is the one its recipe makes
+```
+
+The key is read from the environment only and is never written anywhere.
+The app needs none: at run time the tablet only fetches the files. A clip
+that sounds wrong is put right in `scripts/speech/` and made again, never
+edited by hand. *Grown-ups → Sound check* plays them all.
 
 ## Setup
 

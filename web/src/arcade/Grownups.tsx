@@ -7,6 +7,7 @@ import { go } from "../router.ts";
 import { AvatarSprite, Picture, Sprite } from "../sprites/Sprite.tsx";
 import { useArcade } from "../state.tsx";
 import { PinPad } from "./PinPad.tsx";
+import { SoundCheck } from "./SoundCheck.tsx";
 import { Stars } from "./Stars.tsx";
 
 // The grown-up area: everything that costs real money or overrides the
@@ -33,7 +34,11 @@ function PlayerRow({ p, busy, onAdjust, onOpen, onRetire }: { p: GrownupPlayer; 
   const [note, setNote] = useState("");
   const n = /^[0-9]+$/.test(amount) ? Number(amount) : 0;
   const ok = n >= 1 && n <= ADJUST_MAX;
-  const next = p.levels.find((l) => !l.open);
+  // Each game's levels on a line of their own, with its next locked level to open.
+  const games = [...new Set(p.levels.map((l) => l.gameId))].map((gameId) => {
+    const levels = p.levels.filter((l) => l.gameId === gameId);
+    return { gameId, game: levels[0].game, levels, next: levels.find((l) => !l.open) };
+  });
 
   const send = async (sign: 1 | -1) => {
     if (await onAdjust(sign * n, note)) {
@@ -56,25 +61,30 @@ function PlayerRow({ p, busy, onAdjust, onOpen, onRetire }: { p: GrownupPlayer; 
           <button type="button" className="btn btn-quiet" aria-expanded={form === "tickets"} onClick={() => setForm(form === "tickets" ? null : "tickets")}>
             Tickets
           </button>
-          {next && (
-            <button type="button" className="btn btn-quiet" disabled={busy} onClick={() => onOpen(next.gameId, next.level)}>
-              Unlock {next.title}
-            </button>
-          )}
           <button type="button" className="btn btn-quiet" aria-expanded={form === "retire"} onClick={() => setForm(form === "retire" ? null : "retire")}>
             Retire
           </button>
         </span>
       </div>
 
-      <ul className="m-0 mt-3 flex list-none flex-wrap gap-x-6 gap-y-1 p-0 text-dim">
-        {p.levels.map((l) => (
-          <li key={`${l.gameId}/${l.level}`} className="flex items-center gap-2">
-            {l.title}
-            {l.open ? <Stars count={l.stars} size={14} /> : <Sprite id="lock" size={14} title="locked" />}
-          </li>
-        ))}
-      </ul>
+      {games.map((g) => (
+        <div key={g.gameId} className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-1">
+          <span className="font-display text-xs text-cyan">{g.game}</span>
+          <ul className="m-0 flex flex-1 list-none flex-wrap gap-x-6 gap-y-1 p-0 text-dim">
+            {g.levels.map((l) => (
+              <li key={l.level} className="flex items-center gap-2">
+                {l.title}
+                {l.open ? <Stars count={l.stars} size={14} /> : <Sprite id="lock" size={14} title="locked" />}
+              </li>
+            ))}
+          </ul>
+          {g.next && (
+            <button type="button" className="btn btn-quiet" disabled={busy} aria-label={`Unlock ${g.next.title} in ${g.game}`} onClick={() => onOpen(g.gameId, g.next!.level)}>
+              Unlock {g.next.title}
+            </button>
+          )}
+        </div>
+      ))}
 
       {form === "tickets" && (
         <form className="mt-3 flex flex-wrap items-end gap-3" onSubmit={(ev) => ev.preventDefault()}>
@@ -174,6 +184,8 @@ export function Grownups() {
   /** Choosing a PIN: the first typing, waiting for the second. */
   const [first, setFirst] = useState<string | null>(null);
   const [changing, setChanging] = useState(false);
+  /** The Sound check page is open (Sound Machine's clips, to listen through). */
+  const [checking, setChecking] = useState(false);
   const [data, setData] = useState<GrownupReply | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -268,6 +280,8 @@ export function Grownups() {
     );
   }
 
+  if (checking) return <SoundCheck onBack={() => setChecking(false)} />;
+
   /** Do one thing behind the PIN, then read everything again. */
   const act = async (what: (pin: string) => Promise<unknown>, done?: string): Promise<boolean> => {
     setBusy(true);
@@ -293,9 +307,12 @@ export function Grownups() {
 
   return (
     <main className="screen">
-      <header className="flex items-center justify-between gap-3">
+      <header className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="font-display glow m-0 text-base text-cyan">Grown-ups</h1>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap justify-end gap-2">
+          <button type="button" className="btn btn-quiet" onClick={() => setChecking(true)}>
+            Sound check
+          </button>
           <button type="button" className="btn btn-quiet" onClick={() => setChanging(true)}>
             Change PIN
           </button>

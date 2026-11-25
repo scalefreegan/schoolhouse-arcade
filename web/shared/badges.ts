@@ -9,6 +9,7 @@
 
 import { LEVELS } from "./comet/facts.ts";
 import { MAX_STARS } from "./play.ts";
+import { LEVELS as SOUND_LEVELS } from "./soundmachine/words.ts";
 
 /** What a player has done, across every game. */
 export interface BadgeFacts {
@@ -41,6 +42,13 @@ const COMET = "comet-cards";
 const cometStars = (f: BadgeFacts, level: string): number => f.stars[COMET]?.[level] ?? 0;
 const everyCometLevel = (f: BadgeFacts, stars: number): boolean => LEVELS.every((l) => cometStars(f, l.id) >= stars);
 
+const SOUND = "sound-machine";
+const soundStars = (f: BadgeFacts, level: string): number => f.stars[SOUND]?.[level] ?? 0;
+const everySoundLevel = (f: BadgeFacts, stars: number): boolean => SOUND_LEVELS.every((l) => soundStars(f, l.id) >= stars);
+/** What a Sound Machine level is called on its badge. */
+const SOUND_NAMES: Record<string, string> = { cvc: "3 Sounds", ch: "CH", ck: "CK", sh: "SH", th: "TH", mix: "Mix" };
+const BELLS = ["lime", "cyan", "rose", "violet", "gold", "orange"];
+
 const MEDALS = ["lime", "cyan", "rose", "violet", "gold"];
 
 export const BADGES: Badge[] = [
@@ -61,8 +69,22 @@ export const BADGES: Badge[] = [
   { id: "right-100", title: "100 Club", how: "100 right answers", tickets: 30, sprite: "gem", palette: "cyan", earned: (f) => f.right >= 100 },
   { id: "right-1000", title: "1000 Club", how: "1000 right answers", tickets: 150, sprite: "gem", palette: "magenta", earned: (f) => f.right >= 1000 },
   { id: "clean-sprint", title: "Clean Sweep", how: "A Sprint with no misses", tickets: 40, sprite: "comet", palette: "default", earned: (f) => f.cleanSprints >= 1 },
-  { id: "arcade-ace", title: "Arcade Ace", how: "2 stars on every level", tickets: 200, sprite: "trophy", palette: "default", earned: (f) => everyCometLevel(f, 2) },
-  { id: "comet-champion", title: "Comet Champion", how: "3 stars on every level", tickets: 500, sprite: "crown", palette: "default", earned: (f) => everyCometLevel(f, MAX_STARS) },
+  { id: "arcade-ace", title: "Arcade Ace", how: "2 stars on every Comet Cards level", tickets: 200, sprite: "trophy", palette: "default", earned: (f) => everyCometLevel(f, 2) },
+  { id: "comet-champion", title: "Comet Champion", how: "3 stars on every Comet Cards level", tickets: 500, sprite: "crown", palette: "default", earned: (f) => everyCometLevel(f, MAX_STARS) },
+  // Sound Machine's. The badges above that speak of levels mean Comet Cards' levels, as they always have (and now say so).
+  ...SOUND_LEVELS.map(
+    (l, i): Badge => ({
+      id: `sound-${l.id}`,
+      title: `${SOUND_NAMES[l.id] ?? l.title} Star`,
+      how: `Get a star on ${SOUND_NAMES[l.id] ?? l.title} in Sound Machine`,
+      tickets: 25,
+      sprite: "bell",
+      palette: BELLS[i % BELLS.length],
+      earned: (f) => soundStars(f, l.id) >= 1,
+    }),
+  ),
+  { id: "sound-builder", title: "Word Builder", how: "A star on every Sound Machine level", tickets: 100, sprite: "cog", palette: "default", earned: (f) => everySoundLevel(f, 1) },
+  { id: "sound-champion", title: "Sound Champion", how: "3 stars on every Sound Machine level", tickets: 300, sprite: "megaphone", palette: "default", earned: (f) => everySoundLevel(f, MAX_STARS) },
 ];
 
 export function badgeById(id: string): Badge | undefined {

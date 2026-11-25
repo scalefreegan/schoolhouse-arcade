@@ -15,8 +15,10 @@ export interface PlayConfig {
 export interface AnswerInput {
   /** What was asked, in the game's own notation ("7+5"). */
   fact: string;
-  /** What the player answered; null when the card timed out. */
-  given: number | null;
+  /** What the player answered, as the game writes answers: a number (Comet
+   *  Cards) or text (Sound Machine: the word picked, or the tiles placed,
+   *  "ch-i-ck"). null when the card timed out. */
+  given: number | string | null;
   /** How long the card waited for it, in ms. */
   ms: number;
 }

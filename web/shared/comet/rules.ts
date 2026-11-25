@@ -44,7 +44,7 @@ export const FAST_BONUS = 50;
 /** Timers in a browser are not exact: an answer this far past a limit still counts as in time. */
 const GRACE_MS = 250;
 /** No real answer takes longer than this; a larger number is a bug or a lie. */
-const MAX_ANSWER_MS = 10 * 60_000;
+export const MAX_ANSWER_MS = 10 * 60_000;
 /** The least time an answer is counted as taking: nobody reads a card and
  *  answers faster. A shorter time (an instant tap, or a forged 0) is counted
  *  as this, not refused. It bounds a forged round (Blitz ends after 240
@@ -55,10 +55,13 @@ export const MIN_ANSWER_MS = 250;
 /** Survival has no end but the player's; this is far past any real round. */
 const MAX_ANSWERS = 2_000;
 
-/** An answer's time as every round counts it: whole ms, at least MIN_ANSWER_MS.
- *  The session and settle() both use it, so they cannot disagree. */
+/** An answer's time as every round counts it: whole ms, at least
+ *  MIN_ANSWER_MS and at most MAX_ANSWER_MS (a card left waiting where
+ *  nothing times it, in Sprint or Practice, is counted as the longest an
+ *  answer can take, so its round can still be saved). The session and
+ *  settle() both use it, so they cannot disagree. */
 export function countedMs(ms: number): number {
-  return Math.max(MIN_ANSWER_MS, Math.round(ms));
+  return Math.min(MAX_ANSWER_MS, Math.max(MIN_ANSWER_MS, Math.round(ms)));
 }
 
 /** Points multiplier for the n-th right answer in a row (n ≥ 1). */

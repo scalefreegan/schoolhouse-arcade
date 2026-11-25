@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { BADGES, newBadges, type BadgeFacts } from "./badges.ts";
 import { LEVELS } from "./comet/facts.ts";
+import { LEVELS as SOUND_LEVELS } from "./soundmachine/words.ts";
 import { pay } from "./comet/rules.ts";
 import type { Settled } from "./play.ts";
 import { PIN_RE, cleanPrize } from "./prizes.ts";
@@ -77,4 +78,31 @@ test("a prize needs a name, one of the pictures, a whole price above nothing, an
 test("a PIN is exactly four digits", () => {
   for (const ok of ["0000", "1234", "9999"]) assert.ok(PIN_RE.test(ok), ok);
   for (const bad of ["123", "12345", "12a4", " 1234", "１２３４", ""]) assert.ok(!PIN_RE.test(bad), JSON.stringify(bad));
+});
+
+test("Sound Machine's badges are its own: Word Builder is a star on every one of its levels, Sound Champion three, and neither game's stars count for the other", () => {
+  const sound = (n: number, levels = SOUND_LEVELS.map((l) => l.id)) => ({ "sound-machine": Object.fromEntries(levels.map((l) => [l, n])) });
+  const bells = SOUND_LEVELS.map((l) => `sound-${l.id}`);
+  assert.deepEqual(ids({ stars: sound(1, ["ck"]) }), ["sound-ck"]);
+  assert.deepEqual(ids({ stars: sound(1) }), [...bells, "sound-builder"]);
+  assert.deepEqual(ids({ stars: sound(2) }), [...bells, "sound-builder"], "two stars everywhere is not three");
+  assert.deepEqual(ids({ stars: sound(3) }), [...bells, "sound-builder", "sound-champion"]);
+  const oneShort = sound(3);
+  delete oneShort["sound-machine"].mix;
+  assert.deepEqual(ids({ stars: oneShort }), bells.filter((b) => b !== "sound-mix"), "a level never starred: neither Word Builder nor Sound Champion");
+  const oneLow = sound(3);
+  oneLow["sound-machine"].th = 2;
+  assert.deepEqual(ids({ stars: oneLow }), [...bells, "sound-builder"]);
+  // Arcade Ace gates the biggest prize: three stars on all of Sound Machine does not win it,
+  // even with stars filed under Comet Cards' level ids in the wrong game.
+  assert.ok(!ids({ stars: sound(3) }).includes("arcade-ace"));
+  assert.deepEqual(ids({ stars: { "sound-machine": { ...sound(3)["sound-machine"], ...stars(3)["comet-cards"] } } }), [...bells, "sound-builder", "sound-champion"]);
+  // And Comet Cards' stars win no bell, even under Sound Machine's level ids.
+  assert.deepEqual(ids({ stars: { "comet-cards": { ...stars(3)["comet-cards"], ...sound(3)["sound-machine"] } } }), [...LEVELS.map((l) => `comet-${l.id}`), "arcade-ace", "comet-champion"]);
+  // Both together: each game's badges, in the order they are listed.
+  assert.deepEqual(ids({ stars: { ...stars(2), ...sound(1) } }), [...LEVELS.map((l) => `comet-${l.id}`), "arcade-ace", ...bells, "sound-builder"]);
+});
+
+test("a badge that speaks of levels says whose: the two games both have them", () => {
+  for (const b of BADGES.filter((x) => /level/i.test(x.how))) assert.match(b.how, /Comet Cards|Sound Machine/, b.id);
 });

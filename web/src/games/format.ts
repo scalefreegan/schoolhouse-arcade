@@ -1,4 +1,4 @@
-// How Comet Cards writes its numbers.
+// How the cabinets write their numbers.
 
 /** A score as a cabinet shows it: six digits, zeros in front. */
 export function fmtScore(n: number): string {

@@ -2,7 +2,7 @@
 // name on its Tailscale network, when a grown-up has set one.
 //
 // Why it is needed: `tailscale serve` gives the Mac an https address
-// (https://my-mac.my-tailnet.ts.net:38900) and passes that name on in the
+// (https://my-mac.my-tailnet.ts.net:8900, a port of its own: README) and passes that name on in the
 // Host header. origin.ts admits addresses and `.local` names only, so the
 // name must be given: ARCADE_TAILNET_HOST, in the shell or in .env.local (a
 // Dock app starts the server without the shell's profile). Exact names

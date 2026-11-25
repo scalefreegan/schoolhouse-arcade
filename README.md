@@ -37,7 +37,7 @@ magenta and yellow. [`docs/PRD.md`](docs/PRD.md) has the whole design.
       <img src="docs/screenshots/floor.png" alt="The arcade floor: the Comet Cards cabinet, the Prize Counter, and a crate marked with question marks" width="100%">
       <br><sub><i>The floor: one cabinet so far, and more on the delivery truck.</i></sub>
       <h3>An arcade floor</h3>
-      <p>Each cabinet drills one idea until recall is fast. The first is <b>Comet Cards</b>: adding and taking away, 0 to 10. New cabinets plug into the same players, tickets and badges.</p>
+      <p>Each cabinet drills one idea until recall is fast. The first is <b>Comet Cards</b>: adding and taking away, 0 to 10. The second is <b>Sound Machine</b>, for letter sounds and the digraphs ch, ck, sh and th, with nothing timed and every sound spoken: <i>Build it</i> (hear a word, put its sound tiles in order), <i>Read it</i> (sound out a word, find its picture) and <i>Split it</i> (cut a word into its sounds, a gem for each: "ship" is four letters but three gems). New cabinets plug into the same players, tickets and badges.</p>
     </td>
   </tr>
   <tr>

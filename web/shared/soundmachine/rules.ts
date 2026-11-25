@@ -6,16 +6,18 @@
 // Pure, and run by Node as is.
 
 import { MAX_STARS, RuleError, type AnswerInput, type GameRules, type JudgedAnswer, type PlayConfig, type Settled } from "../play.ts";
-import { LEVELS, ROUND_WORDS, levelById, reviewOf, reviewRoom, soundOf, tilesKey, wordById, type SoundLevel, type Word } from "./words.ts";
+import { LEVELS, ROUND_WORDS, levelById, reviewOf, reviewRoom, soundOf, splitKey, tilesKey, wordById, type SoundLevel, type Word } from "./words.ts";
 
-/** build: hear the word, put its sounds in the boxes. read: sound the word out, pick its picture. */
-export type Mode = "build" | "read";
+/** build: hear the word, put its sounds in the boxes. read: sound the word out,
+ *  pick its picture. gems: see the word, cut it into its sounds (a gem each). */
+export type Mode = "build" | "read" | "gems";
 export type Skill = "easy" | "arcade";
 
 /** Ids are stored on plays: never rename one. */
 export const MODES: GameRules["modes"] = [
   { id: "build", title: "Build it", blurb: "Make the word", board: "score" },
   { id: "read", title: "Read it", blurb: "Find the picture", board: "score" },
+  { id: "gems", title: "Split it", blurb: "A gem a sound", board: "score" },
 ];
 
 export const SKILLS: GameRules["skills"] = [
@@ -97,9 +99,25 @@ export function starsFor(r: Round): number {
 }
 
 /** The right answer to a word, as an answer is written: the word itself
- *  (read), or its tiles in order (build). */
+ *  (read), its tiles in order (build), or its letters cut into its tiles (gems). */
 export function answerOf(mode: Mode, word: Word): string {
-  return mode === "build" ? tilesKey(word.tiles) : word.id;
+  return mode === "build" ? tilesKey(word.tiles) : mode === "gems" ? splitKey(word.tiles) : word.id;
+}
+
+/**
+ * The gems a round's answers have won: one for each sound of a word split
+ * right, none for a word split wrong. Gems are for the round only: they are
+ * drawn in its tray and counted on its results, and are worth what a right
+ * word is worth in the other games (score, stars, tickets). Nothing stores
+ * them.
+ */
+export function gemsOf(mode: Mode, answers: { fact: string; given: unknown }[]): number {
+  let gems = 0;
+  for (const a of answers) {
+    const word = wordById(a.fact);
+    if (word && a.given === answerOf(mode, word)) gems += word.tiles.length;
+  }
+  return gems;
 }
 
 /** The words a round on this level may ask for: its own, and the ones it may review. */
@@ -121,13 +139,27 @@ function builtFrom(given: string, word: Word): boolean {
   return tiles.length === word.tiles.length && tiles.every((t) => soundOf(t) !== undefined);
 }
 
+/** A Split answer is the word's own letters, in order, cut into pieces none of which is empty. */
+function splitFrom(given: string, word: Word): boolean {
+  const pieces = given.split("|");
+  return pieces.every((p) => p.length > 0) && pieces.join("") === word.id;
+}
+
+/** Why an answer is not the shape its game's answers have, or null if it is. */
+function misfit(mode: Mode, given: string, word: Word): string | null {
+  if (mode === "read") return wordById(given) ? null : `"${given}" is not a picture the machine has.`;
+  if (mode === "build") return builtFrom(given, word) ? null : `"${given}" does not fit the boxes of "${word.id}".`;
+  return splitFrom(given, word) ? null : `"${given}" is not "${word.id}" cut into pieces.`;
+}
+
 /**
  * Judge and score a whole play from its answers alone. For Read the answer
- * is the word picked; for Build it is the tiles placed, in order. Refused:
- * a word the level does not hold; a word twice (a round never repeats one);
- * more words than a round has; more review words than the level leaves room
- * for; an answer that is not a word (read) or not a box-full of tiles
- * (build); a time that cannot be. A time under MIN_ANSWER_MS is counted as
+ * is the word picked; for Build it is the tiles placed, in order; for Gems
+ * it is the word's letters as the player cut them. Refused: a word the
+ * level does not hold; a word twice (a round never repeats one); more words
+ * than a round has; more review words than the level leaves room for; an
+ * answer that is not a word (read), not a box-full of tiles (build) or not
+ * the word's own letters cut into pieces (gems); a time that cannot be. A time under MIN_ANSWER_MS is counted as
  * MIN_ANSWER_MS.
  */
 export function settle(config: PlayConfig, inputs: AnswerInput[]): Settled {
@@ -147,8 +179,9 @@ export function settle(config: PlayConfig, inputs: AnswerInput[]): Settled {
     if (!own.has(word.id) && ++reviewed > reviewRoom(level)) throw new RuleError(`A round of ${level.title} does not hold that many old words.`);
     if (!Number.isFinite(input.ms) || input.ms < 0 || input.ms > MAX_ANSWER_MS) throw new RuleError("An answer's time is out of range.");
     const given = input.given;
-    if (typeof given !== "string" || given.length > 40) throw new RuleError("An answer must be a word or its tiles.");
-    if (mode === "read" ? !wordById(given) : !builtFrom(given, word)) throw new RuleError(mode === "read" ? `"${given}" is not a picture the machine has.` : `"${given}" does not fit the boxes of "${word.id}".`);
+    if (typeof given !== "string" || given.length > 40) throw new RuleError("An answer must be a word, its tiles or its pieces.");
+    const shape = misfit(mode, given, word);
+    if (shape) throw new RuleError(shape);
     const ms = countedMs(input.ms);
     const correct = given === answerOf(mode, word);
     answers.push({ fact: word.id, given, ms, correct });

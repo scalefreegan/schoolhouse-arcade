@@ -1884,6 +1884,35 @@ export const ART = {
       light: { k: "#f2ecff" },
     },
   },
+  // Split it: the gem a sound earns. A cushion-cut stone seen from above (the
+  // 100 Club's gem is a diamond from the side), lit from the top left. One
+  // colour per sound of the word, in order; none of them the green or red of
+  // right and wrong.
+  jewel: {
+    rows: [
+      "................",
+      ".....kkkkkk.....",
+      "....kwlllcck....",
+      "...kwllllccck...",
+      "..kllltttcccdk..",
+      ".klllttttttccdk.",
+      ".klltttwttttcdk.",
+      ".kllttttttttcdk.",
+      ".kllttttttttddk.",
+      ".klcttttttttddk.",
+      ".kcccttttttdddk.",
+      "..kcccdddddddk..",
+      "...kccddddddk...",
+      "....kcdddddk....",
+      ".....kkkkkk.....",
+      "................",
+    ],
+    palettes: {
+      gold: { k: "#4a2f06", w: WHITE, l: "#fff3b0", t: "#ffe066", c: "#ffc21a", d: "#b87a0c" },
+      violet: { k: "#24104a", w: WHITE, l: "#ecdcff", t: "#c99bff", c: "#a66cff", d: "#5f2fb0" },
+      blue: { k: "#0a2450", w: WHITE, l: "#d3ebff", t: "#8cc4ff", c: "#4aa3ff", d: "#1f5cb8" },
+    },
+  },
   // --- prize shelf and badge sprites (end) ---
 } satisfies Record<string, SpriteArt>;
 

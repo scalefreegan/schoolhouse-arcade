@@ -798,6 +798,178 @@ select.field {
   cursor: pointer;
 }
 
+/* Split: the word as one block of letters (the player's, so magenta), with
+   a gap between each two to tap. A gap joined is part of the block, with a
+   faint perforation where it would tear; a gap cut is a gap. */
+.sm-split {
+  --letter-w: 5rem;
+  --cut-w: 2.5rem;
+  --letter-h: 7.5rem;
+  --gem: 3.5rem;
+}
+.gm-word {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  padding-top: var(--gem);
+}
+.gm-word[data-judged="true"] {
+  padding-top: 0;
+  gap: var(--cut-w);
+}
+.gm-letter,
+.gm-piece {
+  --edge: var(--magenta);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--letter-h);
+  background: var(--raised);
+  color: var(--magenta);
+  font-family: var(--font-letters);
+  font-weight: 600;
+  font-size: calc(var(--letter-h) * 0.62);
+  line-height: 1;
+  text-transform: none;
+}
+/* A letter is not pressed: a tap on it goes to the gap beside it. */
+.gm-letter {
+  --l: 0;
+  --r: 0;
+  width: var(--letter-w);
+  pointer-events: none;
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--edge),
+    0 var(--px) 0 0 var(--edge),
+    calc(var(--px) * -1 * var(--l)) 0 0 0 var(--edge),
+    calc(var(--px) * var(--r)) 0 0 0 var(--edge);
+}
+.gm-letter[data-open-left="true"] { --l: 1; }
+.gm-letter[data-open-right="true"] { --r: 1; }
+.gm-cut {
+  position: relative;
+  width: var(--cut-w);
+  min-height: max(56px, var(--letter-h));
+  padding: 0;
+  border: 0;
+  background: var(--raised);
+  cursor: pointer;
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--magenta),
+    0 var(--px) 0 0 var(--magenta);
+}
+/* Each gap reaches half a letter either way, so the whole word is a place to tap. */
+.gm-cut::after {
+  content: "";
+  position: absolute;
+  inset: 0 calc(var(--letter-w) / -2);
+}
+.gm-cut-mark {
+  position: absolute;
+  inset: calc(var(--px) * 3) auto calc(var(--px) * 3) 50%;
+  width: var(--px);
+  translate: -50% 0;
+  background: repeating-linear-gradient(to bottom, var(--line) 0 calc(var(--px) * 2), transparent calc(var(--px) * 2) calc(var(--px) * 4));
+}
+.gm-cut[data-cut="true"] {
+  background: transparent;
+  box-shadow: none;
+}
+.gm-cut[data-cut="true"] .gm-cut-mark {
+  background: repeating-linear-gradient(to bottom, var(--dim) 0 calc(var(--px) * 2), transparent calc(var(--px) * 2) calc(var(--px) * 4));
+}
+.gm-cut:hover .gm-cut-mark,
+.gm-cut:focus-visible .gm-cut-mark {
+  width: calc(var(--px) * 2);
+  background: var(--magenta);
+}
+/* Answered: the right pieces, each a box of its own with a place for its gem above. */
+.gm-piece-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.gm-gem-spot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  height: var(--gem);
+}
+.gm-piece {
+  min-width: var(--letter-w);
+  padding: 0 calc(var(--px) * 3);
+  border: 0;
+  cursor: pointer;
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--edge),
+    0 var(--px) 0 0 var(--edge),
+    calc(var(--px) * -1) 0 0 0 var(--edge),
+    var(--px) 0 0 0 var(--edge);
+}
+.gm-piece[data-state="right"] {
+  --edge: var(--good);
+  color: var(--good);
+}
+/* A miss: the game shows the right pieces. */
+.gm-piece[data-state="show"] {
+  --edge: var(--cyan);
+  color: var(--cyan);
+  background: var(--tube);
+}
+.gm-piece[data-lit="true"] {
+  background: var(--edge);
+  color: var(--tube);
+}
+@keyframes gm-drop {
+  from { transform: translateY(calc(var(--px) * -8)); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@keyframes gm-fly {
+  from { transform: translateY(0); opacity: 1; }
+  to { transform: translateY(calc(var(--px) * 40)) scale(0.4); opacity: 0; }
+}
+.gm-drop { animation: gm-drop 0.2s steps(3); }
+.gm-fly { animation: gm-fly 0.45s steps(5) forwards; }
+/* Easy: an empty slot for each of the word's sounds. */
+.gm-slots {
+  display: flex;
+  justify-content: center;
+  gap: calc(var(--px) * 3);
+}
+.gm-slot {
+  width: calc(var(--px) * 10);
+  height: calc(var(--px) * 10);
+  background: var(--tube);
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--line),
+    0 var(--px) 0 0 var(--line),
+    calc(var(--px) * -1) 0 0 0 var(--line),
+    var(--px) 0 0 0 var(--line);
+}
+/* The round's gems, along the bottom of the machine. */
+.gm-tray {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--px) * 3);
+  width: 100%;
+  max-width: 30rem;
+  min-height: calc(var(--px) * 12);
+  padding: calc(var(--px) * 2) calc(var(--px) * 3);
+  background: var(--tube);
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--yellow),
+    0 var(--px) 0 0 var(--yellow),
+    calc(var(--px) * -1) 0 0 0 var(--yellow),
+    var(--px) 0 0 0 var(--yellow);
+}
+.gm-tray-gems {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--px);
+  flex: 1;
+}
+
 @media (max-width: 40rem) {
   .machine { padding: calc(var(--px) * 6) calc(var(--px) * 3); }
   .sm-build {
@@ -834,10 +1006,19 @@ select.field {
   .sm-blend { min-width: calc(var(--px) * 18); }
   .sm-pictures { grid-template-columns: repeat(2, minmax(0, 9rem)); }
   .sm-pictures[data-n="3"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  /* "thick" (five letters, four gaps) fits 390 px across with its gaps 56 px tall. */
+  .sm-split {
+    --letter-w: 2.75rem;
+    --cut-w: 1.5rem;
+    --letter-h: 4.5rem;
+    --gem: 2.75rem;
+  }
+  .gm-piece { padding: 0 var(--px); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hop, .blink, .starfield, .card[data-state="wrong"], .lamp[data-state="now"], .sm-belt[data-run="true"], .sm-choice[data-state="wrong"] { animation: none; }
+  .hop, .blink, .starfield, .card[data-state="wrong"], .lamp[data-state="now"], .sm-belt[data-run="true"], .sm-choice[data-state="wrong"], .gm-drop { animation: none; }
+  .gm-fly { animation: none; opacity: 0; }
   .sm-tile:active:not(:disabled) { transform: none; }
   .pop { animation: none; opacity: 0; }
   .btn:active:not(:disabled) { transform: none; }

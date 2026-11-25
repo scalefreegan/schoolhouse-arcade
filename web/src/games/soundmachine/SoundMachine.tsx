@@ -1,6 +1,6 @@
 import type { AnswerInput, PlayConfig } from "../../../shared/play.ts";
 import { answerOf, poolOf, soundMachineRules, type Mode, type Skill } from "../../../shared/soundmachine/rules.ts";
-import { LEVELS, SOUNDS, clipUrl, levelById, soundClip, wordById, wordClip, type Word } from "../../../shared/soundmachine/words.ts";
+import { LEVELS, SOUNDS, clipUrl, levelById, slowClip, soundClip, wordById, wordClip, type Word } from "../../../shared/soundmachine/words.ts";
 import { sfx } from "../../sound.ts";
 import { preload, say } from "../../speech.ts";
 import { Picture, Sprite } from "../../sprites/Sprite.tsx";
@@ -19,14 +19,22 @@ const GAME: CabinetGame = {
 };
 
 /** Every clip a round on this level can play: each sound (any tile may be
- *  in a tray), and each word the round may ask for. Fetched before the
+ *  in a tray), and each word the round may ask for, plain and slow. Fetched before the
  *  round starts, so nothing waits on the network once it has. */
 function clipsFor(config: PlayConfig): string[] {
   const level = levelById(config.level);
-  return [...SOUNDS.map((s) => clipUrl(soundClip(s.id))), ...(level ? poolOf(level) : []).map((w) => clipUrl(wordClip(w.id)))];
+  return [...SOUNDS.map((s) => clipUrl(soundClip(s.id))), ...(level ? poolOf(level) : []).flatMap((w) => [clipUrl(wordClip(w.id)), clipUrl(slowClip(w.id))])];
 }
 
-const prepare = (config: PlayConfig) => preload(clipsFor(config));
+/** A Build round cannot be played without its words said (the word is the
+ *  question); everything else is fetched too, but a round starts without a
+ *  clip that will not come: that tile, or the snail, is silent. If nothing
+ *  comes at all the Mac is not there, and starting the round says so. */
+const prepare = (config: PlayConfig) => {
+  const level = levelById(config.level);
+  const words = config.mode === "build" && level ? poolOf(level).map((w) => clipUrl(wordClip(w.id))) : [];
+  return preload(words, clipsFor(config));
+};
 
 /** The words missed in a round, to look at and hear again. */
 function Missed({ answers, mode }: { answers: AnswerInput[]; mode: Mode }) {
@@ -86,6 +94,7 @@ export function SoundMachine(props: GameProps) {
       {...props}
       game={GAME}
       prepare={prepare}
+      blocked={muted}
       setup={{ levelFace: (l) => <span className="sm-letter text-base">{l.blurb}</span>, ...(muted ? { notice: <NeedsSound /> } : {}) }}
       round={({ key, config, stats, onDone, onQuit }) => <RoundScreen key={key} level={levelById(config.level)!} mode={config.mode as Mode} skill={config.skill as Skill} stats={stats} onDone={onDone} onQuit={onQuit} />}
       missed={(answers, config) => <Missed answers={answers} mode={config.mode as Mode} />}

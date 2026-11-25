@@ -52,7 +52,11 @@ export const DIGRAPHS = ["ch", "ck", "sh", "th"];
  * The sound each tile makes, by sound id. In this game a tile makes one
  * sound wherever it appears: the vowels are always short, c is always hard,
  * th is always the quiet one of "bath" (never the buzzing one of "this"). A
- * word that would break that does not belong in the list; a test holds it so.
+ * word that would break that does not belong in the list. The tests pin
+ * every tile to its sound and every sound to its IPA; that each word is
+ * really said the way its tiles say is not something a test here can hear:
+ * it is checked when the clips are made (speech-to-text, in
+ * `scripts/speech/build.mjs --verify`) and by ear on the Sound check page.
  */
 export const TILE_SOUND: Record<string, string> = {
   a: "a", e: "e", i: "i", o: "o", u: "u",
@@ -180,13 +184,15 @@ export function lookalike(a: string, b: string): boolean {
 /** A clip's id: a word said whole, or one sound on its own. It is the file's
  *  name under web/public/speech/sound-machine/ and its key in the manifest. */
 export const wordClip = (wordId: string): string => `word-${wordId}`;
+/** The same word said slowly and clearly, as a teacher says it for a child: still one word. */
+export const slowClip = (wordId: string): string => `word-${wordId}-slow`;
 export const soundClip = (soundId: string): string => `sound-${soundId}`;
 /** The clip a tile plays. */
 export const tileClip = (tile: string): string => soundClip(TILE_SOUND[tile]);
 
 /** Every clip the game can play. The speech script makes exactly these. */
 export function allClips(): string[] {
-  return [...SOUNDS.map((s) => soundClip(s.id)), ...WORDS.map((w) => wordClip(w.id))];
+  return [...SOUNDS.map((s) => soundClip(s.id)), ...WORDS.map((w) => wordClip(w.id)), ...WORDS.map((w) => slowClip(w.id))];
 }
 
 export const SPEECH_DIR = "speech/sound-machine";

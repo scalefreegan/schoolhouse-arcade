@@ -162,16 +162,25 @@ sounds, and a different kind of game from Comet Cards.
 
 A digraph is one tile and one box. In Build, pressing a tile says its sound
 and puts it in the next empty box; pressing a box says it and takes it back
-out; a button says the whole word again; the lever does nothing until every
-box is full. In Read, pressing a sound says it, and the blend button says
-the sounds in order and then run together. **Read never says the whole word
-before the answer**: hearing it would be the answer. It is said after.
+out; a button says the whole word again, and the snail beside it says it
+slowly (one word still, the way a teacher says it for a child); the lever
+does nothing until every box is full. In Read, pressing a sound says it,
+and the blend button says the sounds one at a time, takes a breath, and
+says them again run together. **Read never says the whole word before the
+answer**, plain or slow: hearing it would be the answer. Both buttons
+appear once it is answered.
 
-One try a word. A right answer says the word and moves on. A wrong one
-shows the right one (the word built in the boxes with the try crossed out
-above it, or the right picture lit) and says it sound by sound and then
-whole; the next word comes when the player presses the arrow. Nothing
-earned is ever taken away.
+A sound on its own is said the way a teacher models it: one that can be
+held is held ("mmmm", "ssss", a long open "a"), and one that cannot (b, d,
+g, p, t, k, ch) is one clear burst with no "uh" hung on a quiet one.
+
+One try a word. Either way the word is then said sound by sound, unhurried,
+and whole. After a right answer the next word comes by itself when that has
+been said. A wrong one shows the right one (the word built in the boxes
+with the try crossed out above it, or the right picture lit); the next word
+comes when the player presses the arrow, which lights when the word has
+been said. A new word always stops whatever was being said of the last.
+Nothing earned is ever taken away.
 
 ### Levels
 
@@ -237,10 +246,17 @@ when wrong) before the next word can come.
 Every sound and every word is a recorded clip, made ahead of time by
 `npm run speech:build` (Azure text-to-speech, one voice) and served by the
 Mac as a static file: the game calls nowhere outside the house and needs no
-key to run. A round's clips are fetched before it starts. The game needs
-sound: with the sound switch off it says so and offers to turn it on rather
-than start in silence. *Grown-ups → Sound check* plays every sound and
-every word, so the pronunciation can be listened through in one place.
+key to run. A word has two clips, plain and slow. A round's clips are
+fetched before it starts, and none is waited on for more than eight
+seconds. Build cannot ask a word it cannot say, so a Build round does not
+start without its words' clips (the screen says so, with a way back and a
+way to try again); any other clip that will not come is left out, and that
+tile or button is silent. The game needs sound: with the sound switch off
+it says so and offers to turn it on rather than start in silence, from the
+set-up screen and from Play again alike, and a round in which the sound is
+switched off stops and says the same. *Grown-ups → Sound check* plays
+every sound and every word, plain and slow, so the pronunciation can be
+listened through in one place.
 
 ## Tickets, badges, prizes
 
@@ -265,8 +281,8 @@ already deserves it the next time they play.
 | 100 Club | 100 right answers | 30 |
 | 1000 Club | 1000 right answers | 150 |
 | Clean Sweep | a Sprint with no misses | 40 |
-| Arcade Ace | two stars on every level | 200 |
-| Comet Champion | three stars on every level | 500 |
+| Arcade Ace | two stars on every Comet Cards level | 200 |
+| Comet Champion | three stars on every Comet Cards level | 500 |
 | *Level* Star (six of them, Sound Machine's) | a first star on that Sound Machine level | 25 each |
 | Word Builder | a star on every Sound Machine level | 100 |
 | Sound Champion | three stars on every Sound Machine level | 300 |

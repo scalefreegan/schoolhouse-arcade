@@ -1682,8 +1682,10 @@ export const ART = {
       "................",
       "................",
     ],
+    // The tick is not green: on a game screen green means "you were right",
+    // and this picture sits among the choices.
     palettes: {
-      default: { w: "#e8e2ff", g: "#7dff5a" },
+      default: { w: "#e8e2ff", g: "#5aa9ff" },
     },
   },
   w_shock: {
@@ -1849,6 +1851,31 @@ export const ART = {
       ".kkkkkkkkkkkkkk.",
       "...........kkk..",
       "...........kk...",
+      "................",
+      "................",
+    ],
+    palettes: {
+      default: { k: INK },
+      light: { k: "#f2ecff" },
+    },
+  },
+  // Say it slowly: a snail.
+  snail: {
+    rows: [
+      "................",
+      "................",
+      "........kkkkk...",
+      ".......kkkkkkk..",
+      ".k.k..kkk...kkk.",
+      ".k.k..kk.kkk.kk.",
+      ".k.k..kk.k.k.kk.",
+      ".kkk..kk.k...kk.",
+      ".kkk..kkk.kkkkk.",
+      ".kkk...kkkkkkk..",
+      ".kkkkkkkkkkkkk..",
+      ".kkkkkkkkkkkkkkk",
+      "..kkkkkkkkkkkkk.",
+      "................",
       "................",
       "................",
     ],

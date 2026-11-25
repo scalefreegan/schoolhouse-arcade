@@ -69,9 +69,9 @@ export const BADGES: Badge[] = [
   { id: "right-100", title: "100 Club", how: "100 right answers", tickets: 30, sprite: "gem", palette: "cyan", earned: (f) => f.right >= 100 },
   { id: "right-1000", title: "1000 Club", how: "1000 right answers", tickets: 150, sprite: "gem", palette: "magenta", earned: (f) => f.right >= 1000 },
   { id: "clean-sprint", title: "Clean Sweep", how: "A Sprint with no misses", tickets: 40, sprite: "comet", palette: "default", earned: (f) => f.cleanSprints >= 1 },
-  { id: "arcade-ace", title: "Arcade Ace", how: "2 stars on every level", tickets: 200, sprite: "trophy", palette: "default", earned: (f) => everyCometLevel(f, 2) },
-  { id: "comet-champion", title: "Comet Champion", how: "3 stars on every level", tickets: 500, sprite: "crown", palette: "default", earned: (f) => everyCometLevel(f, MAX_STARS) },
-  // Sound Machine's. The badges above that speak of levels mean Comet Cards' levels, as they always have.
+  { id: "arcade-ace", title: "Arcade Ace", how: "2 stars on every Comet Cards level", tickets: 200, sprite: "trophy", palette: "default", earned: (f) => everyCometLevel(f, 2) },
+  { id: "comet-champion", title: "Comet Champion", how: "3 stars on every Comet Cards level", tickets: 500, sprite: "crown", palette: "default", earned: (f) => everyCometLevel(f, MAX_STARS) },
+  // Sound Machine's. The badges above that speak of levels mean Comet Cards' levels, as they always have (and now say so).
   ...SOUND_LEVELS.map(
     (l, i): Badge => ({
       id: `sound-${l.id}`,

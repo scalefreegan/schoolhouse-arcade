@@ -161,3 +161,15 @@ test("the round clock holds for Sound Machine: eight instant words claim eight s
   const late = await post(id, waited, instant);
   assert.deepEqual([late.status, late.body.timeMs, late.body.right], [201, 8000, 8]);
 });
+
+test("what a player has seen is kept per game: Comet Cards' sums are not Sound Machine's words, nor the other way", async (t) => {
+  const { join, send, play, progress } = await arcade(t);
+  const em = await join("Em");
+  assert.equal((await send("comet-cards", em, { level: "add-5", mode: "practice", skill: "easy" }, [{ fact: "2+3", given: 5, ms: 2500 }, { fact: "1+1", given: 3, ms: 2500 }])).status, 201);
+  assert.equal((await play(em, { mode: "read" }, [ok("read", "cat"), { fact: "hat", given: "cat", ms: 3000 }])).status, 201);
+  const sound = (await progress(em)).facts;
+  assert.deepEqual(Object.keys(sound).sort(), ["cat", "hat"]);
+  assert.deepEqual([sound.cat.missed, sound.hat.missed], [0, 1]);
+  const comet = (await request<ProgressReply>(plays, "GET", `/progress?player=${em}&game=comet-cards`, undefined, APP)).body.facts;
+  assert.deepEqual(Object.keys(comet).sort(), ["1+1", "2+3"]);
+});

@@ -67,8 +67,10 @@ six-year-old, and two that could be taken for each other are listed in
 `LOOKALIKES` there, which keeps them from being offered side by side. A
 word that cannot be drawn clearly does not belong in the list. Where the
 word is a part or a quality rather than a thing (chin, neck, thin, thick) a
-cyan arrow points at it. `arrow` and `blend` are what the machine's buttons
-show; `bell`, `cog` and `megaphone` are its badges, and `machine` its
+cyan arrow points at it. No picture uses the green of a right answer for
+something that could be read as "this one" (the tick in `w_check` is blue):
+in Read the pictures are the choices. `arrow`, `blend` and `snail` (say it
+slowly) are what the machine's buttons show; `bell`, `cog` and `megaphone` are its badges, and `machine` its
 cabinet on the floor (a game names its drawing in `web/shared/games.ts`).
 
 ## Replacing a drawing with made art

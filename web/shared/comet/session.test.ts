@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { levelById } from "./facts.ts";
-import { MIN_ANSWER_MS, cardLimit, settle, type Mode, type Skill } from "./rules.ts";
+import { MAX_ANSWER_MS, MIN_ANSWER_MS, cardLimit, settle, type Mode, type Skill } from "./rules.ts";
 import { COUNT_FROM, PACE, advance, cardAnswer, startSession, waited, type Session, type SessionEvent } from "./session.ts";
 
 // A round played by hand, event by event, with a clock the test owns.
@@ -210,4 +210,17 @@ test("a round played as fast as the screen allows still takes longer on the wall
     }
   }
   assert.ok(PACE.right > MIN_ANSWER_MS && PACE.wrong > MIN_ANSWER_MS, "an answer shown outlasts what the floor can add to it");
+});
+
+test("a card left waiting where nothing times it counts as the longest an answer can take, so its round can still be saved", () => {
+  for (const mode of ["sprint", "practice"] as Mode[]) {
+    let s = begin(mode, "arcade");
+    assert.equal(cardLimit(mode, s.round), null, mode);
+    s = typeRight(s, 3 * 3_600_000); // left over lunch
+    assert.equal(s.answers[0].ms, MAX_ANSWER_MS, mode);
+    const settled = settle({ level: level.id, mode, skill: "arcade" }, s.answers);
+    assert.deepEqual([settled.score, settled.right, settled.answers[0].ms], [s.round.score, 1, MAX_ANSWER_MS], mode);
+  }
+  // A posted time past it is still refused.
+  assert.throws(() => settle({ level: level.id, mode: "sprint", skill: "arcade" }, [{ fact: "2+3", given: 5, ms: MAX_ANSWER_MS + 1 }]), /out of range/);
 });

@@ -3,335 +3,407 @@
   "format": "mp3, 24 kHz, mono, 64 kbit/s",
   "clips": {
     "sound-a": {
-      "bytes": 3456,
-      "gainDb": -1,
+      "bytes": 6336,
+      "gainDb": -1.2,
       "kind": "sound",
-      "ms": 370,
+      "ms": 730,
       "post": {
         "cut": "voice",
-        "fadeInMs": 15,
-        "fadeOutMs": 50,
+        "fadeInMs": 25,
+        "fadeOutMs": 80,
+        "holdMs": 700,
         "levelDb": -20
       },
       "provider": "azure",
-      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-35%\">at.</prosody></voice></speak>",
+      "recipe": "4d290e14119eb70b2c2bde665b7b24b0d45afe911e8d7e9ffc8cb21eca677164",
+      "sha256": "d81297a5e27a75d724074f177c418102cde6388e6dbb4f0ac9b7801ebbe720d0",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-50%\">at.</prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "sound-b": {
-      "bytes": 1536,
-      "gainDb": 4.4,
+      "bytes": 2496,
+      "gainDb": 2.7,
       "kind": "sound",
-      "ms": 135,
+      "ms": 255,
       "post": {
         "cut": "voiced-stop",
         "fadeInMs": 3,
-        "fadeOutMs": 40,
-        "keepVoicedMs": 70,
-        "levelDb": -20
+        "fadeOutMs": 80,
+        "keepVoicedMs": 110,
+        "levelDb": -20,
+        "tailMs": 120
       },
       "provider": "azure",
+      "recipe": "205885f11eed10483353f1773ce204080d450383a21d76c294dd3de1cb9ca026",
+      "sha256": "50d438b9230a4138a1431b060a78dfa3e9b427a8b9bfd127ad6bd2d5b7e183f5",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><phoneme alphabet=\"ipa\" ph=\"bʌ\">buh</phoneme></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "sound-ch": {
-      "bytes": 2304,
-      "gainDb": 3.4,
+      "bytes": 3648,
+      "gainDb": 8.4,
       "kind": "sound",
-      "ms": 230,
+      "ms": 400,
       "post": {
         "cut": "before-voice",
         "fadeInMs": 5,
-        "fadeOutMs": 20,
-        "levelDb": -24
+        "fadeOutMs": 40,
+        "levelDb": -20,
+        "tailMs": 120
       },
       "provider": "azure",
-      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-20%\"><phoneme alphabet=\"ipa\" ph=\"tʃʌ\">chuh</phoneme></prosody></voice></speak>",
+      "recipe": "d5c9c51b779e64d7b7be564d09a6543d795f5d1ad946425f9b44f59b14f675bd",
+      "sha256": "4708ff05ad7c64fed4b3fa48da6a264a70d55bed2f9c5332c55a2df1bb4ef226",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-50%\"><phoneme alphabet=\"ipa\" ph=\"tʃʌ\">chuh</phoneme></prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "sound-d": {
-      "bytes": 1728,
-      "gainDb": 1.6,
+      "bytes": 2688,
+      "gainDb": 1.1,
       "kind": "sound",
-      "ms": 155,
+      "ms": 275,
       "post": {
         "cut": "voiced-stop",
         "fadeInMs": 3,
-        "fadeOutMs": 40,
-        "keepVoicedMs": 70,
-        "levelDb": -20
+        "fadeOutMs": 80,
+        "keepVoicedMs": 110,
+        "levelDb": -20,
+        "tailMs": 120
       },
       "provider": "azure",
+      "recipe": "0cd941e5c5bac9450b0cc86dd7d25f466e75435ca6fdc99f90b533ffa32355af",
+      "sha256": "0c34ca7406651b1b6c0d33fe88f666472c5781212e5df4623e7b370f6a13c705",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><phoneme alphabet=\"ipa\" ph=\"dʌ\">duh</phoneme></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "sound-e": {
-      "bytes": 2880,
-      "gainDb": -2.3,
+      "bytes": 6144,
+      "gainDb": -2.5,
       "kind": "sound",
-      "ms": 300,
+      "ms": 711,
       "post": {
         "cut": "voice",
-        "fadeInMs": 15,
-        "fadeOutMs": 50,
+        "fadeInMs": 25,
+        "fadeOutMs": 80,
+        "holdMs": 700,
         "levelDb": -20
       },
       "provider": "azure",
-      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-35%\">etch.</prosody></voice></speak>",
+      "recipe": "601f990a1fc8d8756c61a7da35157dc1b51e666b312d583499efe3b0e19dd164",
+      "sha256": "9d9aae2385d77d66ba38378dd83af5bee0957ef399d8956409b823b265e092ac",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-50%\">etch.</prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "sound-f": {
-      "bytes": 4224,
-      "gainDb": 19.8,
+      "bytes": 6912,
+      "gainDb": 24.8,
       "kind": "sound",
-      "ms": 460,
+      "ms": 800,
       "post": {
         "cut": "after-voice",
-        "fadeInMs": 20,
-        "fadeOutMs": 20,
-        "levelDb": -27
+        "fadeInMs": 30,
+        "fadeOutMs": 70,
+        "hold": "hiss",
+        "holdMs": 750,
+        "levelDb": -22
       },
       "provider": "azure",
+      "recipe": "4dd719fccbaf5fb377f7e1547353051ef316fd225abe2affcc51da060adb0ad1",
+      "sha256": "bc39eaa6ceaf9866de4aa928bb5041f89b65af65be2e20c8031b883fb9d4948e",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-50%\"><phoneme alphabet=\"ipa\" ph=\"ʌf\">uff</phoneme></prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "sound-g": {
-      "bytes": 1728,
-      "gainDb": 2.8,
+      "bytes": 2688,
+      "gainDb": 3.2,
       "kind": "sound",
-      "ms": 155,
+      "ms": 275,
       "post": {
         "cut": "voiced-stop",
         "fadeInMs": 3,
-        "fadeOutMs": 40,
-        "keepVoicedMs": 70,
-        "levelDb": -20
+        "fadeOutMs": 80,
+        "keepVoicedMs": 110,
+        "levelDb": -20,
+        "tailMs": 120
       },
       "provider": "azure",
+      "recipe": "0e4fcbafe7642c4057e8c09d3aeb56fa41936f77f3eed679b85a6eadd09c6ba4",
+      "sha256": "3c0dea78e1a18308e7136456d982ef67edad1ec1bf7f3a0d96caa690ac869336",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><phoneme alphabet=\"ipa\" ph=\"ɡʌ\">guh</phoneme></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "sound-h": {
-      "bytes": 2304,
-      "gainDb": 7.4,
+      "bytes": 3840,
+      "gainDb": 15.8,
       "kind": "sound",
-      "ms": 220,
+      "ms": 430,
       "post": {
         "cut": "before-voice",
-        "fadeInMs": 5,
-        "fadeOutMs": 20,
-        "levelDb": -30
+        "fadeInMs": 30,
+        "fadeOutMs": 70,
+        "hold": "hiss",
+        "holdMs": 380,
+        "levelDb": -23,
+        "tailMs": 40
       },
       "provider": "azure",
+      "recipe": "ddeac41e65cb9c8d5d5320dbf128539e8a53ad6d88a58408c150c3fbcdb307c5",
+      "sha256": "69d33a8acbc3a6f206175727203fb39945be55131fd9425a5770a2de46d7f971",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-50%\"><phoneme alphabet=\"ipa\" ph=\"hʌ\">huh</phoneme></prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "sound-i": {
-      "bytes": 3072,
-      "gainDb": -3.5,
+      "bytes": 6144,
+      "gainDb": -3.8,
       "kind": "sound",
-      "ms": 320,
+      "ms": 714,
       "post": {
         "cut": "voice",
-        "fadeInMs": 15,
-        "fadeOutMs": 50,
+        "fadeInMs": 25,
+        "fadeOutMs": 80,
+        "holdMs": 700,
         "levelDb": -20
       },
       "provider": "azure",
-      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-35%\">it.</prosody></voice></speak>",
+      "recipe": "41eeef280cf8d601ff4fea3976ef0838c2dd39b4772e1fa903fd1a2d7f9c82a5",
+      "sha256": "ef37e0fcb251d97ffc46ef53cdc5c419bc88fe0898efe0c3b9d4948634e5505f",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-50%\">it.</prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "sound-k": {
-      "bytes": 2112,
-      "gainDb": 12.5,
+      "bytes": 2880,
+      "gainDb": 17.2,
       "kind": "sound",
-      "ms": 210,
+      "ms": 290,
       "post": {
         "cut": "before-voice",
         "fadeInMs": 5,
-        "fadeOutMs": 20,
-        "levelDb": -24
+        "fadeOutMs": 40,
+        "levelDb": -20,
+        "tailMs": 120
       },
       "provider": "azure",
+      "recipe": "5e9a760d17794e753746f844641749181806b9fc600e17d17890748cc6f5e6c9",
+      "sha256": "a56f6dccc29b8910c473b65f68de638c31f919c10253ebdc1c54299d3d33ed93",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-50%\"><phoneme alphabet=\"ipa\" ph=\"kʌ\">kuh</phoneme></prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "sound-l": {
-      "bytes": 4992,
-      "gainDb": -2.1,
+      "bytes": 6720,
+      "gainDb": -2.2,
       "kind": "sound",
-      "ms": 555,
+      "ms": 773,
       "post": {
         "cut": "all",
-        "fadeInMs": 5,
-        "fadeOutMs": 20,
+        "fadeInMs": 20,
+        "fadeOutMs": 70,
+        "holdMs": 750,
         "levelDb": -20
       },
       "provider": "azure",
+      "recipe": "09fb248ee00d508020d1ec36b0fb75495d5fc04f90d56249ea8e4f13d4c16969",
+      "sha256": "e7cfa5131fe6f0e7f9197d0bdb6a780f2d8c5460574f4e999f396f351b95b3c3",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-35%\"><phoneme alphabet=\"ipa\" ph=\"l\">l</phoneme></prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "sound-m": {
-      "bytes": 4992,
+      "bytes": 6720,
       "gainDb": -0.1,
       "kind": "sound",
-      "ms": 555,
+      "ms": 772,
       "post": {
         "cut": "all",
-        "fadeInMs": 5,
-        "fadeOutMs": 20,
+        "fadeInMs": 20,
+        "fadeOutMs": 70,
+        "holdMs": 750,
         "levelDb": -20
       },
       "provider": "azure",
+      "recipe": "1b2325adf8926385a914bc9ed5620423aca97002f267b27f96c3e7ab58a317a9",
+      "sha256": "e4283d3494979fbeed8e3a701ee8c7d8ce4c5e3bee630a80ed6dae973c074c12",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-50%\"><phoneme alphabet=\"ipa\" ph=\"m\">m</phoneme></prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "sound-n": {
-      "bytes": 4608,
-      "gainDb": 0.2,
+      "bytes": 6720,
+      "gainDb": 0.1,
       "kind": "sound",
-      "ms": 525,
+      "ms": 774,
       "post": {
         "cut": "all",
-        "fadeInMs": 5,
-        "fadeOutMs": 20,
+        "fadeInMs": 20,
+        "fadeOutMs": 70,
+        "holdMs": 750,
         "levelDb": -20
       },
       "provider": "azure",
+      "recipe": "d056f350d1a93537d1b4ec1d5484c27c2ffb343da2d908134366bcd94f6f5610",
+      "sha256": "74fea415a9d4bb5d0aeaa1d5ad78f881055c52c1736ccda54bdabccdfca86e5c",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-35%\"><phoneme alphabet=\"ipa\" ph=\"n\">n</phoneme></prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "sound-o": {
-      "bytes": 3072,
-      "gainDb": -2.8,
+      "bytes": 6336,
+      "gainDb": -3,
       "kind": "sound",
-      "ms": 320,
+      "ms": 721,
       "post": {
         "cut": "voice",
-        "fadeInMs": 15,
-        "fadeOutMs": 50,
+        "fadeInMs": 25,
+        "fadeOutMs": 80,
+        "holdMs": 700,
         "levelDb": -20
       },
       "provider": "azure",
-      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-35%\"><phoneme alphabet=\"ipa\" ph=\"ɑt\">ot</phoneme></prosody></voice></speak>",
+      "recipe": "fe847166dcfcd938f8a668efbd384afd1e2247fa23d8e3e067fd7e6e476bf4c6",
+      "sha256": "6aa60b8b0f6d6753f810869c1d5c45204171ad539c5e7e343e09b22ffaf55b61",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-50%\"><phoneme alphabet=\"ipa\" ph=\"ɑt\">ot</phoneme></prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "sound-p": {
-      "bytes": 1536,
-      "gainDb": 14.5,
-      "kind": "sound",
-      "ms": 140,
-      "post": {
-        "cut": "before-voice",
-        "fadeInMs": 5,
-        "fadeOutMs": 20,
-        "levelDb": -24
-      },
-      "provider": "azure",
-      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-50%\"><phoneme alphabet=\"ipa\" ph=\"pʌ\">puh</phoneme></prosody></voice></speak>",
-      "voice": "en-US-SaraNeural"
-    },
-    "sound-r": {
-      "bytes": 4800,
-      "gainDb": -3.2,
-      "kind": "sound",
-      "ms": 535,
-      "post": {
-        "cut": "all",
-        "fadeInMs": 5,
-        "fadeOutMs": 20,
-        "levelDb": -20
-      },
-      "provider": "azure",
-      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-40%\"><phoneme alphabet=\"ipa\" ph=\"ɹ\">r</phoneme></prosody></voice></speak>",
-      "voice": "en-US-SaraNeural"
-    },
-    "sound-s": {
-      "bytes": 4800,
-      "gainDb": 2.6,
-      "kind": "sound",
-      "ms": 550,
-      "post": {
-        "cut": "after-voice",
-        "fadeInMs": 20,
-        "fadeOutMs": 20,
-        "levelDb": -27
-      },
-      "provider": "azure",
-      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-50%\"><phoneme alphabet=\"ipa\" ph=\"ʌs\">us</phoneme></prosody></voice></speak>",
-      "voice": "en-US-SaraNeural"
-    },
-    "sound-sh": {
-      "bytes": 4992,
-      "gainDb": 3.9,
-      "kind": "sound",
-      "ms": 570,
-      "post": {
-        "cut": "after-voice",
-        "fadeInMs": 20,
-        "fadeOutMs": 20,
-        "levelDb": -27
-      },
-      "provider": "azure",
-      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-50%\"><phoneme alphabet=\"ipa\" ph=\"ʌʃ\">ush</phoneme></prosody></voice></speak>",
-      "voice": "en-US-SaraNeural"
-    },
-    "sound-t": {
       "bytes": 2304,
-      "gainDb": 11.6,
+      "gainDb": 19.7,
       "kind": "sound",
       "ms": 220,
       "post": {
         "cut": "before-voice",
         "fadeInMs": 5,
-        "fadeOutMs": 20,
-        "levelDb": -24
+        "fadeOutMs": 40,
+        "levelDb": -20,
+        "tailMs": 120
       },
       "provider": "azure",
+      "recipe": "c5ece971dae4dda5e549a0d184e53d38eb9443d9c79162ba2a23acb75ea150aa",
+      "sha256": "c600b157a9121e04e08fe42a71a3bbacdd27b1f4ce2fc5271d5dda2c2df0fb68",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-50%\"><phoneme alphabet=\"ipa\" ph=\"pʌ\">puh</phoneme></prosody></voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "sound-r": {
+      "bytes": 6720,
+      "gainDb": -3.3,
+      "kind": "sound",
+      "ms": 774,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 20,
+        "fadeOutMs": 70,
+        "holdMs": 750,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "74d34c22642646c1f48dc226ce26c853c6262dc8ea3ffdee07b630fdda476059",
+      "sha256": "90800f2ef49b29706c692011cd2e4aa409e923bbed6af088334c6bb858ed91e3",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-40%\"><phoneme alphabet=\"ipa\" ph=\"ɹ\">r</phoneme></prosody></voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "sound-s": {
+      "bytes": 6912,
+      "gainDb": 7.2,
+      "kind": "sound",
+      "ms": 800,
+      "post": {
+        "cut": "after-voice",
+        "fadeInMs": 30,
+        "fadeOutMs": 70,
+        "hold": "hiss",
+        "holdMs": 750,
+        "levelDb": -22
+      },
+      "provider": "azure",
+      "recipe": "b329abadc2d98f6357415315cbdb7ca041a793fb2c7e478edda11e63ff5ae0a5",
+      "sha256": "9d1526bfe514b7a2ab06bc9e05e0ad34d140ac893dc55de5bf51469cef0f217d",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-50%\"><phoneme alphabet=\"ipa\" ph=\"ʌs\">us</phoneme></prosody></voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "sound-sh": {
+      "bytes": 6912,
+      "gainDb": 8.6,
+      "kind": "sound",
+      "ms": 800,
+      "post": {
+        "cut": "after-voice",
+        "fadeInMs": 30,
+        "fadeOutMs": 70,
+        "hold": "hiss",
+        "holdMs": 750,
+        "levelDb": -22
+      },
+      "provider": "azure",
+      "recipe": "97b3a0d00355a30f2bf11acee60a1340bf820db7f850687cdc6d4d8fbb963921",
+      "sha256": "a3204a4d3bfd234eb07984c91e56eea87cf3d3464af181353948f1e19d2f479b",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-50%\"><phoneme alphabet=\"ipa\" ph=\"ʌʃ\">ush</phoneme></prosody></voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "sound-t": {
+      "bytes": 2880,
+      "gainDb": 16.6,
+      "kind": "sound",
+      "ms": 300,
+      "post": {
+        "cut": "before-voice",
+        "fadeInMs": 5,
+        "fadeOutMs": 40,
+        "levelDb": -20,
+        "tailMs": 120
+      },
+      "provider": "azure",
+      "recipe": "bb915a7b07d9bff0801a7c3f77e41059b72153db814cf7a8d2be22f15bda6145",
+      "sha256": "e11d224650d0cc3307e2848395947b3959999b4ff3fbfa69f6671bb2d5c8d7f1",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-50%\"><phoneme alphabet=\"ipa\" ph=\"tʌ\">tuh</phoneme></prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "sound-th": {
-      "bytes": 3648,
-      "gainDb": 17.4,
+      "bytes": 6912,
+      "gainDb": 24.6,
       "kind": "sound",
-      "ms": 400,
+      "ms": 800,
       "post": {
         "cut": "after-voice",
-        "fadeInMs": 20,
-        "fadeOutMs": 20,
-        "levelDb": -30
+        "fadeInMs": 30,
+        "fadeOutMs": 70,
+        "hold": "hiss",
+        "holdMs": 750,
+        "levelDb": -23
       },
       "provider": "azure",
+      "recipe": "e578727954f2816f61df8c0c58aef31b7920c0bb4c0badbea712a37fa4a0acec",
+      "sha256": "78291f4447d1f7d3307292d9b11ef8b1516b0d32c94dd81acf9d38ef60fddf33",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-50%\"><phoneme alphabet=\"ipa\" ph=\"ʌθ\">uth</phoneme></prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "sound-u": {
-      "bytes": 2880,
+      "bytes": 6336,
       "gainDb": -3,
       "kind": "sound",
-      "ms": 300,
+      "ms": 723,
       "post": {
         "cut": "voice",
-        "fadeInMs": 15,
-        "fadeOutMs": 50,
+        "fadeInMs": 25,
+        "fadeOutMs": 80,
+        "holdMs": 700,
         "levelDb": -20
       },
       "provider": "azure",
-      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-35%\">up.</prosody></voice></speak>",
+      "recipe": "8a130065f738786899d348e05d47a513af44c51960ab7a13b194f30668c98935",
+      "sha256": "39c019d984281f7879d86de0e8a6a2de3f7af5fe1f0c36828e2c07fa5687dfb2",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-50%\">up.</prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "sound-w": {
-      "bytes": 4416,
-      "gainDb": 3.4,
+      "bytes": 6528,
+      "gainDb": 3.3,
       "kind": "sound",
-      "ms": 485,
+      "ms": 768,
       "post": {
         "cut": "all",
-        "fadeInMs": 5,
-        "fadeOutMs": 20,
+        "fadeInMs": 20,
+        "fadeOutMs": 70,
+        "holdMs": 750,
         "levelDb": -20
       },
       "provider": "azure",
+      "recipe": "3f0870d787954b3cab5dc8e01050b1c4e6467e39b4a16627af75bd25eedef413",
+      "sha256": "708c0d2e9caef4a7f8ba6e0bfbab302a65c53e373fe5ece21a6e729aa4386ece",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-50%\"><phoneme alphabet=\"ipa\" ph=\"w\">w</phoneme></prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
@@ -347,7 +419,26 @@
         "levelDb": -20
       },
       "provider": "azure",
+      "recipe": "6b2505416baeb3cb4d159b81b2e73c7892d661eaa84726edab69c5832c4cdbc0",
+      "sha256": "67eb3176255e15a086a878736fc4fbc950429064283fb43a5b121ff74da31d5c",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">bath.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-bath-slow": {
+      "bytes": 5760,
+      "gainDb": -0.3,
+      "kind": "word",
+      "ms": 655,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 40,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "c5170ed92d46cb3e3848a677e6e6b6316fbce432043c4d02bd6ff735d6682135",
+      "sha256": "8393e7e12d8cdad57b3d4a4f15076b3dd374e8327dedd2432ae4f47084e6e647",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-30%\">bath.</prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "word-bed": {
@@ -362,6 +453,26 @@
         "levelDb": -20
       },
       "provider": "azure",
+      "recipe": "9f17306626380e6231e34f4d49839dd14995c7f83abd2ade92ae6ab1710d64b9",
+      "sha256": "68ea29a167974b09d25c337e72736db02f273fce9dc95431f08226449d17246b",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">bed.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-bed-slow": {
+      "bytes": 5376,
+      "gainDb": -0.8,
+      "kind": "word",
+      "ms": 616,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 40,
+        "levelDb": -20,
+        "tempo": 0.72
+      },
+      "provider": "azure",
+      "recipe": "c110de869e4fbc2fd3e166993e29e6514ff010484cc0d2cc4a3bc92b2968602d",
+      "sha256": "b53240aa5143072edf880b8f5236a1e7c0279c26757d413b4b39b1e99ee64995",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">bed.</voice></speak>",
       "voice": "en-US-SaraNeural"
     },
@@ -377,7 +488,26 @@
         "levelDb": -20
       },
       "provider": "azure",
+      "recipe": "a28dc73ef5291d41c4324a54b630052b790d79e9208e77c2f2917c4fb898720b",
+      "sha256": "f7cadbbabd388e31d175140c7854ca1f4fe94bf20d916ad0e6b281d28a1ee897",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">bug.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-bug-slow": {
+      "bytes": 5760,
+      "gainDb": -1.7,
+      "kind": "word",
+      "ms": 665,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 40,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "23edf6c4dee69a5904f794604a4732bf54ade7d48d6e73431151317e25f4debb",
+      "sha256": "cac0ccf419c5e618278cf0103921d22c9c10a09f45bfb1e22626f70a9d54a701",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-30%\">bug.</prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "word-cash": {
@@ -392,7 +522,26 @@
         "levelDb": -20
       },
       "provider": "azure",
+      "recipe": "4e17f64a74dfa9d55ff9708635c9e70a2c65ca08502238dd7fc443427bfb61f1",
+      "sha256": "f42de7ab2b66e326750ec538ea856ee73b67bd0a4c0dc433d8c9afc9ec8a4845",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">cash.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-cash-slow": {
+      "bytes": 7488,
+      "gainDb": 1.7,
+      "kind": "word",
+      "ms": 875,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 40,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "ab114b4f8349af677e8845a75e2365fb5db9982f8e54a1ba3e06bb5106e3683c",
+      "sha256": "125003f520ed7e69db48ffdc57223becfc03bb8995f64ca77d10af86816c92ee",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-30%\">cash.</prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "word-cat": {
@@ -407,7 +556,26 @@
         "levelDb": -20
       },
       "provider": "azure",
+      "recipe": "052fd0e06c55f7eb0c1956819758a8b0f3d505ee5df93d897349bb360700202d",
+      "sha256": "cd79e7da3a047885a1a4049df924b7060fefc692be77fb8fddc872941b4ed3b5",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">cat.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-cat-slow": {
+      "bytes": 6144,
+      "gainDb": 1.6,
+      "kind": "word",
+      "ms": 715,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 40,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "ca8e080a56e5787bd1cc52a1c96a05da92aec8db830c3affaf2f8f947393be3f",
+      "sha256": "fe121e96ffc4763230b2c4d219af39d5205967c2dfae4b8a963bb8d72419c401",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-30%\">cat.</prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "word-chat": {
@@ -422,7 +590,26 @@
         "levelDb": -20
       },
       "provider": "azure",
+      "recipe": "45089a0ca65b5759763ae8b2b48f7a92852da64b8954319127e8d93a48140e48",
+      "sha256": "470233de15799959b5df4ecf42166f09f165e15ee5ee4f80e10332288971424f",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">chat.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-chat-slow": {
+      "bytes": 6528,
+      "gainDb": 0.6,
+      "kind": "word",
+      "ms": 765,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 40,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "b1ad79d101af45c853e5a7a07d053efcc1df1f14c3dd123daea385e8740d0ce7",
+      "sha256": "d4eeaa22f1a458e891fc024c852bbc71df1119a060d9b35374ac3e6649eb3cd0",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-30%\">chat.</prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "word-check": {
@@ -437,7 +624,26 @@
         "levelDb": -20
       },
       "provider": "azure",
+      "recipe": "1966554563c5f1808c640083663e8fb1caf7a0b58e682b272bf4e40d0cd13821",
+      "sha256": "f871f10f3813f00ccad86712edcc97424c9b5e241a406e1a7a5c5bc2ac021700",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">check.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-check-slow": {
+      "bytes": 6720,
+      "gainDb": 0.3,
+      "kind": "word",
+      "ms": 785,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 40,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "0a0d123acf6d0fe7077b837547d6b99005fc2e34f9d34228783d8ff69aea2705",
+      "sha256": "379e4b56bd89af6255c418df1d804e93156b372c726ca09e44a2daa69de913e5",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-30%\">check.</prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "word-chick": {
@@ -452,7 +658,26 @@
         "levelDb": -20
       },
       "provider": "azure",
+      "recipe": "02cc7dda3caedba3e8829a96e364153932b75c18e74013cd7b6a07fd808afa55",
+      "sha256": "e9312ce99468ba06a514c97bd3ea543686390f7fe9c3abdec7d42ecc06066c90",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">chick.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-chick-slow": {
+      "bytes": 6912,
+      "gainDb": -2,
+      "kind": "word",
+      "ms": 805,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 40,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "3f392264ab23758366e4b897d0342bfddf61300577a6e8177396bd2b957c2776",
+      "sha256": "e4673a7c278da736f6c8aaa9234e746098f717776901a46e0c6236c75c4f5215",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-30%\">chick.</prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "word-chin": {
@@ -467,7 +692,26 @@
         "levelDb": -20
       },
       "provider": "azure",
+      "recipe": "aa5c67d68e89ed97c4f3081db1c4013950ab7ef17e4423235f0013244f4a991b",
+      "sha256": "eee407eb95c6bc41e048aaa0c005d46ba3ba98e8c438dce8ffdc0d583f616a71",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">chin.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-chin-slow": {
+      "bytes": 6528,
+      "gainDb": -0.8,
+      "kind": "word",
+      "ms": 765,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 40,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "df2a1723d5875f01f09ffe8e292b2e42c202fc98e5d00308be553df9ac888343",
+      "sha256": "b29431fa9d696bb925def0b99ff5c48ecff2213fe70eb354bbe5be74e8d16782",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-30%\">chin.</prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "word-chip": {
@@ -482,7 +726,26 @@
         "levelDb": -20
       },
       "provider": "azure",
+      "recipe": "5246c3ed898049aba42e65606120e892b3a6ea230434cbb114b946817c07015f",
+      "sha256": "c2d78aca8e0120ede5508225246dec2c80428e9856a722d24b88258986f6f24d",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">chip.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-chip-slow": {
+      "bytes": 5568,
+      "gainDb": -0.6,
+      "kind": "word",
+      "ms": 625,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 40,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "edd982d7d3a08d8f7c4cca0ed17034f9e7aba0569ba9e71d16143e85151d55d6",
+      "sha256": "761cc715fc649fb7ff91a11ca12a33c05002fce07f85c72fb6bbae0afa77ed6a",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-20%\">chip.</prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "word-chop": {
@@ -497,7 +760,26 @@
         "levelDb": -20
       },
       "provider": "azure",
+      "recipe": "30e175c1002a2c8eff3b77492758382cf4b74d3de491364451a03075a3db58ae",
+      "sha256": "71d04ba49b933e00f75076c4ea7c111b19cf5acf17003a4db25aa8e81d1b3b21",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">chop.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-chop-slow": {
+      "bytes": 6720,
+      "gainDb": -2.6,
+      "kind": "word",
+      "ms": 775,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 40,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "69f63d00817d68f998d938ed3daa9253462a0f224e46b9bc91d11986e6df0070",
+      "sha256": "ab6250bdadbfcd223727fec2f3adca76d16dca8205bc19cc61627b7bbf24db02",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-30%\">chop.</prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "word-cup": {
@@ -512,7 +794,26 @@
         "levelDb": -20
       },
       "provider": "azure",
+      "recipe": "073ca1acf9d572d56fb97c21690c8138ebb749fd39179a6b6fcc1cdfcff2262c",
+      "sha256": "759ae3c66b60d1727d5c7291ee1311903309134bb4f6dc5f523293250e96603d",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">cup.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-cup-slow": {
+      "bytes": 5568,
+      "gainDb": -1.9,
+      "kind": "word",
+      "ms": 645,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 40,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "3c816aa3f0d3e3c2b013b8b71a1c819b82a165656b84aaf1d246acf7b0809fa3",
+      "sha256": "6adbf765079ca75841783c05f8bee8c6a2d2b486979ae9df555ae3dff1ba2e18",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-30%\">cup.</prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "word-dish": {
@@ -527,12 +828,31 @@
         "levelDb": -20
       },
       "provider": "azure",
+      "recipe": "2d9624146067411f3dbac38203a43eb24e921ac2631e6b22042cb96501392e86",
+      "sha256": "b70c2fed168000ff6af2544852bdcc068502d54041a53c100ecc4c10bb034538",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">dish.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-dish-slow": {
+      "bytes": 6720,
+      "gainDb": -0.9,
+      "kind": "word",
+      "ms": 785,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 40,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "6495e22d2a2e74902aaf7b4a7641f7d50038bac7b2ee8fdbcf26f1886b86809d",
+      "sha256": "6d4a747ff79cad5baab03abaf02c81fb1d32b31c431aa17238c9ba566a1b9d43",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-30%\">dish.</prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "word-dog": {
       "bytes": 4608,
-      "gainDb": -0.3,
+      "gainDb": -1.1,
       "kind": "word",
       "ms": 525,
       "post": {
@@ -542,7 +862,26 @@
         "levelDb": -20
       },
       "provider": "azure",
-      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">dog.</voice></speak>",
+      "recipe": "29cf5f53127f2a8232c6d660249d64e8aa48e7bbe7b0b7157476a74b8333f7c5",
+      "sha256": "79e4d12334030fde53ce55111d81de87af82968992aa3a06d136c3213ebdc94b",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><phoneme alphabet=\"ipa\" ph=\"dɑɡ\">dog</phoneme>.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-dog-slow": {
+      "bytes": 6144,
+      "gainDb": -1.2,
+      "kind": "word",
+      "ms": 705,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 40,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "8a8c3818bdacb4a2e580d3593a56cc9e5bc2d260f70ae5aeecad786142483474",
+      "sha256": "03c0043b5d42195364280690a1725485786e8f160fb82447b5060ca0ce93ed7c",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-30%\"><phoneme alphabet=\"ipa\" ph=\"dɑɡ\">dog</phoneme>.</prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "word-duck": {
@@ -557,6 +896,26 @@
         "levelDb": -20
       },
       "provider": "azure",
+      "recipe": "8926c748f101a41dd2aff2c320d7f701cf2b61a5610cebcf49f9e8da3707a39a",
+      "sha256": "f59977f0a03a1c2cfd24efb6f0c4abba8ce45e90ffa04ede621f48c3062e7018",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">duck.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-duck-slow": {
+      "bytes": 6144,
+      "gainDb": -3.9,
+      "kind": "word",
+      "ms": 710,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 40,
+        "levelDb": -20,
+        "tempo": 0.72
+      },
+      "provider": "azure",
+      "recipe": "a5ce60d22806f50a4b9cb4248678aa451183fc0b9acbab5a34a4892f12a90d5b",
+      "sha256": "a9f7e81a3abdcfba8c1b75b538984e55b4d13de9d25d3a0e2f8cade04944337d",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">duck.</voice></speak>",
       "voice": "en-US-SaraNeural"
     },
@@ -572,7 +931,26 @@
         "levelDb": -20
       },
       "provider": "azure",
+      "recipe": "9ce5a490f185bb6a9f981a1bd863b189701de8b7740204df54f6bb657cac941a",
+      "sha256": "f8386cdb0c4025c515b70d07a7ebf40bb9af88d0a6c148bbf3d4c3c0e3db0e6d",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">fish.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-fish-slow": {
+      "bytes": 7872,
+      "gainDb": -1.9,
+      "kind": "word",
+      "ms": 915,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 40,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "1dac40e1dd74ded3689ab25875b80cbe4947f67f13db104f698174c946616036",
+      "sha256": "0a9a90ed4d28ce7cbb708bab85cf89efac42dfc4721f5ecb3eccc154acba9525",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-30%\">fish.</prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "word-hat": {
@@ -587,7 +965,26 @@
         "levelDb": -20
       },
       "provider": "azure",
+      "recipe": "c9911e608a55980d1a8074989896c21c09f47373f2e0414b918d6c9a93da238e",
+      "sha256": "263adc72f39bf846ff28adc4de88cc8d3abd0180561fb3e0c3b2499de62f6e10",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">hat.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-hat-slow": {
+      "bytes": 6912,
+      "gainDb": 0.1,
+      "kind": "word",
+      "ms": 805,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 40,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "b65e7862b672b3505620087cbea931eb3e9e2181325679dc5d4325444694b79c",
+      "sha256": "ece49cdadc9ed830ec3a15fd6167bbad8ffb24e08a12099a9480172b0ff513a5",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-30%\">hat.</prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "word-kick": {
@@ -602,7 +999,26 @@
         "levelDb": -20
       },
       "provider": "azure",
+      "recipe": "c7b7823235be0802564b4c889516bc65bb19f54a54d5b4298bf2033dc7e3dfa5",
+      "sha256": "773e8fc038c0a1d658f4348b3a42aad2511ac89eacc0488161a1fe29e364695c",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">kick.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-kick-slow": {
+      "bytes": 6336,
+      "gainDb": -2,
+      "kind": "word",
+      "ms": 735,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 40,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "ce3dbda989e38924b6c1c4a471aa6051dcae94b1b7b848542bd3fd588fc26101",
+      "sha256": "fbc74c4b601a888fb3c8bf936e3dc066ccfc426aa1f5fcdd733c25f18813a010",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-30%\">kick.</prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "word-lick": {
@@ -617,7 +1033,26 @@
         "levelDb": -20
       },
       "provider": "azure",
+      "recipe": "da4d567acee0694b3dbb8172e8595b44561bf07f30f047f45dd08ea33390fcdf",
+      "sha256": "0316f1b56da53ce7b327f43b8b335982bc6025e34f358aa20693f579b3a76a36",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">lick.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-lick-slow": {
+      "bytes": 7104,
+      "gainDb": -5.9,
+      "kind": "word",
+      "ms": 825,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 40,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "23178936fcb716753986a5526482417457900502e0e7cd130ef900629772f409",
+      "sha256": "a07c0b6bc8e54402dbfdc11ca359d9f0cb97dac30a0f7c1648055970870511a4",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-30%\">lick.</prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "word-lock": {
@@ -632,7 +1067,26 @@
         "levelDb": -20
       },
       "provider": "azure",
+      "recipe": "3686bdc877a49d79b355b4dd2b12d0cf2f2799e711b4ebddd9ba87eaa0741069",
+      "sha256": "b9da1fbe85f5f7df4900e3aec0521b0290771609bc60fb6bbbd710bac0b7d475",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">lock.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-lock-slow": {
+      "bytes": 7680,
+      "gainDb": -5.1,
+      "kind": "word",
+      "ms": 895,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 40,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "9786c3b9fd2808a16c7c7f3c933fdd6e579bc6bfc9313a12313553e5022e5884",
+      "sha256": "046aff0f6d1ece1084231e3a9dd0c8a7d22bb4c52791494302a871fcb863e4b6",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-30%\">lock.</prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "word-log": {
@@ -647,7 +1101,26 @@
         "levelDb": -20
       },
       "provider": "azure",
-      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">log.</voice></speak>",
+      "recipe": "37c459cebe331f90ac12faa1feba930138741cf82f1735ba34448dd17072ff69",
+      "sha256": "91fc669b451b169064135b7451096587e147456c83f86350e198d8d952f9c3d4",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><phoneme alphabet=\"ipa\" ph=\"lɑɡ\">log</phoneme>.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-log-slow": {
+      "bytes": 7104,
+      "gainDb": -2.6,
+      "kind": "word",
+      "ms": 835,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 40,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "21d19fa244ba0833f38e074b808149144211fe6495757e463efeb7d1fe75019b",
+      "sha256": "6717dfff6b841c1a7e08bd9571b9783667b08e73860fb958665ad630f7a140d0",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-30%\"><phoneme alphabet=\"ipa\" ph=\"lɑɡ\">log</phoneme>.</prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "word-math": {
@@ -662,12 +1135,31 @@
         "levelDb": -20
       },
       "provider": "azure",
+      "recipe": "d26bd320ae8398d54b6c543b781a4efa947c663ac839acb0d29844346e1d8841",
+      "sha256": "cf64d5e48781f7818313d9b39d021603a998cbdb2ca4610db4f991eead7ab0b3",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">math.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-math-slow": {
+      "bytes": 6528,
+      "gainDb": -1.7,
+      "kind": "word",
+      "ms": 745,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 40,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "e1ad797243183f09010fded4812a2a97b89f553b339b91b5a22eeff66233bf8c",
+      "sha256": "4604d81b36ac9ed89504d82335fe35bae0da9d8245fab436410699efb580eefc",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-30%\">math.</prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "word-moth": {
       "bytes": 4992,
-      "gainDb": -3.3,
+      "gainDb": -3.4,
       "kind": "word",
       "ms": 575,
       "post": {
@@ -677,7 +1169,26 @@
         "levelDb": -20
       },
       "provider": "azure",
-      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">moth.</voice></speak>",
+      "recipe": "310246aa932ffcca08cd9d1ed8219ed07a0aafd80d2a3dc0912245b3c4869b9d",
+      "sha256": "242dcc30c6d3bc121fe7f0182b43441259a8b9edcf7823c811ed6ff51147791a",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><phoneme alphabet=\"ipa\" ph=\"mɑθ\">moth</phoneme>.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-moth-slow": {
+      "bytes": 6720,
+      "gainDb": -3.6,
+      "kind": "word",
+      "ms": 785,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 40,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "90ac78bd517fc273c5ee80f8c0eb875467950c33550ab1d61ff286838f539309",
+      "sha256": "50526b550ecd1c4dd8828f6ff67b5aed1e2a0b5dc505079ab4b4319e4a9b9a01",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-30%\"><phoneme alphabet=\"ipa\" ph=\"mɑθ\">moth</phoneme>.</prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "word-neck": {
@@ -692,7 +1203,26 @@
         "levelDb": -20
       },
       "provider": "azure",
+      "recipe": "da1999677de1c80f102eb056125374b9e01e0ec56ec36213b5991771c6ac8fb7",
+      "sha256": "8ec32fed21ab1292918ac5610f34687dd1fa2c81f6317715813efb4d13b09fc4",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">neck.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-neck-slow": {
+      "bytes": 6912,
+      "gainDb": -5.9,
+      "kind": "word",
+      "ms": 815,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 40,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "c736e846a6a5e63785f53a1f340f5a4b8f668927c227a11eb50c776a563b0c9c",
+      "sha256": "be303581759bb32427a3be08ff8222f7a752a1f9c8a35eeedd8397ccd3e3085f",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-30%\">neck.</prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "word-path": {
@@ -707,7 +1237,26 @@
         "levelDb": -20
       },
       "provider": "azure",
+      "recipe": "4193a097973c6cdf867b7baea44dc9c7b8906f67d0da79494eafd239519450b1",
+      "sha256": "ca7951f13bd7b241b31c5332484ab3d2129e8245a5a6d472cda8ce27561bf2f9",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">path.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-path-slow": {
+      "bytes": 6144,
+      "gainDb": 0.8,
+      "kind": "word",
+      "ms": 705,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 40,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "21237dbdfbd4998f7173626b569581930a9fb4c4452e953ad206202575fa5312",
+      "sha256": "1786e63f25a26f3385082e8785614319765ae24b9923ddba558869c23bedd514",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-30%\">path.</prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "word-pig": {
@@ -722,7 +1271,26 @@
         "levelDb": -20
       },
       "provider": "azure",
+      "recipe": "df7d124068846cb52fa7854f0a52097e77aa0376d52ba5da6a7afae3ad8f6584",
+      "sha256": "b911ed3bb2bbb02f70be5212b0427154c0bc9ebfdd17ca1cfdc4cc789fbee3e2",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">pig.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-pig-slow": {
+      "bytes": 6336,
+      "gainDb": -2.7,
+      "kind": "word",
+      "ms": 725,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 40,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "72d55a028346c4834659a0b883709f7cff22d9cc6967a1bc408161adb7ddd511",
+      "sha256": "99f9002aaedbf620ec5e49f84e66c7d6ac091b270265f3ae4856bd5e3f3b9e44",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-30%\">pig.</prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "word-pin": {
@@ -737,7 +1305,26 @@
         "levelDb": -20
       },
       "provider": "azure",
+      "recipe": "258578a7065de240a3352ed19f1107480a518afd251d8d529bc7e24a8606eb9d",
+      "sha256": "5128bbfd85b5b9e9abed7c323756a1e3488a2d1b4825309a1827f785c7fa3d34",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">pin.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-pin-slow": {
+      "bytes": 6528,
+      "gainDb": -1.5,
+      "kind": "word",
+      "ms": 765,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 40,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "1818afb9e0ad6a443ed271c8009f9a6aa53ddbfb10dfaf62f9fb3622f6a8d115",
+      "sha256": "ae57c6f866ff182c777d0cb683a12e8c878cbffd91be072b8be9fb1104095d84",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-30%\">pin.</prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "word-rich": {
@@ -752,7 +1339,26 @@
         "levelDb": -20
       },
       "provider": "azure",
+      "recipe": "efe4bcff4f08e99536e198d09751feac30b14202401a8b8585a741c718032745",
+      "sha256": "e150d7fcbdf00a4baa828d6cb11843f69530368eab463bac89973a28d272e13b",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">rich.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-rich-slow": {
+      "bytes": 7488,
+      "gainDb": -5,
+      "kind": "word",
+      "ms": 885,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 40,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "39941cda609108ee04ffdcdab3424a178f7cf1ac3d68ef2d75b622a967ff23cf",
+      "sha256": "0849062c9dd1b9c8038227820b34cbd571c1a598677a7b2d808622d5ce6f9718",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-30%\">rich.</prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "word-rock": {
@@ -767,7 +1373,26 @@
         "levelDb": -20
       },
       "provider": "azure",
+      "recipe": "75437ef9dca4aa6a2a65def18400c41275927198f62ac47a6ae7f694630ae141",
+      "sha256": "5ee7db2082e201b7cf8352268335e1d83c69296298727141ede1a3051df6017d",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">rock.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-rock-slow": {
+      "bytes": 7488,
+      "gainDb": -4.5,
+      "kind": "word",
+      "ms": 885,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 40,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "9da0ec1b175b6b450ee325bfdd0fab222276659e4d8bdc8248b32b248408273e",
+      "sha256": "bc8503c4f80c73a7dfd34a81ddd5eae56ff0fad2514cd0deed4de676ab8e02bc",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-30%\">rock.</prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "word-sack": {
@@ -782,7 +1407,26 @@
         "levelDb": -20
       },
       "provider": "azure",
+      "recipe": "a318c4482832e18c6934e75a0ba3c52991d940c9f7c88b4ffe682abca10afd4e",
+      "sha256": "5672d4c1509e24ef6aa02122a004dd2ba5d6ac2cbe2e05586f42f9686305d9bb",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">sack.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-sack-slow": {
+      "bytes": 7680,
+      "gainDb": -0.9,
+      "kind": "word",
+      "ms": 895,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 40,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "a0cea9ba7943b6b6d73257f8f16613accf4b2819d5456c1bffd0b5dd76da30c9",
+      "sha256": "c5b11a485b14dd9bd81e6b575cbcc2576f5cfc053e27602e6fb795c10cbca979",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-30%\">sack.</prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "word-shed": {
@@ -797,7 +1441,26 @@
         "levelDb": -20
       },
       "provider": "azure",
+      "recipe": "d813710c7f653b6465dcf356cf6febcf67a6f39ebad7ba51d22a6ae5d2167881",
+      "sha256": "14eab1e613c60d6a4f5b2669b50b307d0da42c11823b443c9ae598d03b40a37c",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">shed.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-shed-slow": {
+      "bytes": 6336,
+      "gainDb": 0.9,
+      "kind": "word",
+      "ms": 735,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 40,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "cdc4f01a92419e154d315631762836b0dde0e9a896d7766c2a9def01d3731738",
+      "sha256": "fe80600ad24027379138e54599fbbe25163687ce1468998d95c39b19e0f4bcc6",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-20%\">shed.</prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "word-ship": {
@@ -812,7 +1475,26 @@
         "levelDb": -20
       },
       "provider": "azure",
+      "recipe": "1f67dcbc6781d23a8967c8ffb50681dbffa9e01cf54bc50753e41747465f5fb7",
+      "sha256": "6d9865e1ebc564caf7f0f0caa430643a99fd429fd81fce16daa017d0cf22445f",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">ship.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-ship-slow": {
+      "bytes": 6528,
+      "gainDb": -1.5,
+      "kind": "word",
+      "ms": 765,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 40,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "8a89771e55dee8b4353d3bd0aa7871b0dff0f253bb50a2d0a737b9359e4ef74a",
+      "sha256": "6d21986484d4eee98397e32723de6f9892cfd270d63bb19c588508c27430a471",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-30%\">ship.</prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "word-shock": {
@@ -827,7 +1509,26 @@
         "levelDb": -20
       },
       "provider": "azure",
+      "recipe": "8ee49d71245fc651b2f58f5f87e559cf973b9227632f05974999ef300c00f6a3",
+      "sha256": "7c33c03316dfb4f1d9196db4a8e92d68aaecc36e02eec704bcaf468cfad1f1d5",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">shock.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-shock-slow": {
+      "bytes": 8064,
+      "gainDb": -2.1,
+      "kind": "word",
+      "ms": 945,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 40,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "360deb6ab6f1428aadc628e20198627fbe25e0729c37415ed25d5945987ef11a",
+      "sha256": "6e95ae87ef9ff2f736741b44fb44ac394bcd50a8af182fe6edd6c20b086e54ad",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-30%\">shock.</prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "word-shop": {
@@ -842,7 +1543,26 @@
         "levelDb": -20
       },
       "provider": "azure",
+      "recipe": "07da86d0f738c777dbfc0eed6d4736da2694219ca4899675032433dd1fb55c0f",
+      "sha256": "15335b1dc2d187652f6bfd89ea82554a09225a0d62b7f0224482b85df51f5345",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">shop.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-shop-slow": {
+      "bytes": 6528,
+      "gainDb": -2.4,
+      "kind": "word",
+      "ms": 745,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 40,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "f33fc23faef7227d330b45b5a31e5b540346db52cb11cf8b7ee4a06da02fa166",
+      "sha256": "d0c6a3fcd37cc7b9750f6df732303509b469daafb76dba9c46fbc5bb2ca8ba50",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-20%\">shop.</prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "word-sock": {
@@ -857,7 +1577,26 @@
         "levelDb": -20
       },
       "provider": "azure",
+      "recipe": "e3d4d384e09edccfc7b245ca68a6cbd34928c1bff64cb44373948c8276fc0d5a",
+      "sha256": "9485fa88244095538335348e3d179026d2f21e3630607def959dcb7302258980",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">sock.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-sock-slow": {
+      "bytes": 7872,
+      "gainDb": -1.9,
+      "kind": "word",
+      "ms": 915,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 40,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "f7fc1451d4f2faaba2afd76aecf4fbe5dcf96401d50277f86faa26d8b29c2165",
+      "sha256": "1fc996dbaff4c7f4139893fadb012ad133abc98e636a26d5c293c86be0abf92e",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-30%\">sock.</prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "word-sun": {
@@ -872,7 +1611,26 @@
         "levelDb": -20
       },
       "provider": "azure",
+      "recipe": "b85588ca08783f543113f443cb65485b61f7d915c8c7a654c96d7516677fd429",
+      "sha256": "b2547cfdc9be773b8b4eed445bb3b226cd21a66ceb48f441ff63992696217a35",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">sun.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-sun-slow": {
+      "bytes": 7680,
+      "gainDb": -0.9,
+      "kind": "word",
+      "ms": 905,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 40,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "0d02b79816cc9c0f1602646c7140f027878815dce3d06599f8a88cdfb4de65c6",
+      "sha256": "f834e9c13159e34514d52cee344f2e9e06f3265cb0282315a71e65ac836b531f",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-30%\">sun.</prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "word-thick": {
@@ -887,7 +1645,26 @@
         "levelDb": -20
       },
       "provider": "azure",
+      "recipe": "0e928f0fd2ee9075672d91e6c9ff107b9aa9c8d855794ba49bb7ace675bcf5b3",
+      "sha256": "96bee994442f691ac538c3cd5338dff8ab92d8dc909c94bec67cae933bcea2c4",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">thick.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-thick-slow": {
+      "bytes": 6912,
+      "gainDb": -4.3,
+      "kind": "word",
+      "ms": 795,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 40,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "e4ada17ea317c47771d8052673370265a1e93edef2ba21570a0828e3511d0f79",
+      "sha256": "7aa79fe03fa7e08893a6d429e48c5a57420fe4297ef12ef94b48faee37b1f15b",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-30%\">thick.</prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "word-thin": {
@@ -902,7 +1679,26 @@
         "levelDb": -20
       },
       "provider": "azure",
+      "recipe": "f9a7a74ca3d07c6769e1f87f9a4b2894c3984e34c9fe5fd6c6aff1885ebbe3a8",
+      "sha256": "9abc880e24e585758263c08ea15a671e678831f8f2598178f3f95386607e26f5",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">thin.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-thin-slow": {
+      "bytes": 6528,
+      "gainDb": -1.7,
+      "kind": "word",
+      "ms": 745,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 40,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "7564f65c5856dc1dc2c66758f5f888bc5ded0591ed2d6bf3912633ae3842a41f",
+      "sha256": "01f735d122253d951cb0053c44762c731db949a5be6bc8e75fd8cd0eaf0be765",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-30%\">thin.</prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "word-web": {
@@ -917,7 +1713,26 @@
         "levelDb": -20
       },
       "provider": "azure",
+      "recipe": "276a06d1b9b22f582bbc6695a7f630d300d7338322bfc79f76c2623e9a587ff5",
+      "sha256": "30ec1ea15d68cd03d0538b3d14995c8543cc80b19d9602aa5dec2226be287b5e",
       "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">web.</voice></speak>",
+      "voice": "en-US-SaraNeural"
+    },
+    "word-web-slow": {
+      "bytes": 6336,
+      "gainDb": -1.7,
+      "kind": "word",
+      "ms": 725,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 40,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "01a4beaaacea18ef985a1624a733f593b23f8efbbd0d32c866e0ece24713fa2b",
+      "sha256": "c6d5ff0d3cc0fb592c797eb2cb38114dae72d35011f64e9b2500b42b453841d4",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><prosody rate=\"-30%\">web.</prosody></voice></speak>",
       "voice": "en-US-SaraNeural"
     }
   }

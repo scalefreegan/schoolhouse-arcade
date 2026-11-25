@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { LEVELS, SOUNDS, TILE_SOUND, clipUrl, soundClip, wordClip, type Word } from "../../shared/soundmachine/words.ts";
+import { LEVELS, SOUNDS, TILE_SOUND, clipUrl, slowClip, soundClip, wordClip, type Word } from "../../shared/soundmachine/words.ts";
 import { hush, preload, say } from "../speech.ts";
 import { Picture, Sprite } from "../sprites/Sprite.tsx";
 import { useArcade } from "../state.tsx";
@@ -14,7 +14,7 @@ const tilesOf = (soundId: string) => Object.keys(TILE_SOUND).filter((t) => TILE_
 
 function WordRow({ word }: { word: Word }) {
   return (
-    <li className="panel flex items-center gap-2">
+    <li className="panel flex flex-wrap items-center justify-end gap-2">
       <Picture id={word.picture} size={64} className="shrink-0" title={word.id} />
       <span className="flex-1">
         <span className="sm-letter block text-base">{word.id}</span>
@@ -22,6 +22,9 @@ function WordRow({ word }: { word: Word }) {
       </span>
       <button type="button" className="btn btn-quiet" aria-label={`Sound out ${word.id}`} onClick={() => void say([...word.tiles.map((t) => clipUrl(soundClip(TILE_SOUND[t]))), clipUrl(wordClip(word.id))], { gap: 0.3 })}>
         <Sprite id="blend" palette="light" size={30} />
+      </button>
+      <button type="button" className="btn btn-quiet" aria-label={`Hear ${word.id} slowly`} onClick={() => void say([clipUrl(slowClip(word.id))])}>
+        <Sprite id="snail" palette="light" size={30} />
       </button>
       <button type="button" className="btn btn-cyan" aria-label={`Hear ${word.id}`} onClick={() => void say([clipUrl(wordClip(word.id))])}>
         <Sprite id="speaker" palette="ink" size={30} />

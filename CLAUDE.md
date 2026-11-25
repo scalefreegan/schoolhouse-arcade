@@ -52,7 +52,7 @@ web/src/games/comet/     Comet Cards: CometCards (what it hands Cabinet), Round
 web/src/games/soundmachine/  Sound Machine: SoundMachine (what it hands Cabinet), Round
 web/src/sprites/art.ts   every drawing, as rows of characters and palettes
 web/src/sprites/Sprite.tsx  <Sprite> and <AvatarSprite>
-web/src/sound.ts         every beep, synthesised (no audio files), and the one audio context
+web/src/sound.ts         every beep, synthesised, and the one audio context (woken on a tap, remade if it will not wake)
 web/src/speech.ts        spoken clips: preload(), say(), hush(); plays through sound.ts's context
 web/public/speech/       Sound Machine's clips and manifest (generated, committed)
 scripts/speech/          npm run speech:build: makes the clips (Azure text-to-speech; needs a key in the environment)
@@ -142,7 +142,10 @@ macos/                   the Dock app (build-app.sh, the launcher, the server he
   `web/shared/soundmachine/words.ts` and records each recipe in the
   manifest. The key lives only in the environment; the app at run time
   fetches static files and calls nowhere. Read never says the whole word
-  before the answer. Sound Machine will not start with the sound off.
+  before the answer, plain or slow. Sound Machine will not start with the
+  sound off, by any way into a round. A new word hushes the last one's
+  speech. No clip is waited on without a limit, and only a Build round's
+  word clips can stop a round from starting.
 - **Letters to be read are lower case in `--font-letters`** (`.sm-letter`):
   the display face has no true small letters.
 - Each table is read and written by one module under `scripts/db/`, whose

@@ -1,5 +1,6 @@
-// Every sound the arcade makes, synthesised: square and triangle waves
-// through the Web Audio API, so there are no audio files to ship or license.
+// Every beep the arcade makes, synthesised: square and triangle waves
+// through the Web Audio API. (The only audio files are Sound Machine's
+// spoken clips, which speech.ts plays through the context made here.)
 // A browser only lets sound start from a tap or a key press; the first call
 // that follows one wakes the context.
 
@@ -27,13 +28,43 @@ export function setMuted(next: boolean): void {
   }
 }
 
-/** The one audio context, awake, or null when the sound is off. Speech
- *  (speech.ts) plays through it too, so one tap wakes both. */
+/** When a context that was not running was first asked to wake (0: not waiting on one). */
+let asked = 0;
+/** A context asked to wake that is still not running this long after is given up on (ms). */
+const WAKE_MS = 1_500;
+
+/**
+ * The one audio context, awake, or null when the sound is off. Speech
+ * (speech.ts) plays through it too, so one tap wakes both.
+ *
+ * A context that is not running is asked to wake on every call: not only a
+ * "suspended" one, since a tablet that has slept reports "interrupted". If
+ * it was asked and is still not running WAKE_MS later (or it is closed), it
+ * is let go and a new one made, so the next tap gets sound back; a game is
+ * never left silent for good by a context that will not wake.
+ */
 export function audio(): AudioContext | null {
   if (muted) return null;
   try {
+    if (ctx && (ctx.state === "closed" || (ctx.state !== "running" && asked && performance.now() - asked > WAKE_MS))) {
+      const dead = ctx;
+      ctx = null;
+      asked = 0;
+      if (dead.state !== "closed") void dead.close().catch(() => undefined);
+    }
     ctx ??= new AudioContext();
-    if (ctx.state === "suspended") void ctx.resume();
+    if (ctx.state === "running") asked = 0;
+    else {
+      asked ||= performance.now();
+      const waking = ctx;
+      // A refusal is not an error to show: the wait above deals with it.
+      void waking.resume().then(
+        () => {
+          if (waking === ctx && waking.state === "running") asked = 0;
+        },
+        () => undefined,
+      );
+    }
     return ctx;
   } catch {
     return null;

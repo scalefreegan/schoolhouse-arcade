@@ -173,13 +173,71 @@ export function partOf(x, post) {
 }
 
 /**
- * A recipe's `post` applied: the part cut out, faded in and out so it does
- * not click, brought to `levelDb` (never past -1 dB at its peak), with a
- * little silence either side. Returns the samples and the gain it took.
+ * A hiss or a breath made to last `want` samples. Slowing one down the way
+ * a voice is slowed repeats little pieces of it, and repeated noise rings
+ * like a note. A hiss is the same all the way through, so more of it is
+ * made instead: short grains taken from its middle at places that do not
+ * repeat (always the same places, so the same clip comes out every time),
+ * laid over each other, and set between its own beginning and end.
  */
-export function finish(x, post) {
+function longerHiss(part, want) {
+  const more = want - part.length;
+  if (more <= 0) return part;
+  const mid = [Math.floor(part.length * 0.25), Math.floor(part.length * 0.75)];
+  const grain = Math.min(samples(60), (mid[1] - mid[0]) & ~1);
+  if (grain < samples(20)) throw new Error("too short a hiss to make longer");
+  // Within a grain of long enough already.
+  if (more < grain) return part;
+  const half = grain / 2;
+  const join = Math.floor(part.length / 2);
+  // The new middle, with half a grain at each end to cross over into.
+  const fill = new Float32Array(more + grain);
+  let seed = 0x9e3779b9;
+  const rnd = () => {
+    seed = (Math.imul(seed ^ (seed >>> 15), 0x2c1b3c6d) + 0x297a2d39) | 0;
+    return ((seed ^ (seed >>> 13)) >>> 0) / 2 ** 32;
+  };
+  // Sine-shaped grains half overlapped: their powers add up to one.
+  for (let at0 = -half; at0 < fill.length; at0 += half) {
+    const from = mid[0] + Math.floor(rnd() * (mid[1] - mid[0] - grain + 1));
+    for (let i = 0; i < grain; i++) {
+      const to = at0 + i;
+      if (to >= 0 && to < fill.length) fill[to] += part[from + i] * Math.sin((Math.PI * (i + 0.5)) / grain);
+    }
+  }
+  const out = new Float32Array(part.length + more);
+  out.set(part.subarray(0, join - half), 0);
+  for (let i = 0; i < grain; i++) {
+    const t = (i + 0.5) / grain;
+    // In: the hiss's own first half gives way to the new middle; out: the other way.
+    out[join - half + i] = part[join - half + i] * Math.cos((Math.PI / 2) * t) + fill[i] * Math.sin((Math.PI / 2) * t);
+  }
+  out.set(fill.subarray(grain, more), join + half);
+  for (let i = 0; i < grain; i++) {
+    const t = (i + 0.5) / grain;
+    out[join - half + more + i] = fill[more + i] * Math.cos((Math.PI / 2) * t) + part[join - half + i] * Math.sin((Math.PI / 2) * t);
+  }
+  out.set(part.subarray(join + half), join + half + more);
+  return out;
+}
+
+/**
+ * A recipe's `post` applied: the part cut out, held longer if the recipe
+ * asks (`holdMs`: a sound a teacher would hold, stretched to at least that;
+ * `tempo`: the whole thing slowed to that share of its speed), faded in and
+ * out so it does not click, brought to `levelDb` (never past -1 dB at its
+ * peak), with a little silence either side (`tailMs` after it).
+ * `stretch(samples, tempo)` does the slowing without changing the pitch.
+ * Returns the samples and the gain it took.
+ */
+export function finish(x, post, stretch) {
   const [start, end] = partOf(x, post);
-  const part = Float32Array.from(x.subarray(start, end));
+  let part = Float32Array.from(x.subarray(start, end));
+  if (post.hold === "hiss") part = longerHiss(part, samples(post.holdMs));
+  else {
+    const tempo = post.tempo ?? (post.holdMs && part.length < samples(post.holdMs) ? Math.max(0.4, part.length / samples(post.holdMs)) : 1);
+    if (tempo < 0.999) part = Float32Array.from(stretch(part, tempo));
+  }
   const fadeIn = Math.min(samples(post.fadeInMs), part.length >> 1);
   const fadeOut = Math.min(samples(post.fadeOutMs), part.length >> 1);
   for (let i = 0; i < fadeIn; i++) part[i] *= i / fadeIn;
@@ -191,7 +249,7 @@ export function finish(x, post) {
   const gainDb = Math.min(post.levelDb - level, -1 - 20 * Math.log10(peak));
   const gain = 10 ** (gainDb / 20);
   const lead = samples(10);
-  const out = new Float32Array(lead + part.length + samples(40));
+  const out = new Float32Array(lead + part.length + samples(post.tailMs ?? 40));
   for (let i = 0; i < part.length; i++) out[lead + i] = part[i] * gain;
   return { pcm: out, gainDb: Math.round(gainDb * 10) / 10 };
 }

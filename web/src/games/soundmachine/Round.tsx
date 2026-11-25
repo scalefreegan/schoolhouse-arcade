@@ -3,10 +3,11 @@ import type { FactStat } from "../../../shared/deal.ts";
 import type { AnswerInput } from "../../../shared/play.ts";
 import type { Mode, Skill } from "../../../shared/soundmachine/rules.ts";
 import { PACE, advance, built, full, startSession } from "../../../shared/soundmachine/session.ts";
-import { ROUND_WORDS, clipUrl, tileClip, wordById, wordClip, type SoundLevel, type Word } from "../../../shared/soundmachine/words.ts";
+import { ROUND_WORDS, clipUrl, slowClip, tileClip, wordById, wordClip, type SoundLevel, type Word } from "../../../shared/soundmachine/words.ts";
 import { sfx } from "../../sound.ts";
 import { hush, say } from "../../speech.ts";
 import { Picture, Sprite } from "../../sprites/Sprite.tsx";
+import { useArcade } from "../../state.tsx";
 import { fmtScore } from "../format.ts";
 
 // One round on the machine, from the first word to the eighth. What happens
@@ -19,12 +20,16 @@ import { fmtScore } from "../format.ts";
 const seed = () => Math.floor(Math.random() * 2 ** 32);
 const soundsOf = (word: Word) => word.tiles.map((t) => clipUrl(tileClip(t)));
 const wholeOf = (word: Word) => clipUrl(wordClip(word.id));
-/** Between sounds when a word is sounded out slowly, and when it is run together (seconds). */
-const SLOW = 0.32;
-const QUICK = 0.04;
+const slowOf = (word: Word) => clipUrl(slowClip(word.id));
+/** Between sounds when a word is sounded out, unhurried, and when it is run together (seconds). */
+const SLOW = 0.36;
+const QUICK = 0.02;
+/** Blend: the breath between sounding it out and running it together. */
+const BREATH = 0.5;
 
 export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { level: SoundLevel; mode: Mode; skill: Skill; stats: Record<string, FactStat>; onDone: (answers: AnswerInput[]) => void; onQuit: () => void }) {
   const [s, send] = useReducer(advance, null, () => startSession(level, mode, skill, stats, seed()));
+  const { muted, setMuted } = useArcade();
   // Both are remembered with the step of the round they belong to (s.seq),
   // so neither outlives its word and nothing has to reset them.
   /** The sound being said now: which of the word's tiles is lit. */
@@ -49,21 +54,43 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
         later(next, 250);
         break;
       case "ask":
+        // A new word (or the same one after a pause): whatever was being said
+        // of the last one stops, in both games. Its sounds heard over this
+        // word's pictures would be a wrong answer said aloud.
+        hush();
         // Build begins by saying the word. Read never says it: reading it is the game.
         if (mode === "build" && s.word) void say([wholeOf(s.word)]);
         break;
-      case "right":
+      case "right": {
         sfx.right(Math.min(4, s.round.streak - 1));
-        later(() => s.word && void say([wholeOf(s.word)]), 220);
-        // The session lets the next word come once this one has had its time; ask until it does.
-        later(() => timers.push(window.setInterval(next, 100)), PACE.right);
+        // The word again, sound by sound and then whole, at its own pace.
+        const word = s.word;
+        let said = !word;
+        later(() => word && void soundOut(word, SLOW, true).then(() => (said = true)), 320);
+        // The session lets the next word come once this one has had its time,
+        // and the machine waits until it has finished saying it; ask until both.
+        later(() => timers.push(window.setInterval(() => said && next(), 100)), PACE.right);
         break;
-      case "wrong":
+      }
+      case "wrong": {
         sfx.wrong();
-        // The right answer, sound by sound, then whole.
-        later(() => s.word && void soundOut(s.word, SLOW, true), 380);
-        later(() => setGoAt(s.seq), PACE.wrong + 30);
+        // The right answer, sound by sound, then whole. Next comes on when it
+        // has been said (and not before the session would take it).
+        const word = s.word;
+        const seq = s.seq;
+        let said = !word;
+        later(() => word && void soundOut(word, SLOW, true).then(() => (said = true)), 380);
+        later(
+          () =>
+            timers.push(
+              window.setInterval(() => {
+                if (said) setGoAt(seq);
+              }, 100),
+            ),
+          PACE.wrong + 30,
+        );
         break;
+      }
       case "paused":
         hush();
         break;
@@ -81,6 +108,11 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
     };
   });
   useEffect(() => follow(), [s.seq]);
+  // The sound switched off in the middle of a round: the round waits (this
+  // game cannot be played in silence) and the screen says so.
+  useEffect(() => {
+    if (muted) send({ type: "pause", now: performance.now() });
+  }, [muted]);
   // Leaving the machine stops it talking.
   useEffect(() => hush, []);
 
@@ -125,7 +157,7 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
             const done = i < s.answers.length;
             const was = done ? s.answers[i].fact : null;
             const good = done && (i < s.answers.length - 1 || !s.last ? lampOf(s.words[i], s.answers[i], mode) : s.last.correct);
-            return <li key={i} className="lamp" data-state={done ? (good ? "right" : "wrong") : i === s.answers.length && s.phase !== "done" ? "now" : "off"} aria-label={was ? `${was}: ${good ? "right" : "missed"}` : undefined} />;
+            return <li key={i} className="lamp" data-state={done ? (good ? "right" : "wrong") : i === s.answers.length && !judged && s.phase !== "done" ? "now" : "off"} aria-label={was ? `${was}: ${good ? "right" : "missed"}` : undefined} />;
           })}
         </ol>
         <button type="button" className="btn btn-quiet" onClick={() => send({ type: "pause", now: performance.now() })} aria-label="Pause">
@@ -144,9 +176,7 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
               <div className="sm-glass" data-state={state}>
                 <Picture id={word.picture} size={176} className={`sm-pic ${s.phase === "right" ? "hop" : ""}`} title={judged ? word.id : "What is it?"} />
               </div>
-              <button type="button" className="btn btn-cyan sm-hear" aria-label="Hear the word" onClick={() => void say([wholeOf(word)])}>
-                <Sprite id="speaker" palette="ink" size={40} />
-              </button>
+              <HearButtons word={word} />
             </div>
 
             <div className="sm-works">
@@ -230,9 +260,12 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
                 className="btn btn-cyan sm-blend"
                 aria-label={judged ? "Hear the word" : "Blend the sounds"}
                 onClick={() => {
-                  // Before an answer: the sounds, slowly then run together, never the word itself.
+                  // Before an answer: the sounds one at a time, a breath, then the
+                  // same sounds run together. Never the word itself, plain or
+                  // slow: that is the answer.
+                  const n = word.tiles.length;
                   if (judged) void soundOut(word, SLOW, true);
-                  else void say([...soundsOf(word), ...soundsOf(word)], { gap: QUICK, onEach: (i) => setLit(i % word.tiles.length) }).then(() => setLit(null));
+                  else void say([...soundsOf(word), ...soundsOf(word)], { gap: (i) => (i < n - 1 ? SLOW : i === n - 1 ? BREATH : QUICK), onEach: (i) => setLit(i % n) }).then(() => setLit(null));
                 }}
               >
                 <Sprite id="blend" size={40} />
@@ -251,6 +284,8 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
             </div>
 
             <div className="sm-after">
+              {/* The word itself, plain and slow: only once it has been answered. */}
+              {judged && <HearButtons word={word} />}
               {s.phase === "right" && s.last && (
                 <p key={s.seq} className="font-display glow m-0 text-xl text-yellow">
                   +{s.last.gained}
@@ -262,7 +297,32 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
         )}
       </section>
 
-      {s.wantPause && (
+      {muted ? (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-tube/90 p-4" role="dialog" aria-modal="true" aria-label="The sound is off">
+          <div className="panel panel-cyan max-w-md text-center">
+            <p className="font-display glow m-0 text-base text-cyan">This game needs sound.</p>
+            <p className="mt-4">The sound is off.</p>
+            <div className="mt-4 flex flex-wrap justify-center gap-2">
+              <button type="button" className="btn btn-quiet" onClick={onQuit}>
+                Stop the round
+              </button>
+              <button
+                type="button"
+                className="btn btn-cyan"
+                autoFocus
+                onClick={() => {
+                  setMuted(false);
+                  sfx.coin();
+                  send({ type: "resume", now: performance.now() });
+                }}
+              >
+                <Sprite id="speaker" palette="ink" size={30} />
+                Turn sound on
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : s.wantPause && (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-tube/90 p-4" role="dialog" aria-modal="true" aria-label="Paused">
           <div className="panel panel-cyan max-w-md text-center">
             <p className="font-display glow m-0 text-base text-cyan">Paused</p>
@@ -285,6 +345,20 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
 /** Whether a word already answered was right, for its lamp. */
 function lampOf(word: Word, answer: AnswerInput, mode: Mode): boolean {
   return answer.given === (mode === "build" ? word.tiles.join("-") : word.id);
+}
+
+/** Hear the word, and hear it slowly (the snail). */
+function HearButtons({ word }: { word: Word }) {
+  return (
+    <div className="sm-hears">
+      <button type="button" className="btn btn-cyan sm-hear" aria-label="Hear the word" onClick={() => void say([wholeOf(word)])}>
+        <Sprite id="speaker" palette="ink" size={40} />
+      </button>
+      <button type="button" className="btn btn-cyan sm-hear" aria-label="Hear the word slowly" onClick={() => void say([slowOf(word)])}>
+        <Sprite id="snail" size={40} />
+      </button>
+    </div>
+  );
 }
 
 /** After a miss: on to the next word, when the player is ready. */

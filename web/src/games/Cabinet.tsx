@@ -42,6 +42,50 @@ function remembered(game: CabinetGame, playerId: string): PlayConfig {
   return game.first;
 }
 
+/** How long getting a round ready may take before the player is told and
+ *  can try again: the game's own fetching (its sounds), and the server's answer. */
+const PREPARE_MS = 20_000;
+const START_MS = 10_000;
+/** How long "Ready" may be up before it offers a way back. */
+const BACK_AFTER_MS = 3_000;
+
+/** `work`, or a failure with `message` if it has not finished in `ms`. */
+function within<T>(work: Promise<T>, ms: number, message: string): Promise<T> {
+  return new Promise<T>((ok, fail) => {
+    const timer = window.setTimeout(() => fail(new Error(message)), ms);
+    work.then(
+      (v) => {
+        window.clearTimeout(timer);
+        ok(v);
+      },
+      (e: unknown) => {
+        window.clearTimeout(timer);
+        fail(e instanceof Error ? e : new Error(String(e)));
+      },
+    );
+  });
+}
+
+/** A round is being made ready. If that goes on, a way back appears: nothing
+ *  here waits for ever, but a child should not have to wait it out. */
+function Starting({ onBack }: { onBack: () => void }) {
+  const [slow, setSlow] = useState(false);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setSlow(true), BACK_AFTER_MS);
+    return () => window.clearTimeout(timer);
+  }, []);
+  return (
+    <div>
+      <p className="font-display blink text-sm text-dim">Ready</p>
+      {slow && (
+        <button type="button" className="btn btn-quiet mt-6" onClick={onBack}>
+          Back
+        </button>
+      )}
+    </div>
+  );
+}
+
 /** A round the server has started: the set-up it is played on (so what is
  *  sent, and shown, is what was played), its id, and the server's clock. */
 interface Begun {
@@ -71,6 +115,7 @@ export function Cabinet({
   onExit,
   round,
   prepare,
+  blocked,
   missed,
   setup,
 }: GameProps & {
@@ -78,6 +123,9 @@ export function Cabinet({
   round: (props: RoundProps & { key: number }) => ReactNode;
   /** Runs before the server is asked to start a round; a round does not start if it fails. */
   prepare?: (config: PlayConfig) => Promise<void>;
+  /** A round may not start now (the set-up screen's `notice` says why): every
+   *  way into a round, Play again too, leads to the set-up screen instead. */
+  blocked?: boolean;
   missed?: (answers: AnswerInput[], config: PlayConfig) => ReactNode;
   setup?: SetupExtras;
 }) {
@@ -119,8 +167,9 @@ export function Cabinet({
       setStage({ at: "starting", config: played, roundId, error: null });
       let next: Stage;
       try {
-        await prepare?.(played);
-        const { clock } = await startRound({ playerId: player.id, gameId: game.id, roundId });
+        // Neither may hang: a stalled fetch ends here with something to press.
+        if (prepare) await within(prepare(played), PREPARE_MS, "The game is taking too long to get ready. Try again.");
+        const { clock } = await within(startRound({ playerId: player.id, gameId: game.id, roundId }), START_MS, "The arcade's computer is taking too long to answer. Try again.");
         next = { at: "round", round: Date.now(), config: played, roundId, clock };
       } catch (e) {
         next = { at: "starting", config: played, roundId, error: e instanceof Error ? e.message : String(e) };
@@ -178,7 +227,10 @@ export function Cabinet({
   // A remembered level that is locked for this player (another device, a
   // fresh database) falls back to the hardest one that is open.
   const live = playable(config, progress.open);
-  const play = () => void begin(live, newRoundId());
+  const play = () => {
+    if (blocked) setStage({ at: "setup" });
+    else void begin(live, newRoundId());
+  };
 
   if (stage.at === "starting") {
     return (
@@ -197,7 +249,7 @@ export function Cabinet({
             </div>
           </div>
         ) : (
-          <p className="font-display blink text-sm text-dim">Ready</p>
+          <Starting key={stage.roundId} onBack={() => setStage({ at: "setup" })} />
         )}
       </main>
     );

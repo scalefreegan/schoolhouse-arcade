@@ -44,10 +44,12 @@ export const MIN_ANSWER_MS = 1_000;
 /** No real answer takes longer than this; a larger number is a bug or a lie. */
 export const MAX_ANSWER_MS = 10 * 60_000;
 
-/** A word's time as a round counts it: whole ms, at least MIN_ANSWER_MS.
- *  The session and settle() both use it, so they cannot disagree. */
+/** A word's time as a round counts it: whole ms, at least MIN_ANSWER_MS and
+ *  at most MAX_ANSWER_MS (a word left on the machine over lunch is counted
+ *  as the longest a word can take, so the round it is in can still be
+ *  saved). The session and settle() both use it, so they cannot disagree. */
 export function countedMs(ms: number): number {
-  return Math.max(MIN_ANSWER_MS, Math.round(ms));
+  return Math.min(MAX_ANSWER_MS, Math.max(MIN_ANSWER_MS, Math.round(ms)));
 }
 
 /** A round as it stands after some words. */

@@ -8,7 +8,7 @@ uses, which is why an id never changes once live. Mirrors Lean Into It's `docs/D
 | What | Where | Tracked by git |
 |---|---|---|
 | The games' rules, the avatars, the sprites | `web/shared/`, `web/src/sprites/` | yes |
-| Sound Machine's spoken clips (one mp3 a sound and a word) and their manifest | `web/public/speech/sound-machine/` | yes (generated: `npm run speech:build`) |
+| Sound Machine's spoken clips (one mp3 a sound, two a word: plain and slow) and their manifest | `web/public/speech/sound-machine/` | yes (generated: `npm run speech:build`) |
 | Players; every play and every answer in it; stars per level; tickets, badges, prizes and hand-overs; the grown-up PIN's hash | Postgres `schoolhouse_arcade` | no |
 | `DATABASE_URL`, local overrides | `.env.local` | no |
 | Which player this device is, whether sound is off, the set-up each player used last | the browser's localStorage (`arcade.player`, `arcade.muted`, `arcade.comet.setup.<player>`, `arcade.sound-machine.setup.<player>`) | no, and not in the database |
@@ -76,18 +76,23 @@ one is chosen on the Mac, like the first.
 
 Sound Machine's sounds and words are static files, made once and committed:
 `web/public/speech/sound-machine/<clip>.mp3`, where a clip is `sound-<id>`
-(a sound in `SOUNDS`, `web/shared/soundmachine/words.ts`) or `word-<word>`.
+(a sound in `SOUNDS`, `web/shared/soundmachine/words.ts`), `word-<word>`
+or `word-<word>-slow` (the word said slowly, still as one word).
 `manifest.json` beside them records, per clip, the voice, the SSML it was
-made from and anything done to the audio afterwards, so any clip can be
-made again. `npm test` checks that every sound and word has a clip and a
-manifest entry and that nothing else is there.
+made from and anything done to the audio afterwards (`post`), so any clip
+can be made again; and two hashes, of that recipe (`recipe`) and of the
+file's bytes (`sha256`). `npm test` checks that every sound has a clip and
+every word its two, each with a manifest entry, and that nothing else is
+there. `npm run speech:check` goes further: a clip whose recipe in
+`scripts/speech/build.mjs` has changed since it was made, or whose file is
+not the one the manifest describes, fails it.
 
 ```sh
 # needs AZURE_SPEECH_KEY and AZURE_SPEECH_REGION in the environment, and ffmpeg
 npm run speech:build              # makes what is missing or whose recipe changed
 npm run speech:build -- --force   # makes everything again
 npm run speech:build -- --only sound-k,word-chick
-npm run speech:check              # no key, no network: every clip is there
+npm run speech:check              # no key, no network: every clip is there, and is the one its recipe makes
 ```
 
 The key is read from the environment only and is never written anywhere.

@@ -561,6 +561,11 @@ select.field {
   max-width: 14rem;
   height: auto;
 }
+/* The word, and the word slowly: side by side. */
+.sm-hears {
+  display: flex;
+  gap: calc(var(--px) * 3);
+}
 .sm-hear,
 .sm-blend {
   min-width: calc(var(--px) * 22);
@@ -675,6 +680,7 @@ select.field {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: calc(var(--px) * 5);
 }
 
 /* Read: the word along the top, a button under each sound; the pictures below. */
@@ -804,6 +810,10 @@ select.field {
     gap: calc(var(--px) * 5);
   }
   .sm-glass { width: 9rem; }
+  .sm-side .sm-hears { flex-direction: column; }
+  .sm-after { gap: calc(var(--px) * 3); }
+  .sm-after .sm-hear { min-width: calc(var(--px) * 16); }
+  .sm-after .sm-next { min-width: calc(var(--px) * 28); }
   .sm-box {
     width: 5.5rem;
     height: 5.5rem;

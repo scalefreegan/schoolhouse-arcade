@@ -11,7 +11,7 @@ import { RULES } from "../rules.ts";
 import { DISTRACTORS, PICTURES, picturesFor, roundWords, trayFor } from "./pick.ts";
 import { MAX_ANSWER_MS, MIN_ANSWER_MS, MODES, SKILLS, answerOf, pay, poolOf, settle, soundMachineRules, type Mode, type Skill } from "./rules.ts";
 import { PACE, advance, built, full, startSession, waited, type Session } from "./session.ts";
-import { DIGRAPHS, LEVELS, LOOKALIKES, ROUND_WORDS, SOUNDS, SPEECH_DIR, TILE_SOUND, VOWELS, WORDS, allClips, levelById, lookalike, reviewOf, reviewRoom, soundClip, soundOf, tileClip, tilesKey, wordById, wordClip } from "./words.ts";
+import { DIGRAPHS, LEVELS, LOOKALIKES, ROUND_WORDS, SOUNDS, SPEECH_DIR, TILE_SOUND, VOWELS, WORDS, allClips, levelById, lookalike, reviewOf, reviewRoom, slowClip, soundClip, soundOf, tileClip, tilesKey, wordById, wordClip } from "./words.ts";
 
 const level = (id: string) => levelById(id)!;
 const cfg = (levelId: string, mode: Mode = "build", skill: Skill = "easy") => ({ level: levelId, mode, skill });
@@ -37,6 +37,23 @@ test("every word is three sounds, consonant - short vowel - consonant, spelt by 
   assert.equal(soundOf("ck"), "k");
   assert.equal(soundOf("k"), "k");
   assert.equal(soundOf("constructor"), undefined);
+});
+
+test("every tile is pinned to its sound and every sound to how it is said: none may drift to a neighbour", () => {
+  // Written out, not derived: a tile that came to say another sound (th as sh, b as d) fails here.
+  assert.deepEqual({ ...TILE_SOUND }, {
+    a: "a", e: "e", i: "i", o: "o", u: "u",
+    b: "b", c: "k", d: "d", f: "f", g: "g", h: "h", k: "k", l: "l", m: "m", n: "n", p: "p", r: "r", s: "s", t: "t", w: "w",
+    ch: "ch", ck: "k", sh: "sh", th: "th",
+  });
+  assert.deepEqual(Object.fromEntries(SOUNDS.map((s) => [s.id, s.ipa])), {
+    a: "\u00e6", e: "\u025b", i: "\u026a", o: "\u0251", u: "\u028c",
+    b: "b", d: "d", f: "f", g: "\u0261", h: "h", k: "k", l: "l", m: "m", n: "n", p: "p", r: "\u0279", s: "s", t: "t", w: "w",
+    ch: "t\u0283", sh: "\u0283", th: "\u03b8",
+  });
+  // A sound that can be held is one a mouth can keep making; a stop is not.
+  assert.deepEqual(SOUNDS.filter((s) => !s.held).map((s) => s.id).sort(), ["b", "ch", "d", "g", "k", "p", "t"]);
+  for (const tile of Object.keys(TILE_SOUND)) assert.equal(tileClip(tile), `sound-${TILE_SOUND[tile]}`);
 });
 
 test("a level's words need only what it and the levels before it teach, and carry what it teaches", () => {
@@ -74,15 +91,18 @@ test("every word has a 16 x 16 picture of its own, and every lookalike pair name
   for (const g of GAMES) assert.ok(Object.hasOwn(art, g.sprite), `${g.id}: no drawing ${g.sprite}`);
 });
 
-test("every sound and every word has a clip on disk and in the manifest, and nothing else is there", () => {
+test("every sound has a clip and every word has two (plain and slow), on disk and in the manifest, and nothing else is there", () => {
   const dir = path.join(path.dirname(fileURLToPath(import.meta.url)), "../../public", SPEECH_DIR);
   const manifest = JSON.parse(fs.readFileSync(path.join(dir, "manifest.json"), "utf8")) as { clips: Record<string, { kind: string; voice: string; bytes: number }> };
   const clips = allClips();
-  assert.equal(clips.length, SOUNDS.length + WORDS.length);
+  assert.equal(clips.length, SOUNDS.length + 2 * WORDS.length);
+  assert.equal(new Set(clips).size, clips.length);
   assert.equal(new Set(SOUNDS.map((s) => s.id)).size, SOUNDS.length);
   for (const tile of Object.keys(TILE_SOUND)) assert.ok(clips.includes(tileClip(tile)), `no clip for the tile ${tile}`);
   for (const w of WORDS) {
     assert.ok(clips.includes(wordClip(w.id)));
+    assert.equal(slowClip(w.id), `${wordClip(w.id)}-slow`);
+    assert.ok(clips.includes(slowClip(w.id)), `${w.id} has no slow clip`);
     for (const t of w.tiles) assert.ok(SOUNDS.some((s) => soundClip(s.id) === tileClip(t)), `${w.id}: ${t} has no sound`);
   }
   for (const clip of clips) {
@@ -173,6 +193,25 @@ test("a time under the floor is counted as the floor", () => {
   assert.equal(s.timeMs, MIN_ANSWER_MS + 2500);
 });
 
+test("the session counts a word's time between the floor and the longest a word can take, so its round can always be saved", () => {
+  for (const mode of ["build", "read"] as Mode[]) {
+    let s = startSession(level("cvc"), mode, "easy", {}, 3);
+    s = advance(s, { type: "next", now: 1000, seed: 1 });
+    // Answered the moment it came up: the floor, in the session as in settle().
+    s = answerAt(s, 1000, true);
+    assert.equal(s.answers[0].ms, MIN_ANSWER_MS, mode);
+    assert.equal(s.round.ms, MIN_ANSWER_MS, mode);
+    // Left on the machine for three hours: the longest a word can take, not a time settle() refuses.
+    s = advance(s, { type: "next", now: 10_000, seed: 2 });
+    s = answerAt(s, 10_000 + 3 * 3_600_000, true);
+    assert.equal(s.answers[1].ms, MAX_ANSWER_MS, mode);
+    const settled = settle(cfg("cvc", mode), s.answers);
+    assert.deepEqual([settled.score, settled.right, settled.timeMs], [s.round.score, 2, MIN_ANSWER_MS + MAX_ANSWER_MS], mode);
+  }
+  // A posted time past the longest is still refused: the session never makes one.
+  assert.throws(() => settle(cfg("cvc"), [ok("build", "cat", MAX_ANSWER_MS + 1)]), /out of range/);
+});
+
 // ---------- what a round is made of ----------
 
 test("a round is eight different words: all of a short level's own and old ones to fill it, missed words first in line", () => {
@@ -200,6 +239,17 @@ test("a round is eight different words: all of a short level's own and old ones 
     dog += ids.includes("dog") ? 1 : 0;
   }
   assert.ok(pig > 380 && dog < 330, `pig ${pig}, dog ${dog}`);
+  // Nothing here is on a clock, so a word got right slowly is a word known:
+  // it comes up no more often than one got right fast.
+  stats.pig = { seen: 5, missed: 0, ms: 9 * 60_000 };
+  let slow = 0;
+  let quick = 0;
+  for (let seed = 0; seed < 1000; seed++) {
+    const ids = roundWords(level("cvc"), stats, seeded(seed)).map((w) => w.id);
+    slow += ids.includes("pig") ? 1 : 0;
+    quick += ids.includes("dog") ? 1 : 0;
+  }
+  assert.ok(Math.abs(slow - quick) < 60 && slow < 790, `slow ${slow}, quick ${quick}`);
   // The order is not always the list's.
   assert.notDeepEqual(roundWords(level("ck"), {}, seeded(1)).map((w) => w.id), roundWords(level("ck"), {}, seeded(2)).map((w) => w.id));
 });
@@ -251,8 +301,34 @@ test("Read's pictures: the word's own among 3 on Easy and 4 on Arcade, no two al
       }
     }
   }
-  const near = picturesFor(wordById("sock")!, "arcade", level("ck"), seeded(3)).filter((id) => id !== "sock");
-  assert.ok(near.every((id) => id.startsWith("s") || id.endsWith("ck")), String(near));
+  // Arcade's wrong pictures are the near ones first. In "3 sounds" only cup
+  // starts like cat and only hat ends like it, so both are always there; pig
+  // has four near it (pin; dog, log, bug), so all three beside it are near.
+  // Easy takes any, so it does not always.
+  const sharesWith = (id: string, other: string) => {
+    const [a, b] = [wordById(id)!, wordById(other)!];
+    return soundOf(a.tiles[0]) === soundOf(b.tiles[0]) || soundOf(a.tiles[2]) === soundOf(b.tiles[2]);
+  };
+  let easyNear = 0;
+  for (let seed = 0; seed < 40; seed++) {
+    const cat = picturesFor(wordById("cat")!, "arcade", level("cvc"), seeded(seed));
+    assert.ok(cat.includes("cup") && cat.includes("hat"), `cat on Arcade: ${cat}`);
+    const pig = picturesFor(wordById("pig")!, "arcade", level("cvc"), seeded(seed)).filter((id) => id !== "pig");
+    assert.ok(pig.every((id) => ["pin", "dog", "log", "bug"].includes(id)), `pig on Arcade: ${pig}`);
+    easyNear += picturesFor(wordById("cat")!, "easy", level("cvc"), seeded(seed)).filter((id) => id === "cup" || id === "hat").length;
+  }
+  assert.ok(easyNear < 80, "Easy does not go looking for the near ones");
+  // And everywhere: as many near ones as there is room for and words to be had.
+  for (const l of LEVELS) {
+    for (const w of poolOf(l)) {
+      const nearBy = poolOf(l).filter((o) => o.id !== w.id && !lookalike(o.id, w.id) && sharesWith(w.id, o.id));
+      for (let seed = 0; seed < 5; seed++) {
+        const got = picturesFor(w, "arcade", l, seeded(seed)).filter((id) => id !== w.id && sharesWith(w.id, id));
+        // Two near ones that look alike cannot both be shown, so one may be lost to that.
+        assert.ok(got.length >= Math.min(PICTURES.arcade - 1, nearBy.length) - 1 && (nearBy.length === 0 || got.length >= 1), `${l.id} ${w.id}: ${got} of ${nearBy.map((o) => o.id)}`);
+      }
+    }
+  }
   const places = new Set(Array.from({ length: 30 }, (_, seed) => picturesFor(wordById("cat")!, "easy", level("cvc"), seeded(seed)).indexOf("cat")));
   assert.equal(places.size, 3, "the right picture is not always in the same place");
 });
@@ -323,6 +399,26 @@ test("the next word does not come until the answer has had its time on show", ()
   s = answerAt(advance(s, { type: "next", now: 5000, seed: 2 }), 5100, false);
   assert.equal(advance(s, { type: "next", now: 5100 + PACE.wrong - 1, seed: 3 }), s);
   assert.equal(advance(s, { type: "next", now: 5100 + PACE.wrong, seed: 3 }).phase, "ask");
+});
+
+test("a pause before the first word does not lose the round: resuming starts it", () => {
+  let s = startSession(level("cvc"), "build", "easy", {}, 3);
+  s = advance(s, { type: "pause", now: 100 });
+  assert.deepEqual([s.phase, s.wantPause], ["start", true]);
+  // The screen's first "next" arrives behind the box and is refused.
+  assert.equal(advance(s, { type: "next", now: 250, seed: 1 }), s);
+  const before = s.seq;
+  s = advance(s, { type: "resume", now: 5000 });
+  // The step goes up: that is what makes the screen send "next" again.
+  assert.deepEqual([s.phase, s.wantPause, s.seq > before], ["start", false, true]);
+  s = advance(s, { type: "next", now: 5250, seed: 1 });
+  assert.deepEqual([s.phase, !!s.word, waited(s, 6250)], ["ask", true, 1000]);
+  // The same with the pause key pressed twice.
+  let t = advance(startSession(level("cvc"), "read", "easy", {}, 3), { type: "toggle", now: 10 });
+  const seq = t.seq;
+  t = advance(t, { type: "toggle", now: 20 });
+  assert.ok(t.seq > seq && !t.wantPause);
+  assert.equal(advance(t, { type: "next", now: 300, seed: 1 }).phase, "ask");
 });
 
 test("only the time a word waits is counted: the answer on show and the pause box are not", () => {

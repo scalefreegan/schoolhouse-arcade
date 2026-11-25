@@ -136,7 +136,11 @@ function pause(s: Session, now: number): Session {
 
 function resume(s: Session, now: number): Session {
   if (s.phase === "paused") return { ...s, wantPause: false, wordStart: now, phase: "ask", seq: s.seq + 1 };
-  return s.wantPause ? { ...s, wantPause: false } : s;
+  if (!s.wantPause) return s;
+  // Paused before the first word: the "next" that would have brought it was
+  // refused, and nothing else would send another. The step goes up, so the
+  // screen starts the round again from here.
+  return s.phase === "start" ? { ...s, wantPause: false, seq: s.seq + 1 } : { ...s, wantPause: false };
 }
 
 /** The session after one event. Returns the same object when nothing changed. */

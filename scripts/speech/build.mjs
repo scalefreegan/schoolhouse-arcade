@@ -8,6 +8,7 @@
 //   node scripts/speech/build.mjs --only sound-k,word-cat
 //   node scripts/speech/build.mjs --check      no network, no key: is every clip there? (npm run speech:check)
 //   node scripts/speech/build.mjs --verify     measure every clip and ask speech-to-text what it hears
+//                                 (--match -slow: only the clips with that in their name)
 //
 // Making and verifying need AZURE_SPEECH_KEY and AZURE_SPEECH_REGION in the
 // environment (never in a file here), and ffmpeg on the PATH. One way that
@@ -34,7 +35,7 @@ import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { SOUNDS, SPEECH_DIR, WORDS, allClips, soundClip, wordClip } from "../../web/shared/soundmachine/words.ts";
+import { SOUNDS, SPEECH_DIR, WORDS, allClips, slowClip, soundClip, wordClip } from "../../web/shared/soundmachine/words.ts";
 import { RATE, finish, measure, pcmOfS16, pcmOfWav, s16Of } from "./audio.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
@@ -57,53 +58,80 @@ const rate = (percent, inner) => (percent ? `<prosody rate="${percent}%">${inner
 /** The vowel a consonant is said against before it is cut away: the "uh" of "sun". */
 const CARRIER = "ʌ";
 
-/** How loud each kind of clip is made, in dB (audio.mjs levelOf). A hiss at
- *  a vowel's level would be a shout, so breath sounds sit lower. */
-const LEVEL = { word: -20, voiced: -20, stop: -24, hiss: -27, breath: -30 };
+/** How loud each kind of clip is made, in dB (audio.mjs levelOf): one
+ *  confident loudness. A hiss at a vowel's level is a shout, so breath
+ *  sounds sit a little lower, and no further. */
+const LEVEL = { word: -20, voiced: -20, stop: -20, hiss: -22, breath: -23 };
+
+/** How long a sound that can be held is held, in ms: the way a teacher
+ *  says "mmmm" to a child, not the way it passes inside a word. What the
+ *  voice gives is stretched to this (never to more than 2.5 times). */
+const HOLD = { vowel: 700, hum: 750, hiss: 750, breath: 380 };
 
 /** How each sound is asked for, and which part of the answer is kept. */
 const SOUND_RECIPES = {
   // Short vowels: said in a short word that ends without a voice ("at",
-  // "it", "etch"), and the vowel cut out. Asked for alone, this voice's short
-  // i comes out as "ee" and its short a as "ah"; inside a word they are right.
-  a: { say: () => rate(-35, "at."), post: { cut: "voice", levelDb: LEVEL.voiced } },
-  e: { say: () => rate(-35, "etch."), post: { cut: "voice", levelDb: LEVEL.voiced } },
-  i: { say: () => rate(-35, "it."), post: { cut: "voice", levelDb: LEVEL.voiced } },
-  o: { say: (s) => rate(-35, ipa(s.ipa + "t", "ot")), post: { cut: "voice", levelDb: LEVEL.voiced } },
-  u: { say: () => rate(-35, "up."), post: { cut: "voice", levelDb: LEVEL.voiced } },
-  // Sounds that hum: on their own, slowed, whole. (Three in a row, "nnn",
-  // comes out with a vowel in the middle.)
-  m: { say: (s) => rate(-50, ipa(s.ipa, "m")), post: { cut: "all", levelDb: LEVEL.voiced } },
-  n: { say: (s) => rate(-35, ipa(s.ipa, "n")), post: { cut: "all", levelDb: LEVEL.voiced } },
-  l: { say: (s) => rate(-35, ipa(s.ipa, "l")), post: { cut: "all", levelDb: LEVEL.voiced } },
-  r: { say: (s) => rate(-40, ipa(s.ipa, "r")), post: { cut: "all", levelDb: LEVEL.voiced } },
-  w: { say: (s) => rate(-50, ipa(s.ipa, "w")), post: { cut: "all", levelDb: LEVEL.voiced } },
-  // Hisses: after the carrier vowel, cut from where the voice stops.
-  f: { say: (s) => rate(-50, ipa(CARRIER + s.ipa, "uff")), post: { cut: "after-voice", levelDb: LEVEL.hiss } },
-  s: { say: (s) => rate(-50, ipa(CARRIER + s.ipa, "us")), post: { cut: "after-voice", levelDb: LEVEL.hiss } },
-  sh: { say: (s) => rate(-50, ipa(CARRIER + s.ipa, "ush")), post: { cut: "after-voice", levelDb: LEVEL.hiss } },
-  th: { say: (s) => rate(-50, ipa(CARRIER + s.ipa, "uth")), post: { cut: "after-voice", levelDb: LEVEL.breath } },
-  // h is the breath before a vowel.
-  h: { say: (s) => rate(-50, ipa(s.ipa + CARRIER, "huh")), post: { cut: "before-voice", levelDb: LEVEL.breath } },
-  // Stops without a voice: the burst and its breath, cut where the vowel starts.
+  // "it", "etch"), and the vowel cut out and held. Asked for alone, this
+  // voice's short i comes out as "ee" and its short a as "ah"; inside a word
+  // they are right.
+  a: { say: () => rate(-50, "at."), post: { cut: "voice", holdMs: HOLD.vowel, levelDb: LEVEL.voiced } },
+  e: { say: () => rate(-50, "etch."), post: { cut: "voice", holdMs: HOLD.vowel, levelDb: LEVEL.voiced } },
+  i: { say: () => rate(-50, "it."), post: { cut: "voice", holdMs: HOLD.vowel, levelDb: LEVEL.voiced } },
+  o: { say: (s) => rate(-50, ipa(s.ipa + "t", "ot")), post: { cut: "voice", holdMs: HOLD.vowel, levelDb: LEVEL.voiced } },
+  u: { say: () => rate(-50, "up."), post: { cut: "voice", holdMs: HOLD.vowel, levelDb: LEVEL.voiced } },
+  // Sounds that hum: on their own, slowed, whole, held. (Three in a row,
+  // "nnn", comes out with a vowel in the middle.)
+  m: { say: (s) => rate(-50, ipa(s.ipa, "m")), post: { cut: "all", holdMs: HOLD.hum, levelDb: LEVEL.voiced, fadeInMs: 20, fadeOutMs: 70 } },
+  n: { say: (s) => rate(-35, ipa(s.ipa, "n")), post: { cut: "all", holdMs: HOLD.hum, levelDb: LEVEL.voiced, fadeInMs: 20, fadeOutMs: 70 } },
+  l: { say: (s) => rate(-35, ipa(s.ipa, "l")), post: { cut: "all", holdMs: HOLD.hum, levelDb: LEVEL.voiced, fadeInMs: 20, fadeOutMs: 70 } },
+  r: { say: (s) => rate(-40, ipa(s.ipa, "r")), post: { cut: "all", holdMs: HOLD.hum, levelDb: LEVEL.voiced, fadeInMs: 20, fadeOutMs: 70 } },
+  w: { say: (s) => rate(-50, ipa(s.ipa, "w")), post: { cut: "all", holdMs: HOLD.hum, levelDb: LEVEL.voiced, fadeInMs: 20, fadeOutMs: 70 } },
+  // Hisses: after the carrier vowel, cut from where the voice stops, held.
+  f: { say: (s) => rate(-50, ipa(CARRIER + s.ipa, "uff")), post: { cut: "after-voice", hold: "hiss", holdMs: HOLD.hiss, levelDb: LEVEL.hiss } },
+  s: { say: (s) => rate(-50, ipa(CARRIER + s.ipa, "us")), post: { cut: "after-voice", hold: "hiss", holdMs: HOLD.hiss, levelDb: LEVEL.hiss } },
+  sh: { say: (s) => rate(-50, ipa(CARRIER + s.ipa, "ush")), post: { cut: "after-voice", hold: "hiss", holdMs: HOLD.hiss, levelDb: LEVEL.hiss } },
+  th: { say: (s) => rate(-50, ipa(CARRIER + s.ipa, "uth")), post: { cut: "after-voice", hold: "hiss", holdMs: HOLD.hiss, levelDb: LEVEL.breath } },
+  // h is the breath before a vowel, held as long as a breath can be.
+  h: { say: (s) => rate(-50, ipa(s.ipa + CARRIER, "huh")), post: { cut: "before-voice", hold: "hiss", holdMs: HOLD.breath, levelDb: LEVEL.breath, fadeInMs: 30, fadeOutMs: 70, tailMs: 40 } },
+  // Stops without a voice cannot be held: the whole burst and its breath,
+  // up to where the vowel would start, the tail faded and not cut.
   k: { say: (s) => rate(-50, ipa(s.ipa + CARRIER, "kuh")), post: { cut: "before-voice", levelDb: LEVEL.stop } },
   p: { say: (s) => rate(-50, ipa(s.ipa + CARRIER, "puh")), post: { cut: "before-voice", levelDb: LEVEL.stop } },
   t: { say: (s) => rate(-50, ipa(s.ipa + CARRIER, "tuh")), post: { cut: "before-voice", levelDb: LEVEL.stop } },
-  ch: { say: (s) => rate(-20, ipa(s.ipa + CARRIER, "chuh")), post: { cut: "before-voice", levelDb: LEVEL.stop } },
-  // Stops with a voice cannot be heard with no vowel at all: a sliver is kept.
-  b: { say: (s) => ipa(s.ipa + CARRIER, "buh"), post: { cut: "voiced-stop", keepVoicedMs: 70, levelDb: LEVEL.voiced } },
-  d: { say: (s) => ipa(s.ipa + CARRIER, "duh"), post: { cut: "voiced-stop", keepVoicedMs: 70, levelDb: LEVEL.voiced } },
-  g: { say: (s) => ipa(s.ipa + CARRIER, "guh"), post: { cut: "voiced-stop", keepVoicedMs: 70, levelDb: LEVEL.voiced } },
+  ch: { say: (s) => rate(-50, ipa(s.ipa + CARRIER, "chuh")), post: { cut: "before-voice", levelDb: LEVEL.stop } },
+  // Stops with a voice cannot be heard with no vowel at all: a short one is
+  // kept and dies away, as it does when a teacher says "b!".
+  b: { say: (s) => ipa(s.ipa + CARRIER, "buh"), post: { cut: "voiced-stop", keepVoicedMs: 110, levelDb: LEVEL.voiced } },
+  d: { say: (s) => ipa(s.ipa + CARRIER, "duh"), post: { cut: "voiced-stop", keepVoicedMs: 110, levelDb: LEVEL.voiced } },
+  g: { say: (s) => ipa(s.ipa + CARRIER, "guh"), post: { cut: "voiced-stop", keepVoicedMs: 110, levelDb: LEVEL.voiced } },
 };
 
-/** The fades each cut gets, in ms: a cut edge needs a longer one than a natural edge. */
+/** The fades each cut gets, and the quiet after it, in ms: a cut edge needs
+ *  a longer fade than a natural one, and a stop needs room to ring. A recipe
+ *  may say otherwise. */
 const FADES = {
   all: { fadeInMs: 5, fadeOutMs: 20 },
-  voice: { fadeInMs: 15, fadeOutMs: 50 },
-  "before-voice": { fadeInMs: 5, fadeOutMs: 20 },
-  "after-voice": { fadeInMs: 20, fadeOutMs: 20 },
-  "voiced-stop": { fadeInMs: 3, fadeOutMs: 40 },
+  voice: { fadeInMs: 25, fadeOutMs: 80 },
+  "before-voice": { fadeInMs: 5, fadeOutMs: 40, tailMs: 120 },
+  "after-voice": { fadeInMs: 30, fadeOutMs: 70 },
+  "voiced-stop": { fadeInMs: 3, fadeOutMs: 80, tailMs: 120 },
 };
+
+/** A word said slowly: how much slower the voice is asked to say it. */
+const SLOW_RATE = -30;
+/** Words the voice does not say as themselves at SLOW_RATE (speech-to-text
+ *  hears another word): what is done for each instead. `rate` asks for
+ *  another speed; `tempo` asks for the word at its usual speed and slows the
+ *  sound itself to that share, which keeps every sound in it as it was.
+ *  (bed and duck: speech-to-text hears any slow one as "bad" and "dark",
+ *  even the plain clip slowed; it goes by the vowel's length.) */
+const SLOW_FIX = { bed: { tempo: 0.72 }, chip: { rate: -20 }, duck: { tempo: 0.72 }, shop: { rate: -20 }, shed: { rate: -20 } };
+
+/** Words whose vowel the voice says a little off the one the game teaches,
+ *  and so are asked for by their sounds. Its "dog", "log" and "moth" lean
+ *  towards "aw"; the short o of "chop", "sock" and the o tile is opener. */
+const WORD_IPA = { dog: "dɑɡ", log: "lɑɡ", moth: "mɑθ" };
+const asWord = (w) => `${WORD_IPA[w.id] ? ipa(WORD_IPA[w.id], w.id) : w.id}.`;
 
 /** What each clip is: the SSML sent, and what is done to what comes back. */
 function recipes() {
@@ -111,10 +139,21 @@ function recipes() {
   for (const s of SOUNDS) {
     const r = SOUND_RECIPES[s.id];
     if (!r) throw new Error(`no recipe for the sound "${s.id}" (scripts/speech/build.mjs SOUND_RECIPES)`);
-    out[soundClip(s.id)] = { kind: "sound", provider: "azure", voice: VOICE, ssml: speak(r.say(s)), post: { ...r.post, ...FADES[r.post.cut] } };
+    out[soundClip(s.id)] = { kind: "sound", provider: "azure", voice: VOICE, ssml: speak(r.say(s)), post: { ...FADES[r.post.cut], ...r.post } };
   }
   // A word: said plainly, as a sentence of its own so it falls at the end.
-  for (const w of WORDS) out[wordClip(w.id)] = { kind: "word", provider: "azure", voice: VOICE, ssml: speak(`${w.id}.`), post: { cut: "all", levelDb: LEVEL.word, ...FADES.all } };
+  for (const w of WORDS) out[wordClip(w.id)] = { kind: "word", provider: "azure", voice: VOICE, ssml: speak(asWord(w)), post: { cut: "all", levelDb: LEVEL.word, ...FADES.all } };
+  // And slowly, as a teacher says it for a child: one word still, not sound by sound.
+  for (const w of WORDS) {
+    const fix = SLOW_FIX[w.id] ?? {};
+    out[slowClip(w.id)] = {
+      kind: "word",
+      provider: "azure",
+      voice: VOICE,
+      ssml: speak(fix.tempo ? asWord(w) : rate(fix.rate ?? SLOW_RATE, asWord(w))),
+      post: { cut: "all", levelDb: LEVEL.word, ...FADES.all, fadeOutMs: 40, ...(fix.tempo ? { tempo: fix.tempo } : {}) },
+    };
+  }
   return out;
 }
 
@@ -176,6 +215,12 @@ async function synthesise(clip, ssml) {
 }
 
 const encode = (pcm) => ffmpeg(["-f", "s16le", "-ar", String(RATE), "-ac", "1", "-i", "pipe:0", "-codec:a", "libmp3lame", "-b:a", BITRATE, "-map_metadata", "-1", "-id3v2_version", "0", "-fflags", "+bitexact", "-flags:a", "+bitexact", "-f", "mp3", "pipe:1"], s16Of(pcm));
+/** Samples slowed to `tempo` of their speed, at the same pitch. */
+function stretch(pcm, tempo) {
+  // One atempo goes no slower than half speed; two in a row go further.
+  const chain = tempo < 0.5 ? `atempo=0.5,atempo=${(tempo / 0.5).toFixed(4)}` : `atempo=${tempo.toFixed(4)}`;
+  return pcmOfS16(ffmpeg(["-f", "s16le", "-ar", String(RATE), "-ac", "1", "-i", "pipe:0", "-af", chain, "-f", "s16le", "-ar", String(RATE), "-ac", "1", "pipe:1"], s16Of(pcm)));
+}
 const decode = (file, hz = RATE) => pcmOfS16(ffmpeg(["-i", file, "-f", "s16le", "-ar", String(hz), "-ac", "1", "pipe:1"]));
 
 /** What speech-to-text makes of a clip: its guesses, best first, in lower case; none when it hears no words. */
@@ -215,20 +260,28 @@ function writeManifest(clips) {
 }
 
 const fileOf = (clip) => path.join(OUT, `${clip}.mp3`);
-const same = (a, b) => JSON.stringify(sorted(a)) === JSON.stringify(sorted(b));
+const sha = (data) => createHash("sha256").update(data).digest("hex");
+/** A recipe in one line: the voice, what it is asked, what is done to the
+ *  answer. Kept with each clip (`recipe`), beside the hash of the clip's own
+ *  bytes (`sha256`), so check can tell a clip made from an older recipe, or
+ *  a file changed by hand, without asking the voice anything. */
+const recipeHash = (r) => sha(JSON.stringify(sorted({ voice: r.voice, ssml: r.ssml, post: r.post })));
 
 // ---------- the commands ----------
 
 /** Is every clip there, with its entry, and nothing else? No network. */
 function check() {
   const want = allClips();
+  const now = recipes();
   const { clips } = readManifest();
   const wrong = [];
   for (const clip of want) {
     if (!Object.hasOwn(clips, clip)) wrong.push(`${clip}: not in the manifest`);
+    else if (clips[clip].recipe !== recipeHash(now[clip])) wrong.push(`${clip}: its recipe has changed since it was made (npm run speech:build)`);
     const size = fs.statSync(fileOf(clip), { throwIfNoEntry: false })?.size ?? 0;
     if (!size) wrong.push(`${clip}: no file, or an empty one`);
     else if (clips[clip] && clips[clip].bytes !== size) wrong.push(`${clip}: the file is ${size} bytes, the manifest says ${clips[clip].bytes}`);
+    else if (clips[clip] && clips[clip].sha256 !== sha(fs.readFileSync(fileOf(clip)))) wrong.push(`${clip}: the file is not the one the manifest describes (made by hand, or by an older run?)`);
   }
   for (const clip of Object.keys(clips)) if (!want.includes(clip)) wrong.push(`${clip}: in the manifest, but no word or sound has it`);
   const files = fs.existsSync(OUT) ? fs.readdirSync(OUT) : [];
@@ -246,18 +299,22 @@ async function build({ force, only }) {
   let made = 0;
   for (const [clip, recipe] of Object.entries(want)) {
     const had = clips[clip];
-    const current = had && fs.existsSync(fileOf(clip)) && same({ voice: had.voice, ssml: had.ssml, post: had.post }, { voice: recipe.voice, ssml: recipe.ssml, post: recipe.post });
-    if (only ? !only.includes(clip) : current && !force) continue;
+    const current = had && fs.existsSync(fileOf(clip)) && recipeHash(had) === recipeHash(recipe);
+    if (only ? !only.includes(clip) : current && !force) {
+      // A clip from before the hashes were kept: it is the one this recipe made, so it is stamped as it stands.
+      if (current && !(had.recipe && had.sha256)) clips[clip] = { ...had, recipe: recipeHash(recipe), sha256: sha(fs.readFileSync(fileOf(clip))) };
+      continue;
+    }
     let done;
     try {
-      done = finish(await synthesise(clip, recipe.ssml), recipe.post);
+      done = finish(await synthesise(clip, recipe.ssml), recipe.post, stretch);
     } catch (e) {
       if (e instanceof Failed) throw e;
       throw new Failed(`${clip}: ${e.message}`);
     }
     const mp3 = encode(done.pcm);
     fs.writeFileSync(fileOf(clip), mp3);
-    clips[clip] = { ...recipe, gainDb: done.gainDb, ms: Math.round((done.pcm.length / RATE) * 1000), bytes: mp3.length };
+    clips[clip] = { ...recipe, recipe: recipeHash(recipe), gainDb: done.gainDb, ms: Math.round((done.pcm.length / RATE) * 1000), bytes: mp3.length, sha256: sha(mp3) };
     // After every clip: a run that stops half way has lost nothing.
     writeManifest(clips);
     made++;
@@ -282,7 +339,7 @@ const VOICELESS = ["f", "s", "sh", "th", "h", "k", "p", "t", "ch"];
  * none is heard as a letter's name. What it cannot say is whether a sound
  * is the right sound: a person has to listen for that (the Sound check page).
  */
-async function verify({ only }) {
+async function verify({ only, match }) {
   check();
   const { clips } = readManifest();
   const held = new Map(SOUNDS.map((s) => [soundClip(s.id), s]));
@@ -290,20 +347,24 @@ async function verify({ only }) {
   console.log("clip          ms  sounds voiced  level  heard        frames (v voiced, u unvoiced, . silent)");
   for (const clip of allClips()) {
     if (only && !only.includes(clip)) continue;
+    if (match && !clip.includes(match)) continue;
     const m = measure(decode(fileOf(clip)));
     const guesses = await heard(clip, fileOf(clip));
     const said = guesses[0] ?? "";
     const flags = [];
     if (clips[clip].kind === "word") {
-      const word = clip.slice(5);
-      if (!guesses.some((g) => g === word || SAME_SOUND[g] === word)) flags.push(`heard as "${said}"`);
-      if (m.soundMs < 250 || m.soundMs > 1500) flags.push("an odd length for a word");
+      const word = clip.slice(5).replace(/-slow$/, "");
+      // A clip that is the word's own sound slowed (`tempo`) has the sounds of
+      // the plain clip, which is judged on its own line; speech-to-text takes
+      // a long short vowel for another word ("bed" as "bad"), so it is not asked.
+      if (!clips[clip].post.tempo && !guesses.some((g) => g === word || SAME_SOUND[g] === word)) flags.push(`heard as "${said}"`);
+      if (m.soundMs < 250 || m.soundMs > 1800) flags.push("an odd length for a word");
     } else {
       const s = held.get(clip);
       if (LETTER_NAMES.includes(said) && said !== "") flags.push(`heard as "${said}", which could be a letter's name`);
       if (VOICELESS.includes(s.id) && m.voicedMs > 20) flags.push("a voiceless sound with voice in it");
-      if (s.held && (m.soundMs < 150 || m.soundMs > 900)) flags.push("a held sound of an odd length");
-      if (!s.held && m.soundMs > 220) flags.push("a stop that goes on");
+      if (s.held && (m.soundMs < 300 || m.soundMs > 1000)) flags.push("a held sound of an odd length");
+      if (!s.held && m.soundMs > 320) flags.push("a stop that goes on");
       if (m.soundMs < 40) flags.push("almost nothing there");
     }
     console.log(`${clip.padEnd(12)} ${String(m.ms).padStart(4)}  ${String(m.soundMs).padStart(5)}  ${String(m.voicedMs).padStart(5)}  ${m.levelDb.toFixed(1).padStart(5)}  ${JSON.stringify(said).padEnd(12)} ${m.track}${flags.length ? `\n    !! ${flags.join("; ")}` : ""}`);
@@ -320,7 +381,7 @@ const only = onlyAt >= 0 ? (args[onlyAt + 1] ?? "").split(",").filter(Boolean) :
 
 try {
   if (flag("--check")) check();
-  else if (flag("--verify")) await verify({ only });
+  else if (flag("--verify")) await verify({ only, match: args.includes("--match") ? args[args.indexOf("--match") + 1] : null });
   else await build({ force: flag("--force"), only });
 } catch (e) {
   if (!(e instanceof Failed)) throw e;

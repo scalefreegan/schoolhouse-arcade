@@ -157,8 +157,10 @@ test("a reply lost after the play was stored: the retry gets it, and pays nothin
   const round = many(16, () => right("2+3"));
   const id = randomUUID();
   const db = rawDb();
-  // The transaction commits, and then whatever comes next fails.
-  setDb(new Proxy(db, { get: (real, name) => (name === "transaction" ? async (fn: Parameters<typeof db.transaction>[0]) => { await real.transaction(fn); throw new Error("the board fell over"); } : Reflect.get(real, name)) }));
+  // The transaction that stores the play commits, and then whatever comes
+  // next fails. (The look for a round already stored comes first, finds
+  // nothing and returns null: that one is let through.)
+  setDb(new Proxy(db, { get: (real, name) => (name === "transaction" ? async (fn: Parameters<typeof db.transaction>[0]) => { const out = await real.transaction(fn); if (out === null) return out; throw new Error("the board fell over"); } : Reflect.get(real, name)) }));
   assert.equal((await play(em, {}, round, id)).status, 500);
   setDb(db);
   const written = await query(WRITTEN);

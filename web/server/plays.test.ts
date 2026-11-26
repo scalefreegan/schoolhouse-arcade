@@ -188,7 +188,7 @@ const pause = (ms: number) => new Promise((r) => setTimeout(r, ms));
 async function clockArcade(t: { after: (fn: () => unknown) => void }) {
   const a = await arcade(t);
   const start = (playerId: string, roundId: string, gameId = "comet-cards") => request<{ clock: string } & ErrorReply>(plays, "POST", "/start", { playerId, gameId, roundId }, APP);
-  const send = (playerId: string, roundId: string, clock: unknown, answers: AnswerInput[], config: { mode?: string } = {}) =>
+  const send = (playerId: string, roundId: string, clock: unknown, answers: AnswerInput[], config: { mode?: string; level?: string } = {}) =>
     request<PlayReply & ErrorReply>(plays, "POST", "/", { playerId, gameId: "comet-cards", roundId, clock, level: "add-5", mode: "practice", skill: "easy", ...config, answers }, APP);
   return { ...a, start, send };
 }
@@ -247,6 +247,28 @@ test("a round already saved is answered with its play whatever clock comes with 
   for (const sentAgain of [clock, later, "nonsense", undefined]) {
     const retry = await send(em, id, sentAgain, [right("1+1", 300)]);
     assert.deepEqual([retry.status, retry.body.playId, retry.body.tickets.total], [201, first.body.playId, first.body.tickets.total], String(sentAgain));
+  }
+  assert.deepEqual(await query(COUNT), written);
+});
+
+test("a round already saved is answered with its play even if it would no longer be judged legal", async (t) => {
+  const { join, start, send, query } = await clockArcade(t);
+  const em = await join("Em");
+  const id = randomUUID();
+  const { clock } = (await start(em, id)).body;
+  await pause(400);
+  const first = await send(em, id, clock, [right("1+1", 300)]);
+  assert.equal(first.status, 201);
+  const written = await query(COUNT);
+  // As if the rules had changed since it was saved: the same round id, sent
+  // with what the rules now refuse (a fact the level does not hold, no
+  // answers, a mode that is not one) or for a level that is locked.
+  const refusedNew = await send(em, randomUUID(), clock, [right("9+9", 300)]);
+  assert.equal(refusedNew.status, 400, "a new round like this is refused");
+  const tries: [AnswerInput[], { mode?: string; level?: string }][] = [[[right("9+9", 300)], {}], [[], {}], [[right("1+1", 300)], { mode: "no-such-mode" }], [[right("1+1", 300)], { level: "add-10" }]];
+  for (const [answers, config] of tries) {
+    const retry = await send(em, id, clock, answers, config);
+    assert.deepEqual([retry.status, retry.body.playId, retry.body.right, retry.body.tickets.total], [201, first.body.playId, first.body.right, first.body.tickets.total], JSON.stringify(config));
   }
   assert.deepEqual(await query(COUNT), written);
 });

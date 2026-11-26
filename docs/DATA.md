@@ -11,7 +11,7 @@ uses, which is why an id never changes once live. Mirrors Lean Into It's `docs/D
 | Sound Machine's spoken clips (one mp3 a sound, two a word: plain and slow) and their manifest | `web/public/speech/sound-machine/` | yes (generated: `npm run speech:build`) |
 | Players; every play and every answer in it; stars per level; tickets, badges, prizes and hand-overs; the grown-up PIN's hash | Postgres `schoolhouse_arcade` | no |
 | `DATABASE_URL`, local overrides | `.env.local` | no |
-| Which player this device is, whether sound is off, the set-up each player used last | the browser's localStorage (`arcade.player`, `arcade.muted`, `arcade.comet.setup.<player>`, `arcade.sound-machine.setup.<player>`) | no, and not in the database |
+| Which player this device is, whether sound is off, the set-up each player used last | the browser's localStorage (`arcade.player`, `arcade.muted`, `arcade.comet.setup.<player>`, `arcade.sound-machine.setup.<player>`, `arcade.rhyme-time.setup.<player>`) | no, and not in the database |
 | `npm run db:backup`'s dumps of the database, the newest 14, readable only by you | `backups/` (`SCHOOLHOUSE_ARCADE_BACKUPS_DIR` moves it) | no (`backups/` is ignored) |
 | The Mac app's server log, and the daily backup's | `~/Library/Logs/SchoolhouseArcade.log` (`.old`: the run before), `SchoolhouseArcadeBackup.log` | no |
 
@@ -40,6 +40,13 @@ added by migration `0005_answers_given_text`): the word picked in Read
 letters as cut in Split (`ch|i|ck`; `correct` is the server's verdict on
 the cut). `fact` is the sum or the word asked. Split's gems are not stored:
 they are the sounds of its right words, counted again from these rows.
+Rhyme Time answers in text too, with no migration of its own: the question
+and the picture picked, so the server can check the question was a fair one
+before it judges the pick. Find it is `cat>hat|pin|dog=hat` (the word to
+rhyme with, `>`, the pictures in the order shown, `=`, the pick); Odd one
+out is `cat|hat|pin=pin`. `fact` is the word the question was about (in
+Odd one out, one of the pair), so which words come next leans on it as it
+does in the other games.
 Each row has one or neither (a card that timed out), never both; the
 column added is nullable and no row from before was touched.
 
@@ -101,6 +108,12 @@ The key is read from the environment only and is never written anywhere.
 The app needs none: at run time the tablet only fetches the files. A clip
 that sounds wrong is put right in `scripts/speech/` and made again, never
 edited by hand. *Grown-ups → Sound check* plays them all.
+
+Rhyme Time says Sound Machine's words with Sound Machine's clips. Its own
+sixteen words have one plain clip each,
+`web/public/speech/rhyme-time/word-<word>.mp3`, with a `manifest.json` of
+the same form, made and checked by the same commands (`--only word-van`
+finds a clip in either folder).
 
 ## Setup
 

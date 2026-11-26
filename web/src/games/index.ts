@@ -1,6 +1,7 @@
 import type { ComponentType } from "react";
 import type { Player } from "../../shared/wire.ts";
 import { CometCards } from "./comet/CometCards.tsx";
+import { RhymeTime } from "./rhymetime/RhymeTime.tsx";
 import { SoundMachine } from "./soundmachine/SoundMachine.tsx";
 
 // The screen for each live cabinet, keyed by the game's id in
@@ -16,4 +17,5 @@ export interface GameProps {
 export const GAME_SCREENS: Record<string, ComponentType<GameProps>> = {
   "comet-cards": CometCards,
   "sound-machine": SoundMachine,
+  "rhyme-time": RhymeTime,
 };

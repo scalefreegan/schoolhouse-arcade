@@ -1065,8 +1065,175 @@ select.field {
   .gm-piece { padding: 0 var(--px); }
 }
 
+/* ---------- Rhyme Time ---------- */
+
+/* Find it: the word to rhyme with on the left, the pictures to pick from on
+   the right with the lever under them. Odd one out: the pictures alone. */
+.rt-board {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 15rem) minmax(0, 1fr);
+  align-items: center;
+  gap: calc(var(--px) * 6);
+}
+.rt-board[data-mode="odd"] { grid-template-columns: minmax(0, 1fr); }
+.rt-call-side {
+  display: flex;
+  justify-content: center;
+}
+.rt-works {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(var(--px) * 3);
+}
+/* The word to rhyme with is the game's (cyan): press it to hear it again. */
+.rt-call {
+  --edge: var(--cyan);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(var(--px) * 2);
+  padding: calc(var(--px) * 4) calc(var(--px) * 3) calc(var(--px) * 2);
+  border: 0;
+  background: var(--tube);
+  color: var(--fg);
+  cursor: pointer;
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--edge),
+    0 var(--px) 0 0 var(--edge),
+    calc(var(--px) * -1) 0 0 0 var(--edge),
+    var(--px) 0 0 0 var(--edge);
+}
+.rt-call .rt-pic {
+  width: 100%;
+  max-width: 12rem;
+  height: auto;
+}
+.rt-choices {
+  --n: 3;
+  display: grid;
+  grid-template-columns: repeat(var(--n), minmax(0, 11rem));
+  justify-content: center;
+  gap: calc(var(--px) * 4);
+  width: 100%;
+}
+.rt-choices[data-n="4"] { --n: 4; }
+/* A picture to pick: pressed, it says its word and is the player's choice
+   (magenta) until the lever is pulled. */
+.rt-choice {
+  --edge: var(--line);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--px);
+  min-height: 7rem;
+  margin: var(--px);
+  padding: calc(var(--px) * 3) calc(var(--px) * 2) var(--px);
+  border: 0;
+  background: var(--tube);
+  color: var(--fg);
+  cursor: pointer;
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--edge),
+    0 var(--px) 0 0 var(--edge),
+    calc(var(--px) * -1) 0 0 0 var(--edge),
+    var(--px) 0 0 0 var(--edge);
+}
+.rt-choice .rt-pic {
+  width: 100%;
+  max-width: 8.5rem;
+  height: auto;
+}
+.rt-choice:focus-visible { --edge: var(--magenta); }
+.rt-choice[data-state="chosen"],
+.rt-choice[data-state="right"] {
+  background: var(--raised);
+  box-shadow:
+    0 calc(var(--px) * -2) 0 0 var(--edge),
+    0 calc(var(--px) * 2) 0 0 var(--edge),
+    calc(var(--px) * -2) 0 0 0 var(--edge),
+    calc(var(--px) * 2) 0 0 0 var(--edge),
+    0 0 calc(var(--px) * 8) color-mix(in srgb, var(--edge) 50%, transparent);
+}
+.rt-choice[data-state="chosen"] { --edge: var(--magenta); }
+.rt-choice[data-state="right"] { --edge: var(--good); }
+.rt-choice[data-state="wrong"] {
+  --edge: var(--bad);
+  animation: shake 0.32s steps(1);
+}
+/* Odd one out, answered: the pair that rhymes, shown by the game. */
+.rt-choice[data-state="pair"] { --edge: var(--cyan); }
+.rt-choice[data-state="out"] { opacity: 0.3; }
+/* The word being said glows. */
+.rt-call[data-lit="true"],
+.rt-choice[data-lit="true"] { background: var(--raised); }
+.rt-call[data-lit="true"] .rt-pic,
+.rt-choice[data-lit="true"] .rt-pic { filter: drop-shadow(0 0 calc(var(--px) * 3) var(--cyan)); }
+@media (hover: hover) {
+  .rt-choice[data-state=""]:hover { --edge: var(--magenta); }
+  .rt-call:hover { background: var(--raised); }
+}
+/* Under each picture, the word once it is answered; its place is kept before, so nothing moves. */
+.rt-written {
+  min-height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+  white-space: nowrap;
+}
+/* The ending the rhyme shares, lit: the game showing (cyan). */
+.rt-rime {
+  color: var(--cyan);
+  text-shadow: 0 0 calc(var(--px) * 2) var(--cyan);
+}
+.rt-again .rt-written,
+.rt-again .rt-word { font-size: 1.25rem; }
+
+/* Narrower than a landscape tablet: the word to rhyme with goes on top, and
+   four pictures go two by two. */
+@media (max-width: 63.9375rem) {
+  .rt-board {
+    grid-template-columns: minmax(0, 1fr);
+    gap: calc(var(--px) * 4);
+  }
+  .rt-call { width: 11rem; }
+  .rt-call .rt-pic { max-width: 8rem; }
+  .rt-choices[data-n="4"] { grid-template-columns: repeat(2, minmax(0, 11rem)); }
+}
+/* The same widths on their side and short (a small tablet held sideways, a
+   phone on its side): side by side again, the pictures in one row, and the
+   lever beside them rather than under them. */
+@media (min-width: 40.0625rem) and (max-width: 63.9375rem) and (max-height: 44.9375rem) {
+  .rt-board { grid-template-columns: 9rem minmax(0, 1fr); }
+  .rt-board[data-mode="odd"] { grid-template-columns: minmax(0, 1fr); }
+  .rt-call { width: 100%; padding: calc(var(--px) * 2); }
+  .rt-call .rt-pic { max-width: 6rem; }
+  .rt-works { flex-direction: row; justify-content: center; }
+  .rt-choices,
+  .rt-choices[data-n="4"] { grid-template-columns: repeat(var(--n), minmax(0, 8rem)); gap: calc(var(--px) * 2); }
+  .rt-choice { min-height: 0; padding: calc(var(--px) * 2) var(--px) 0; }
+  .rt-choice .rt-pic { max-width: 5rem; }
+  .rt-written { min-height: 2rem; font-size: 1.375rem; }
+  .rt-works .sm-after { min-height: 0; }
+  .rt-works .sm-go,
+  .rt-works .sm-next { min-width: calc(var(--px) * 22); }
+}
+@media (max-width: 40rem) {
+  .rt-call { width: 9rem; padding: calc(var(--px) * 2); }
+  .rt-call .rt-pic { max-width: 6rem; }
+  .rt-choices { gap: calc(var(--px) * 2); }
+  .rt-choices[data-n="4"] { grid-template-columns: repeat(2, minmax(0, 9rem)); }
+  .rt-choice { min-height: 0; padding: calc(var(--px) * 2) var(--px) 0; }
+  .rt-choice .rt-pic { max-width: 6rem; }
+  .rt-written { font-size: 1.5rem; }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .hop, .blink, .starfield, .card[data-state="wrong"], .lamp[data-state="now"], .sm-belt[data-run="true"], .sm-choice[data-state="wrong"], .gm-drop { animation: none; }
+  .hop, .blink, .starfield, .card[data-state="wrong"], .lamp[data-state="now"], .sm-belt[data-run="true"], .sm-choice[data-state="wrong"], .rt-choice[data-state="wrong"], .gm-drop { animation: none; }
   .gm-fly { animation: none; opacity: 0; }
   .sm-tile:active:not(:disabled) { transform: none; }
   .pop { animation: none; opacity: 0; }

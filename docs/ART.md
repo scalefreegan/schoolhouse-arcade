@@ -76,6 +76,19 @@ cabinet on the floor (a game names its drawing in `web/shared/games.ts`).
 diamond), in a palette for each place of a sound in its word (`gold`,
 `violet`, `blue`): never the green or red of right and wrong.
 
+## Rhyme Time's pictures
+
+Rhyme Time shows Sound Machine's pictures, and sixteen of its own in the
+same form (`w_bat`, `w_van`, `w_fan`, `w_pan`, `w_cap`, `w_map`,
+`w_wig`, `w_hen`, `w_pen`, `w_ten`, `w_net`, `w_jet`, `w_mop`, `w_mug`,
+`w_rug`, `w_bun`). Here the picture is all the player has before the
+answer (no word is written), so it has to be named at a glance, and the
+pictures that could be taken for each other are in `LOOKALIKES` in
+`web/shared/rhymetime/words.ts` (a cap and a hat, a mug and a cup, a net
+and a web, …). The same rule on green and red holds: the cap is blue and the
+map's path and X are brown. `jukebox` is its cabinet on the floor (and, in
+`gold`, the Rhyme Champion badge), and `ear` the Good Ear badge.
+
 ## Replacing a drawing with made art
 
 The rest of the app only knows a sprite's id, so art made elsewhere (ArtCraft,

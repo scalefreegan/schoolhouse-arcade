@@ -8,7 +8,8 @@ candy, a new video game). The list of cabinets is meant to grow; the first
 is **Comet Cards**, addition and subtraction flashcards against the clock,
 and the second is **Sound Machine**, letter sounds and sounding out short
 words (build a word, read one, or split one into its sounds), with nothing
-timed.
+timed, and the third is **Rhyme Time**, hearing which words rhyme, from
+pictures and voices alone.
 
 The name nods to the Saturday-morning idea that a lesson can be something
 you want to sit through. Everything in the app (names, characters, art,
@@ -40,14 +41,15 @@ all answers below are final for v1):
 | **Cabinet** | One game on the arcade floor. Listed in `web/shared/games.ts` |
 | **Player** | A row picked on the "Who is playing?" screen: a name, an avatar and its colour. No logins |
 | **Avatar** | The pixel character a player is, in one of its colours (`web/shared/avatars.ts`). The first colour is the character's own look |
-| **Fact** | What a game asks: one sum, written `7+5` or `10-2`, in Comet Cards; one word, `chick`, in Sound Machine. The unit everything is counted in |
+| **Fact** | What a game asks: one sum, written `7+5` or `10-2`, in Comet Cards; one word, `chick`, in Sound Machine and Rhyme Time (there, the word a question is about). The unit everything is counted in |
 | **Sound** | One spoken sound (a phoneme): the k of cat, kick and duck is one sound |
 | **Tile** | The letter or letters that write one sound: `c`, `a`, `ch`, `ck`. A digraph is one tile |
 | **Card** | A fact shown to be answered |
 | **Level** | A set of facts (add within 5, …). Levels unlock in order |
-| **Mode** | How a round is played: in Comet Cards how it is timed (Blitz, Sprint, Survival, Practice); in Sound Machine which game (Build it, Read it, Split it) |
+| **Mode** | How a round is played: in Comet Cards how it is timed (Blitz, Sprint, Survival, Practice); in Sound Machine which game (Build it, Read it, Split it); in Rhyme Time Find it or Odd one out |
+| **Rhyme family** | In Rhyme Time, words whose vowel and what follows it sound the same: cat, hat, chat and bat are the family `a-t`. Kept as data, never guessed from spelling |
 | **Gem** | In Split it, one sound of a word split right. Shown during the round and on its results only; never stored |
-| **Skill** | How an answer is given: Easy (four choices) or Arcade (number pad) |
+| **Skill** | How hard a round is: in Comet Cards Easy (four choices) or Arcade (number pad); in Sound Machine and Rhyme Time how many pictures or tiles there are, and how alike |
 | **Play** | One finished round: a player, a level, a mode, a skill, and every answer in it |
 | **Combo** | Right answers in a row. Raises the points per card |
 | **Star** | A level's mastery mark, 0 to 3 |
@@ -291,6 +293,127 @@ switched off stops and says the same. *Grown-ups → Sound check* plays
 every sound and every word, plain and slow, so the pronunciation can be
 listened through in one place.
 
+## Rhyme Time
+
+A jukebox that plays words, and the player listens for the rhyme. Added
+2026-11-25: a third cabinet for the skill that comes before sounding out,
+hearing that cat and hat end the same. It is built like Sound Machine's
+Read it (pictures, voices, a lever, no clock), and it reuses Sound
+Machine's words, pictures and clips, with sixteen words of its own.
+
+### Two games
+
+| Game (mode id) | The player | The answer |
+|---|---|---|
+| **Find it** (`find`) | sees a picture and hears its word, then hears each picture to pick from, and picks the one that rhymes | the question and the picture picked (`cat>hat\|pin\|dog=hat`) |
+| **Odd one out** (`odd`) | sees three pictures and hears each; two rhyme, and the player picks the one that does not | the question and the picture picked (`cat\|hat\|pin=pin`) |
+
+**Before the answer it is pictures and voices only.** A written word would
+let the letters find the rhyme (and the letters of a rhyme do not always
+match: sock and lock do, but the game is about the ear). Pressing a picture
+says its word and makes it the player's choice (magenta); pressing another
+changes the choice; the lever does nothing until one is chosen. In Find it
+the word to rhyme with stays on the left (on top, on a narrow screen), and
+pressing it says it again. When a question comes up its words are said in
+turn, each picture glowing as it is said, once (again after a pause). A
+picture pressed before that begins is said first, and the question right
+after it (or 2.5 seconds after the press at most, should its clip not end);
+pressing a picture while the question is being said stops it there.
+
+One try a question. Then the words are written under their pictures, lower
+case, with the ending they share lit in the game's cyan (c**at**, h**at**),
+and the rhyme is said: the word and its rhyme (Find it), or the pair and
+then the odd one (Odd one out). Right: the picture is lit green and the next
+question comes by itself once the words have been said. Wrong: the try is
+marked red, the right picture is lit green (and in Odd one out the pair is
+shown in cyan), and the arrow lights once the words have been said. Neither
+waits on a clip for more than six seconds. Nothing earned is taken away.
+
+### Words and rhymes
+
+Every word is three sounds, as in Sound Machine: all 39 of its words, and
+bat van fan pan cap map wig hen pen ten net jet mop mug rug bun, added so
+the families are bigger (van and jet bring the two sounds Sound Machine has
+no tile for). Two words rhyme when their vowel and last sound are the same
+sound (sock, lock, rock and shock are one family: c, k and ck are one
+sound); that is data in `web/shared/rhymetime/words.ts`, never a guess from
+the spelling.
+
+Kept out of each other's questions:
+
+- **Doubtful rhymes.** Many American speakers say pin and pen alike, so the
+  `i-n` and `e-n` families never stand in one question: a wrong answer
+  there would be right to the ear that hears it.
+- **Lookalike pictures.** Sound Machine's pairs, and a cap and a hat, a mug
+  and a cup, a net and a web, a pen and a pin, a hen and a chick, a map and
+  a path, the number ten and the sum, a bun and a chip, a bat and a moth, a
+  hen and a duck.
+
+### Levels
+
+| Level | Its words |
+|---|---|
+| 1 a i (`a-i`) | cat hat chat bat · van fan pan · cap map · pin chin thin · pig wig · chip ship |
+| 2 o e u (`o-e-u`) | dog log · chop shop mop · bed shed · hen pen ten · net jet · web · bug mug rug · sun bun · cup |
+| 3 ck sh th (`ck-sh-th`) | rock sock lock shock · kick lick chick thick · neck check · fish dish · bath path math · sack cash rich duck moth |
+| 4 Mix (`mix`) | every word |
+
+A question is about a word with a rhyme on its level; a word without one
+(web, cup, duck, …) is only ever a wrong picture. Level 1 is open; a star on
+a level opens the next; a grown-up can open any.
+
+**A round is eight questions about eight different words.** Which words
+leans towards the ones the player has missed lately (five times as likely
+as a word they know) and the ones never seen (three times), and a family is
+not asked about twice while the level has one not yet asked. In Odd one out
+a pair is never asked twice in a round.
+
+### Skills
+
+| Skill | Find it | Odd one out |
+|---|---|---|
+| Easy | three pictures; the two wrong ones share no sound in the same place with the word (not the first sound, the vowel or the last sound) | three pictures; the odd one shares no sound in the same place with either of the pair |
+| Arcade | four pictures; the wrong ones are near misses where the level has them (the same first sound as the word, or its vowel), and at least one always is when the level has a word that could be | three pictures; the odd one is a near miss (the same first sound as one of the pair, or their vowel) whenever the level has a word that could be |
+
+In Find it, no two wrong pictures rhyme with each other, so there is one
+answer and the others are not a second pair.
+
+### Scoring and stars
+
+As Sound Machine: a right answer scores 100, and 20 more for each right
+answer before it in a row; a table for each level, game and skill; ★ for 5
+right, ★★ for 7, ★★★ for all 8, in either game and on either skill; tickets
+one a right answer on Easy, two on Arcade, and the arcade's own bonuses.
+Two badges: Good Ear and Rhyme Champion (below). No per-level star badges,
+to keep the Prize Counter's badge wall short.
+
+The server judges every answer from the question and the pick
+(`answers.given_text`), with `web/shared/rhymetime/rules.ts`. It refuses a
+question about a word with no rhyme on the level, a word asked about twice,
+a picture not on the level, a picture twice in a question, the wrong number
+of pictures for the skill, lookalike pictures together, a doubtful rhyme,
+a question with no single answer, an Easy question whose wrong pictures
+(or odd one) share a sound in the same place with the word (or the pair),
+an Arcade question with no near miss where the level had one to show (so an
+Easy round cannot be sent as Arcade's, for its tickets or its table), an Odd
+one out pair asked twice, and a pick that is not one of the pictures. Whether the pick is right is the server's
+finding, not the browser's.
+
+Nothing is timed for the player. As in Sound Machine, each question's time
+is counted as at least one second and each answer stays up (1.7 seconds
+right, at least 1.4 wrong) before the next can come, so the server's round
+clock holds.
+
+### Speech
+
+A word Sound Machine has is said with Sound Machine's clip. Rhyme Time's
+sixteen own words have one plain clip each, made by the same
+`npm run speech:build` into `web/public/speech/rhyme-time/`. A round's
+words are fetched before it starts, and a round does not start without them
+(the pictures mean nothing unheard). Like Sound Machine it will not start,
+or go on, with the sound switched off. *Grown-ups → Sound check* lists Rhyme
+Time's own words after Sound Machine's.
+
 ## Tickets, badges, prizes
 
 **Tickets per play.** One per right answer on Easy, two on Arcade. Practice
@@ -319,6 +442,8 @@ already deserves it the next time they play.
 | *Level* Star (six of them, Sound Machine's) | a first star on that Sound Machine level | 25 each |
 | Word Builder | a star on every Sound Machine level | 100 |
 | Sound Champion | three stars on every Sound Machine level | 300 |
+| Good Ear | a star in Rhyme Time | 25 |
+| Rhyme Champion | three stars on every Rhyme Time level | 300 |
 
 Arcade Ace and Comet Champion mean Comet Cards' levels, as they always
 have; the counting badges (First Game, the Clubs, the streaks) count every
@@ -395,7 +520,7 @@ out; it is not a safe. A forgotten PIN is reset at the Mac:
 - Multiplication, division or numbers past 20 in Comet Cards.
 - Speech input, or speech made while the game runs (Sound Machine's clips
   are made ahead of time).
-- Blends, long vowels and longer words in Sound Machine.
+- Blends, long vowels and longer words in Sound Machine and Rhyme Time.
 - A native app. Added to an iPad's home screen it opens full screen.
 
 ## Architecture

@@ -29,6 +29,10 @@ web/shared/soundmachine/words.ts    Sound Machine: the sounds, the tiles, every 
 web/shared/soundmachine/rules.ts    its three games (build, read, gems: Split it), scoring, stars, gemsOf(), and settle()
 web/shared/soundmachine/pick.ts     a round's eight words, Build's tray of tiles, Read's pictures
 web/shared/soundmachine/session.ts  a round as events: next, place, take, cut, go, pick, pause (the screen's reducer)
+web/shared/rhymetime/words.ts   Rhyme Time: every word (Sound Machine's and its own), rhyme families, doubtful rhymes, lookalikes, levels, clip urls
+web/shared/rhymetime/rules.ts   its two games (find, odd), a question as text, rightOf(), faultOf() (a fair question), and settle()
+web/shared/rhymetime/pick.ts    a round's plan (eight words and their rhymes) and each question's pictures
+web/shared/rhymetime/session.ts a round as events: next, choose, go, pause (the screen's reducer); PACE, REVEAL_WAIT_MS
 web/server/api.ts        wrap() and the route table (ROUTES)
 web/server/origin.ts     who may call the API: this Mac or the home network, from the app
 web/server/tailnet.ts    ARCADE_TAILNET_HOST: the Mac's Tailscale name, the one name beyond those
@@ -50,11 +54,13 @@ web/src/games/Cabinet.tsx  any cabinet's flow: set up, the server's clock, the r
 web/src/games/           Setup, Results, Scores, format: the screens every cabinet shares
 web/src/games/comet/     Comet Cards: CometCards (what it hands Cabinet), Round
 web/src/games/soundmachine/  Sound Machine: SoundMachine (what it hands Cabinet), Round, Gems (Split's tray and tally)
+web/src/games/rhymetime/     Rhyme Time: RhymeTime (what it hands Cabinet), Round (and Written: a word with its ending lit)
+web/src/games/NeedsSound.tsx the notice and the in-round box for a game that will not play with the sound off
 web/src/sprites/art.ts   every drawing, as rows of characters and palettes
 web/src/sprites/Sprite.tsx  <Sprite> and <AvatarSprite>
 web/src/sound.ts         every beep, synthesised, and the one audio context (woken on a tap, remade if it will not wake)
 web/src/speech.ts        spoken clips: preload(), say(), hush(), speaking(); plays through sound.ts's context
-web/public/speech/       Sound Machine's clips and manifest (generated, committed)
+web/public/speech/       sound-machine/ and rhyme-time/: the clips and a manifest each (generated, committed)
 scripts/speech/          npm run speech:build: makes the clips (Azure text-to-speech; needs a key in the environment)
 web/src/index.css        the tokens and the pixel-box classes (.panel, .btn, .pick, .field)
 scripts/db/schema.ts     the whole schema (Drizzle)
@@ -126,28 +132,41 @@ macos/                   the Dock app (build-app.sh, the launcher, the server he
   (`scripts/db/config.mjs` refuses to start without a `DATABASE_URL`).
 - Never change a game id, a level id, a mode or skill id, a badge id, an
   avatar id or a colour id once live: rows are keyed on them. In Sound
-  Machine a word's id
+  Machine and Rhyme Time a word's id
   (its spelling) and a tile are stored on answers and never change either,
   and a sound's id names its clip.
 - **An answer is a number or text**, never both: `answers.given` for Comet
   Cards, `answers.given_text` for Sound Machine (the word picked, the
-  tiles placed, `ch-i-ck`, or the letters as cut, `ch|i|ck`). A game's
-  `settle()` refuses the other kind. Split's gems are counted from the
+  tiles placed, `ch-i-ck`, or the letters as cut, `ch|i|ck`) and for
+  Rhyme Time (the question and the pick, `cat>hat|pin|dog=hat` or
+  `cat|hat|pin=pin`: the server checks the question was fair, then judges
+  the pick). A game's `settle()` refuses the other kind. Split's gems are counted from the
   answers for the round's screens and never stored.
-- **Sound Machine has no clock the player sees**, and nothing in it is
+- **Sound Machine and Rhyme Time have no clock the player sees**, and nothing in them is
   scored on time. A word's time is still counted (at least `MIN_ANSWER_MS`)
   and each answer stays up for its `PACE` before the session lets the next
   word come, so the server's round clock holds as it does for Comet Cards;
   a test proves a round as fast as the screen allows still fits.
 - **Speech clips are generated, never hand-edited**: `npm run speech:build`
   (`scripts/speech/`) makes them from the words and sounds in
-  `web/shared/soundmachine/words.ts` and records each recipe in the
-  manifest. The key lives only in the environment; the app at run time
+  `web/shared/soundmachine/words.ts` and Rhyme Time's own words in
+  `web/shared/rhymetime/words.ts` (its others are Sound Machine's clips),
+  and records each recipe in the manifest. The key lives only in the environment; the app at run time
   fetches static files and calls nowhere. Read never says the whole word
-  before the answer, plain or slow. Sound Machine will not start with the
-  sound off, by any way into a round. A new word hushes the last one's
-  speech. No clip is waited on without a limit, and only a Build round's
-  word clips can stop a round from starting.
+  before the answer, plain or slow. Sound Machine and Rhyme Time will not
+  start with the sound off, by any way into a round. A new word hushes the
+  last one's speech. No clip is waited on without a limit, and only a Build
+  round's word clips and a Rhyme Time round's words can stop a round from
+  starting.
+- **Rhyme Time writes no word before the answer**: pictures and voices
+  only. A rhyme is data (`rhymeOf()`, the vowel and last sound), never the
+  spelling; the pin/pen families (`DOUBTFUL`) and lookalike pictures never
+  stand in one question, and the server refuses a question that breaks a
+  rule of its skill (`faultOf()`): Easy's wrong pictures share no sound in
+  the same place, and Arcade's include a near miss whenever the level has
+  one, so an Easy round is never taken as Arcade's. A test deals a question
+  for every word and each of its rhyme partners on every level, mode and
+  skill (four seeds each), and `faultOf()` takes every one dealt.
 - **Letters to be read are lower case in `--font-letters`** (`.sm-letter`):
   the display face has no true small letters.
 - Each table is read and written by one module under `scripts/db/`, whose
@@ -180,7 +199,7 @@ npm test                    # node --test: shared rules, routes, database (PGlit
 npm run typecheck && npm run lint
 npm run db:generate -- --name <what_changed>   # after editing scripts/db/schema.ts; commit the SQL
 npm run pin:reset           # forget the grown-up PIN
-npm run speech:build        # make Sound Machine's missing clips (AZURE_SPEECH_KEY and _REGION in the environment; ffmpeg)
+npm run speech:build        # make Sound Machine's and Rhyme Time's missing clips (AZURE_SPEECH_KEY and _REGION in the environment; ffmpeg)
 npm run speech:check        # every clip is there (no key, no network)
 ```
 `ARCADE_LOCAL_ONLY=1 npm run dev` keeps the server to this machine.

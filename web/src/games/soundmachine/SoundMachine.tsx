@@ -1,12 +1,12 @@
 import type { AnswerInput, PlayConfig } from "../../../shared/play.ts";
 import { answerOf, gemsOf, poolOf, soundMachineRules, type Mode, type Skill } from "../../../shared/soundmachine/rules.ts";
 import { LEVELS, SOUNDS, clipUrl, levelById, slowClip, soundClip, wordById, wordClip, type Word } from "../../../shared/soundmachine/words.ts";
-import { sfx } from "../../sound.ts";
 import { preload, say } from "../../speech.ts";
-import { Picture, Sprite } from "../../sprites/Sprite.tsx";
+import { Picture } from "../../sprites/Sprite.tsx";
 import { useArcade } from "../../state.tsx";
 import { Cabinet, type CabinetGame } from "../Cabinet.tsx";
 import type { GameProps } from "../index.ts";
+import { NeedsSound } from "../NeedsSound.tsx";
 import { GemTally } from "./Gems.tsx";
 import { RoundScreen } from "./Round.tsx";
 
@@ -70,31 +70,6 @@ function Missed({ answers, mode }: { answers: AnswerInput[]; mode: Mode }) {
           </li>
         ))}
       </ul>
-    </div>
-  );
-}
-
-/** This game is its sounds: with the sound off it says so, and offers to turn it on. */
-function NeedsSound() {
-  const { setMuted } = useArcade();
-  return (
-    <div role="alert" className="panel panel-cyan mt-4 flex flex-wrap items-center justify-center gap-4 text-center">
-      <p className="m-0">
-        <span className="font-display text-sm text-cyan">This game needs sound.</span>
-        <br />
-        The sound is off.
-      </p>
-      <button
-        type="button"
-        className="btn btn-cyan"
-        onClick={() => {
-          setMuted(false);
-          sfx.coin();
-        }}
-      >
-        <Sprite id="speaker" palette="ink" size={30} />
-        Turn sound on
-      </button>
     </div>
   );
 }

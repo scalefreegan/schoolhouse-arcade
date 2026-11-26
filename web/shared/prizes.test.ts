@@ -103,6 +103,6 @@ test("Sound Machine's badges are its own: Word Builder is a star on every one of
   assert.deepEqual(ids({ stars: { ...stars(2), ...sound(1) } }), [...LEVELS.map((l) => `comet-${l.id}`), "arcade-ace", ...bells, "sound-builder"]);
 });
 
-test("a badge that speaks of levels says whose: the two games both have them", () => {
-  for (const b of BADGES.filter((x) => /level/i.test(x.how))) assert.match(b.how, /Comet Cards|Sound Machine/, b.id);
+test("a badge that speaks of levels says whose: every game has them", () => {
+  for (const b of BADGES.filter((x) => /level/i.test(x.how))) assert.match(b.how, /Comet Cards|Sound Machine|Rhyme Time/, b.id);
 });

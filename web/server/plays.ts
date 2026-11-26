@@ -128,9 +128,30 @@ export async function settlePlay(db: Db, rules: GameRules, playerId: string, key
     };
     return { at: key, told };
   });
+  return replyOf(db, at, told);
+}
+
+/** A play as it is told to the screen: with its rank and its table as they stand now. */
+async function replyOf(db: Db, at: BoardKey, told: Told): Promise<PlayReply> {
   const tables = rulesFor(at.gameId);
   const kind = told.finished ? boardOf(tables, at.mode) : null;
   return { ...told, rank: kind ? await rankOf(db, at, kind, told) : null, board: await boardReply(db, tables, at) };
+}
+
+/**
+ * The play a round was stored as, or null. postPlay asks this once it knows
+ * the game is a live one and the player is there, and before it judges the
+ * play: a round already saved was judged when it was saved, by
+ * the rules as they were then, and a retry of it must get that play back
+ * even if a word list or a rule has changed since (or the level has).
+ */
+async function storedReply(db: Db, playerId: string, roundId: string): Promise<PlayReply | null> {
+  const found = await db.transaction(async (tx): Promise<{ at: BoardKey; told: Told } | null> => {
+    if (!(await lockPlayer(tx, playerId))) throw new HttpError(404, "no such player");
+    const stored = await playOfRound(tx, playerId, roundId);
+    return stored ? { at: stored.key, told: await retell(tx, playerId, stored) } : null;
+  });
+  return found && replyOf(db, found.at, found.told);
 }
 
 /** A round begins: the server notes the time, in a clock the browser keeps
@@ -173,6 +194,9 @@ async function postPlay(req: IncomingMessage, res: ServerResponse): Promise<void
   // Required. Only this app's pages post plays, and one that names no round
   // (a page left open since before rounds had ids) could be paid twice.
   if (!isUuid(body.roundId)) throw new HttpError(400, "This page is too old to save a score. Reload it.");
+  // A round already saved is answered before anything is judged: see storedReply().
+  const saved = await storedReply(db, playerId, body.roundId);
+  if (saved) return sendJson(res, 201, saved);
   const config: PlayConfig = { level: text(body.level), mode: text(body.mode), skill: text(body.skill) };
   let settled: Settled;
   try {

@@ -115,7 +115,9 @@ macos/                   the Dock app (build-app.sh, the launcher, the server he
   A game supplies only `pay()`; bonuses and badges are the arcade's. And
   once: a game makes one round id per round and sends it on every retry; a
   round id the player has already sent gets the stored play back and writes
-  nothing. `recordPlay()` comes after `playOfRound()`, under the lock.
+  nothing. `recordPlay()` comes after `playOfRound()`, under the lock. A stored
+  round is looked for before the play is judged (`storedReply()`), so a
+  retry gets its play back even if a rule or a word list changed since.
 - **A round has the server's clock** (`web/server/clock.ts`). A game asks
   `POST /api/plays/start` with its round id before its countdown and plays
   only once it has the clock; it sends the clock back with the play. A new

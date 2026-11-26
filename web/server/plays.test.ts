@@ -259,18 +259,20 @@ test("a round already saved is answered with its play even if it would no longer
   await pause(400);
   const first = await send(em, id, clock, [right("1+1", 300)]);
   assert.equal(first.status, 201);
-  const written = await query(COUNT);
+  const WRITTEN = "select (select count(*)::int from plays) as plays, (select count(*)::int from answers) as answers, (select count(*)::int from ticket_events) as lines, (select sum(delta)::int from ticket_events) as tickets, (select count(*)::int from badges_earned) as badges, (select sum(stars)::int from level_stars) as stars";
+  const written = await query(WRITTEN);
   // As if the rules had changed since it was saved: the same round id, sent
   // with what the rules now refuse (a fact the level does not hold, no
   // answers, a mode that is not one) or for a level that is locked.
   const refusedNew = await send(em, randomUUID(), clock, [right("9+9", 300)]);
   assert.equal(refusedNew.status, 400, "a new round like this is refused");
+  assert.equal((await send(em, randomUUID(), clock, [right("1+1", 300)], { level: "add-10" })).status, 403, "and so is a new round on a locked level");
   const tries: [AnswerInput[], { mode?: string; level?: string }][] = [[[right("9+9", 300)], {}], [[], {}], [[right("1+1", 300)], { mode: "no-such-mode" }], [[right("1+1", 300)], { level: "add-10" }]];
   for (const [answers, config] of tries) {
     const retry = await send(em, id, clock, answers, config);
     assert.deepEqual([retry.status, retry.body.playId, retry.body.right, retry.body.tickets.total], [201, first.body.playId, first.body.right, first.body.tickets.total], JSON.stringify(config));
   }
-  assert.deepEqual(await query(COUNT), written);
+  assert.deepEqual(await query(WRITTEN), written);
 });
 
 test("a clock is good only for the player, game and round it was given for, as it was given", async (t) => {

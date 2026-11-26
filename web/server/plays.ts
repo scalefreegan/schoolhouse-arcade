@@ -139,8 +139,9 @@ async function replyOf(db: Db, at: BoardKey, told: Told): Promise<PlayReply> {
 }
 
 /**
- * The play a round was stored as, or null. postPlay asks this before it
- * judges anything: a round already saved was judged when it was saved, by
+ * The play a round was stored as, or null. postPlay asks this once it knows
+ * the game is a live one and the player is there, and before it judges the
+ * play: a round already saved was judged when it was saved, by
  * the rules as they were then, and a retry of it must get that play back
  * even if a word list or a rule has changed since (or the level has).
  */

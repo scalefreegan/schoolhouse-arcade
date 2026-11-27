@@ -129,6 +129,11 @@ export const sfx = {
     const f = 1319 * 2 ** ((step % 8) / 12);
     play([{ f, at: 0, len: 0.05 }, { f: f * 2, at: 0.04, len: 0.09 }], "triangle", 0.1);
   },
-  /** `n` gems dropping into the tray, one ping each, climbing. Never over speech: after the word is said. */
-  gems: (n: number) => play(Array.from({ length: Math.max(0, Math.min(n, 8)) }, (_, i) => ({ f: 1047 * 2 ** ((i * 4) / 12), at: i * 0.09, len: 0.08 })), "triangle", 0.1),
+  /** `n` gems dropping into the tray, one ping each, climbing. Never over speech: after the word is said.
+   *  Only on a context that is running: queued on one that is not, they would sound whenever it woke,
+   *  over whatever was being said by then. (They follow the lever by seconds, so a healthy context is awake.) */
+  gems: (n: number) => {
+    if (audio()?.state !== "running") return;
+    play(Array.from({ length: Math.max(0, Math.min(n, 8)) }, (_, i) => ({ f: 1047 * 2 ** ((i * 4) / 12), at: i * 0.09, len: 0.08 })), "triangle", 0.1);
+  },
 };

@@ -61,6 +61,18 @@ export function readQuestion(o: { askSeq: number; seq: number; phase: Phase; ask
   return "read";
 }
 
+/**
+ * Whether a question sent to be said was stopped before any of it sounded:
+ * a picture pressed since it was sent (`readAt`), while its first word had
+ * yet to begin (the caller asks only until then). That press counts as an
+ * early one: the pressed word is heard out and the question said after it,
+ * as readQuestion has it. Without this the press would stop the whole
+ * reading for good, in the few dozen ms between "read" and the first sound.
+ */
+export function cutUnheard(o: { readAt: number; tappedAt: number | null }): boolean {
+  return o.tappedAt !== null && o.tappedAt >= o.readAt;
+}
+
 export interface Session {
   level: RhymeLevel;
   mode: Mode;

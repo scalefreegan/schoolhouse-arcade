@@ -316,9 +316,11 @@ changes the choice; the lever does nothing until one is chosen. In Find it
 the word to rhyme with stays on the left (on top, on a narrow screen), and
 pressing it says it again. When a question comes up its words are said in
 turn, each picture glowing as it is said, once (again after a pause). A
-picture pressed before that begins is said first, and the question right
-after it (or 2.5 seconds after the press at most, should its clip not end);
-pressing a picture while the question is being said stops it there.
+picture pressed before that begins (before any of it has sounded) is said
+first, and the question right after it (or 2.5 seconds after the last such
+press at most, should its clip not end: pressing again and again holds the
+question back, each press heard out first); pressing a picture while the
+question is being said stops it there.
 
 One try a question. Then the words are written under their pictures, lower
 case, with the ending they share lit in the game's cyan (c**at**, h**at**),

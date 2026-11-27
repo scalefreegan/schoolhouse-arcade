@@ -10,7 +10,7 @@ import type { AnswerInput, PlayConfig } from "../play.ts";
 import { RULES } from "../rules.ts";
 import { DISTRACTORS, PICTURES, picturesFor, roundWords, trayFor } from "./pick.ts";
 import { MAX_ANSWER_MS, MIN_ANSWER_MS, MODES, SKILLS, answerOf, gemsOf, pay, poolOf, settle, soundMachineRules, type Mode, type Skill } from "./rules.ts";
-import { GEM_WAIT_MS, PACE, advance, built, gemsMayFly, cutEnough, full, pieces, startSession, waited, type Session } from "./session.ts";
+import { PACE, advance, built, gemsMayFly, cutEnough, full, pieces, startSession, waited, type Session } from "./session.ts";
 import { DIGRAPHS, LEVELS, LOOKALIKES, ROUND_WORDS, SOUNDS, SPEECH_DIR, TILE_SOUND, VOWELS, WORDS, allClips, levelById, lookalike, piecesOf, reviewOf, reviewRoom, slowClip, soundClip, soundOf, splitKey, tileClip, tilesKey, wordById, wordClip } from "./words.ts";
 
 const level = (id: string) => levelById(id)!;
@@ -537,19 +537,11 @@ test("a pause during a Split answer on show holds the next word, and a pause whi
   assert.equal(advance(s, { type: "next", now: shown + 100_000, seed: 2 }).phase, "ask");
 });
 
-test("Split's gems wait for speech to stop, but never without a limit", () => {
-  const fly = (begun: boolean, talking: boolean, settledAt: number | null, now: number) => gemsMayFly({ begun, speaking: talking, settledAt, now });
-  assert.equal(fly(false, false, null, 0), false, "not before the reveal has begun");
-  assert.equal(fly(true, false, null, 0), true, "at once when nothing is being said");
-  assert.equal(fly(true, true, null, 1e9), false, "speech goes on and the reveal is still being said");
-  assert.equal(fly(true, true, 4000, 4000 + GEM_WAIT_MS - 1), false, "a clip still playing after the reveal (a hear button) is waited for");
-  assert.equal(fly(true, true, 4000, 4000 + GEM_WAIT_MS), true, "a clip that never ends (the audio stopped) is not waited for past the limit");
-  // A hear button pressed just before the reveal settles says a word that may outlast it by the
-  // word's own length: the limit leaves room for the longest clip there is, and is a few seconds at most.
-  const dir = path.join(path.dirname(fileURLToPath(import.meta.url)), "../../public", SPEECH_DIR);
-  const manifest = JSON.parse(fs.readFileSync(path.join(dir, "manifest.json"), "utf8")) as { clips: Record<string, { ms: number }> };
-  const longest = Math.max(...Object.values(manifest.clips).map((c) => c.ms));
-  assert.ok(GEM_WAIT_MS >= longest + 250 && GEM_WAIT_MS <= 3000, `${GEM_WAIT_MS} ms against the longest clip, ${longest} ms`);
+test("Split's gems wait for the reveal to begin and for speech to stop, whatever is being said", () => {
+  assert.equal(gemsMayFly({ begun: false, speaking: false }), false, "not before the reveal has begun");
+  assert.equal(gemsMayFly({ begun: false, speaking: true }), false);
+  assert.equal(gemsMayFly({ begun: true, speaking: true }), false, "the reveal, or a hear button pressed during it, is heard out");
+  assert.equal(gemsMayFly({ begun: true, speaking: false }), true, "at once when nothing is being said");
 });
 
 test("the next word does not come until the answer has had its time on show", () => {

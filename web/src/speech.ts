@@ -23,6 +23,11 @@ const loading = new Map<string, Promise<AudioBuffer>>();
 const missing = new Set<string>();
 /** What is playing now, or queued to. */
 let playing: AudioBufferSourceNode[] = [];
+/** When what is queued is due to have been said: on its context's own clock
+ *  (`end`, seconds), and on performance.now()'s as it stood when queued (`until`, ms). */
+let due: { ac: AudioContext; end: number; until: number } | null = null;
+/** How long past that speaking() still waits for the last clip to say it has ended (ms). */
+const OVERRUN_MS = 250;
 let turn = 0;
 /** What to tell whoever is speaking now when it stops (say's `onStop`). */
 let stopping: (() => void) | null = null;
@@ -122,12 +127,19 @@ export async function preload(need: string[], want: string[] = []): Promise<void
 /**
  * Something is being said now, or is queued to be: whatever say() started
  * last, even if it cut short an earlier say() (whose promise still waits out
- * its own time). For a sound that must not land on speech. It has no limit
- * of its own: a clip on a context that was suspended or closed never ends,
- * so whoever waits on this puts a limit on the wait (as Split's gems do).
+ * its own time). For a sound that must not land on speech, and for what
+ * waits until a word has been heard out. It has its own limit: a clip on a
+ * context that was suspended or closed never ends, so nothing counts as
+ * being said past the time the queue was due to end (and OVERRUN_MS). That
+ * time is told by the context's own clock while it runs (a context that
+ * woke late says its clips late, and its clock knows), and by the wall
+ * clock when it does not run, since its own clock then stands still. Each
+ * say() sets it afresh, so waiting on this hears out every press, however
+ * many, and still never waits on a dead context.
  */
 export function speaking(): boolean {
-  return playing.length > 0;
+  if (!playing.length || !due) return false;
+  return due.ac.state === "running" ? due.ac.currentTime < due.end + OVERRUN_MS / 1000 : performance.now() < due.until;
 }
 
 /** Stop whatever is being said. */
@@ -179,6 +191,7 @@ export async function say(urls: string[], opts: { gap?: number | ((index: number
   if (!clips.length) return over();
   const gapAfter = (index: number) => (typeof opts.gap === "function" ? opts.gap(index) : (opts.gap ?? 0.12));
   let at = ac.currentTime + 0.03;
+  let end = at;
   await new Promise<void>((done) => {
     clips.forEach(({ buffer, index }, i) => {
       const node = ac.createBufferSource();
@@ -193,8 +206,10 @@ export async function say(urls: string[], opts: { gap?: number | ((index: number
         playing = playing.filter((n) => n !== node);
       });
       playing.push(node);
-      at += buffer.duration + gapAfter(index);
+      end = at + buffer.duration;
+      at = end + gapAfter(index);
     });
+    due = { ac, end, until: performance.now() + (end - ac.currentTime) * 1000 + OVERRUN_MS };
     // If this was cut short, hush() dropped the callbacks: let go when the time is up.
     window.setTimeout(done, (at - ac.currentTime) * 1000 + 250);
   });

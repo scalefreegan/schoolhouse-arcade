@@ -2,7 +2,7 @@ import { useEffect, useEffectEvent, useReducer, useRef, useState } from "react";
 import type { FactStat } from "../../../shared/deal.ts";
 import type { AnswerInput } from "../../../shared/play.ts";
 import { rightOf, type Mode, type Skill } from "../../../shared/rhymetime/rules.ts";
-import { PACE, advance, readQuestion, ready, revealDone, startSession } from "../../../shared/rhymetime/session.ts";
+import { PACE, advance, cutUnheard, readQuestion, ready, revealDone, startSession } from "../../../shared/rhymetime/session.ts";
 import { ROUND_QUESTIONS, rhymes, sayUrl, wordById, type RhymeLevel, type RhymeWord } from "../../../shared/rhymetime/words.ts";
 import { sfx } from "../../sound.ts";
 import { hush, say, speaking } from "../../speech.ts";
@@ -58,13 +58,26 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
   const tapped = useRef<{ seq: number; at: number }>({ seq: -1, at: 0 });
   const next = () => send({ type: "next", now: performance.now(), seed: seed() });
 
-  /** Say these words in order, each picture glowing as its word is said. */
-  const sayAll = (ids: string[], gap: number | ((i: number) => number) = GAP) => {
+  /** Say these words in order, each picture glowing as its word is said
+   *  (`onSound`: the first of them to be said has begun to sound). The glow goes out when
+   *  this stops being said, by its end or by being cut short, and so never
+   *  puts out the glow of what cut it. */
+  const sayAll = (ids: string[], gap: number | ((i: number) => number) = GAP, onSound?: () => void) => {
     const seq = s.seq;
+    let silent = true;
     return say(
       ids.map((id) => sayUrl(wordOf(id))),
-      { gap, onEach: (i) => setLitAt({ seq, id: ids[i] }) },
-    ).then(() => setLitAt((l) => (l.seq === seq ? { seq, id: null } : l)));
+      {
+        gap,
+        onEach: (i) => {
+          // The first clip there is: a word whose clip could not be had is left out.
+          if (silent) onSound?.();
+          silent = false;
+          setLitAt({ seq, id: ids[i] });
+        },
+        onStop: () => setLitAt((l) => (l.seq === seq ? { seq, id: null } : l)),
+      },
+    );
   };
 
   const q = s.question;
@@ -92,7 +105,10 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
         // said stops (a press before now included: it is forgotten with it),
         // then the question is said once: the word, a breath, and each picture
         // in turn; or the three pictures. A picture pressed before then is
-        // heard out first (readQuestion has the limits), and nothing pending
+        // heard out first (readQuestion has the limits), and "before then"
+        // is before any of it has sounded: a press in the moment between
+        // the reading being sent and its first word stops it unheard, so it
+        // is read again after the pressed word (cutUnheard). Nothing pending
         // outlives this step: the timer goes when the step does, and the
         // session is asked again before speaking.
         hush();
@@ -101,13 +117,38 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
           const ids = q.mode === "find" ? [q.call!, ...q.choices] : q.choices;
           const askSeq = s.seq;
           const askedAt = performance.now();
+          /** When the reading was last sent to be said (null: not yet, or to be sent again). */
+          let readAt: number | null = null;
+          /** The reading is over with: some of it sounded, or it ended with nothing to say. */
+          let heard = false;
+          /** When a picture was last pressed in this step, if one was. */
+          const tapNow = () => (tapped.current.seq === askSeq ? tapped.current.at : null);
           const tick = window.setInterval(() => {
-            const t = tapped.current;
+            const tappedAt = tapNow();
             const now = performance.now();
-            const what = readQuestion({ askSeq, ...stepNow(), askedAt, tappedAt: t.seq === askSeq ? t.at : null, speaking: speaking(), now });
+            if (!heard && readAt !== null && cutUnheard({ readAt, tappedAt })) readAt = null;
+            if (heard) return window.clearInterval(tick);
+            // Sent, and not cut: wait for its first word (or its end).
+            if (readAt !== null) {
+              if (stepNow().seq !== askSeq) window.clearInterval(tick);
+              return;
+            }
+            const what = readQuestion({ askSeq, ...stepNow(), askedAt, tappedAt, speaking: speaking(), now });
             if (what === "wait") return;
-            window.clearInterval(tick);
-            if (what === "read") void sayAll(ids, (i) => (q.mode === "find" && i === 0 ? BREATH : GAP));
+            if (what === "drop") return window.clearInterval(tick);
+            const mine = (readAt = now);
+            const sounded = () => {
+              if (readAt === mine) heard = true;
+            };
+            // Ended with nothing sounded: there was nothing to say (that is the
+            // reading over with), unless a press stopped it first, which may
+            // be seen here before the next tick sees it (a clip still loading).
+            const ended = () => {
+              if (readAt !== mine || heard) return;
+              if (cutUnheard({ readAt: mine, tappedAt: tapNow() })) readAt = null;
+              else heard = true;
+            };
+            void sayAll(ids, (i) => (q.mode === "find" && i === 0 ? BREATH : GAP), sounded).then(ended, ended);
           }, 50);
           timers.push(tick);
         }
@@ -178,7 +219,14 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
   const byKeys = useRef(false);
   const onKey = useEffectEvent((ev: KeyboardEvent) => {
     // A held key repeating is not a new press (holding Enter on the box's button must not pull the lever underneath).
-    if (ev.repeat || ev.metaKey || ev.ctrlKey || ev.altKey) return;
+    // Nor is it a press of whatever has focus: Enter held would press a button last tapped or clicked
+    // again on every repeat. Only a button reached by Tab
+    // keeps its own repeats, as a button does anywhere.
+    if (ev.repeat) {
+      if (ev.key === "Enter" && !(byKeys.current && ev.target instanceof HTMLButtonElement && !ev.target.disabled)) ev.preventDefault();
+      return;
+    }
+    if (ev.metaKey || ev.ctrlKey || ev.altKey) return;
     // While the sound-off box is up the round is not there to play: its keys are the box's own.
     if (muted) return;
     if (ev.key === "Tab") byKeys.current = true;

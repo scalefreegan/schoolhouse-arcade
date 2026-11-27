@@ -444,6 +444,28 @@ test("Read: one tap on a picture is the answer; a wrong one is shown, never puni
   assert.equal(advance(s, { type: "pick", word: s.word!.id, now: 9100 }), s, "one try");
 });
 
+test("The +N shown for a right word is what the score went up by, in every game: more as a run grows, the base again after a miss", () => {
+  for (const mode of MODES.map((m) => m.id as Mode)) {
+    let s = startSession(level("cvc"), mode, "easy", {}, 6);
+    const shown: number[] = [];
+    let now = 0;
+    // Three right, one missed, then right to the end.
+    for (let i = 0; i < ROUND_WORDS; i++) {
+      s = advance(s, { type: "next", now: (now += 5_000), seed: i });
+      const before = s.round.score;
+      s = answerAt(s, (now += 2_000), i !== 3);
+      assert.equal(s.last?.gained, s.round.score - before, `${mode}, word ${i + 1}`);
+      shown.push(s.last!.gained);
+    }
+    assert.equal(s.round.over, true);
+    assert.equal(shown[3], 0, `${mode}: a miss shows nothing won`);
+    assert.ok(shown[0] > 0 && shown[1] > shown[0] && shown[2] > shown[1], `${mode}: a run pays more each time (${shown.join(" ")})`);
+    assert.equal(shown[4], shown[0], `${mode}: the word after a miss is worth the base again`);
+    assert.equal(shown.reduce((a, b) => a + b, 0), s.round.score, `${mode}: what was shown adds up to the score`);
+    assert.equal(settle({ level: "cvc", mode, skill: "easy" }, s.answers).score, s.round.score, `${mode}: and to what the server scores`);
+  }
+});
+
 test("Split: a word comes up whole; a tap on a gap cuts it there and another joins it; the lever works once it is cut; one try", () => {
   let s = startSession(level("th"), "gems", "easy", {}, 4);
   assert.equal(advance(s, { type: "cut", at: 0 }), s, "no word yet");

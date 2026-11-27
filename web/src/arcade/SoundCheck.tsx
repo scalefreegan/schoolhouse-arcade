@@ -52,7 +52,9 @@ export function SoundCheck({ onBack }: { onBack: () => void }) {
   const [missing, setMissing] = useState<string | null>(null);
 
   useEffect(() => {
-    const all = [...SOUNDS.map((s) => clipUrl(soundClip(s.id))), ...LEVELS.flatMap((l) => l.focus).map((w) => clipUrl(wordClip(w.id))), ...RHYME_WORDS.filter((w) => !w.shared).map(sayUrl)];
+    // Every clip a button here plays, the slow words too: one that is missing is said so, not left silent.
+    const words = LEVELS.flatMap((l) => l.focus);
+    const all = [...SOUNDS.map((s) => clipUrl(soundClip(s.id))), ...words.map((w) => clipUrl(wordClip(w.id))), ...words.map((w) => clipUrl(slowClip(w.id))), ...RHYME_WORDS.filter((w) => !w.shared).map(sayUrl)];
     preload(all).catch((e: unknown) => setMissing(e instanceof Error ? e.message : String(e)));
     return hush;
   }, []);

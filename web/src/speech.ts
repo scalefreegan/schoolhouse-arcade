@@ -24,6 +24,8 @@ const missing = new Set<string>();
 /** What is playing now, or queued to. */
 let playing: AudioBufferSourceNode[] = [];
 let turn = 0;
+/** What to tell whoever is speaking now when it stops (say's `onStop`). */
+let stopping: (() => void) | null = null;
 
 /** Why a clip could not be had, in words for a screen a child reads. */
 export type ClipTrouble = "away" | "slow" | "missing";
@@ -140,6 +142,9 @@ export function hush(): void {
     }
   }
   playing = [];
+  const told = stopping;
+  stopping = null;
+  told?.();
 }
 
 /**
@@ -147,20 +152,31 @@ export function hush(): void {
  * seconds: one number, or a function of the clip just said (its place in
  * `urls`). Whatever was being said stops first: a new tap is a new thing to
  * hear. `onEach` is called as each clip starts (to light the tile it
- * belongs to). A clip that cannot be had is left out. Resolves when the last
- * has ended (or at once when the sound is off, or when something newer cut
- * it short).
+ * belongs to). `onStop` is called once, the moment this stops being said:
+ * when its last clip ends, or at once when something cuts it short (a newer
+ * say(), hush()), before the newer thing's own onEach; so a light onEach
+ * put on is put out by onStop and never outlives its sound or puts out
+ * another's. A clip that cannot be had is left out. Resolves when the last
+ * has ended (or at once when the sound is off); if it was cut short, not
+ * until the time it would have ended.
  */
-export async function say(urls: string[], opts: { gap?: number | ((index: number) => number); onEach?: (index: number) => void } = {}): Promise<void> {
+export async function say(urls: string[], opts: { gap?: number | ((index: number) => number); onEach?: (index: number) => void; onStop?: () => void } = {}): Promise<void> {
   hush();
   const mine = turn;
+  stopping = opts.onStop ?? null;
+  /** Over without being cut short (hush() tells a say that was). */
+  const over = () => {
+    if (mine !== turn) return;
+    stopping = null;
+    opts.onStop?.();
+  };
   const ac = audio();
-  if (!ac || !urls.length) return;
+  if (!ac || !urls.length) return over();
   // A clip known to be missing is not waited for again here; preload tries it afresh.
   const found = await Promise.all(urls.map((url) => buffers.get(url) ?? (missing.has(url) ? null : load(url).catch(() => null))));
   if (mine !== turn) return;
   const clips = found.flatMap((buffer, index) => (buffer ? [{ buffer, index }] : []));
-  if (!clips.length) return;
+  if (!clips.length) return over();
   const gapAfter = (index: number) => (typeof opts.gap === "function" ? opts.gap(index) : (opts.gap ?? 0.12));
   let at = ac.currentTime + 0.03;
   await new Promise<void>((done) => {
@@ -182,6 +198,7 @@ export async function say(urls: string[], opts: { gap?: number | ((index: number
     // If this was cut short, hush() dropped the callbacks: let go when the time is up.
     window.setTimeout(done, (at - ac.currentTime) * 1000 + 250);
   });
+  over();
 }
 
 /** For the tests in a browser: how many clips are decoded, and their total length in seconds. */

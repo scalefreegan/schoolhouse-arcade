@@ -2,7 +2,7 @@ import { useEffect, useEffectEvent, useReducer, useRef, useState } from "react";
 import { lookOf } from "../../../shared/avatars.ts";
 import type { FactStat } from "../../../shared/deal.ts";
 import type { AnswerInput } from "../../../shared/play.ts";
-import { TOP_SPEED, speedOf, type Skill } from "../../../shared/sightwords/rules.ts";
+import { TOP_SPEED, speedOf, trickOf, type Skill } from "../../../shared/sightwords/rules.ts";
 import { PACE, SAY_DELAY_MS, advance, revealDone, startSession } from "../../../shared/sightwords/session.ts";
 import { ROUND_WORDS, sayUrl, type SightLevel, type SightWord } from "../../../shared/sightwords/words.ts";
 import type { Player } from "../../../shared/wire.ts";
@@ -18,8 +18,8 @@ import { SoundOff } from "../NeedsSound.tsx";
 // it events (a word tapped), says the word, times what follows each answer,
 // and draws. It hands back the answers; the server judges them again and
 // its numbers are the ones kept. There is no clock the player sees: the
-// runner goes faster as right answers come in a row, and that is all the
-// speed there is.
+// runner goes faster as right answers come in a row, and jumps or does a
+// trick as each one lands, and that is all the speed there is.
 
 const seed = () => Math.floor(Math.random() * 2 ** 32);
 
@@ -250,7 +250,12 @@ export function RoundScreen({ level, skill, stats, player, onDone, onQuit }: { l
             ))}
           </div>
           <span className="sw-runner" data-moves data-turn={LOOKS_LEFT.includes(lookOf(player.avatar, player.colour).character.sprite)}>
-            <AvatarSprite avatar={player.avatar} colour={player.colour} size={64} />
+            {/* A right answer is a trick, bigger as the run grows: made anew for each (the key), so it plays once from its start. */}
+            <span key={s.phase === "right" ? s.seq : "run"} className="sw-trick" data-trick={(s.phase === "right" && trickOf(s.round.streak)) || undefined}>
+              <span className="sw-face">
+                <AvatarSprite avatar={player.avatar} colour={player.colour} size={64} />
+              </span>
+            </span>
           </span>
           <ol className="sw-pace" aria-hidden>
             {Array.from({ length: TOP_SPEED + 1 }, (_, i) => (

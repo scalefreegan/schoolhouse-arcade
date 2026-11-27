@@ -198,9 +198,11 @@ macos/                   the Dock app (build-app.sh, the launcher, the server he
   said, and one tap on a tile is the answer. A tile makes one sound (Sound
   Machine's), and a tray never has two of one sound: k before e and i, c
   elsewhere (`onsetsFor()`), and never a tile that with the ending would
-  spell a word in `BLOCKED`. The server refuses an Easy tray with a tile
+  spell a word in `BLOCKED`; ch, sh and th are in a tray only on a level
+  that asks words starting with them. The server refuses an Easy tray with a tile
   that sounds like the answer (`near()`) and an Arcade tray without every
-  one that does (`faultOf()`); a test deals every word on every level and
+  one that does (`faultOf()`), and answers that are not two families of up
+  to four words, one after the other (`settle()`); a test deals every word on every level and
   skill. It will not start with the sound off. A word another game says is
   said with that game's clip; only its endings and own words are made for it.
 - **Letters to be read are lower case in `--font-letters`** (`.sm-letter`):

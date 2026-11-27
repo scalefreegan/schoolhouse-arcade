@@ -136,7 +136,7 @@ const SLOW_FIX = { bed: { tempo: 0.72 }, chip: { rate: -20 }, duck: { tempo: 0.7
 /** Words whose vowel the voice says a little off the one the game teaches,
  *  and so are asked for by their sounds. Its "dog", "log" and "moth" lean
  *  towards "aw"; the short o of "chop", "sock" and the o tile is opener. */
-const WORD_IPA = { dog: "dɑɡ", log: "lɑɡ", moth: "mɑθ", hog: "hɑɡ", hop: "hɑp", pet: "pɛt", bin: "bɪn", tin: "tɪn", shack: "ʃæk" };
+const WORD_IPA = { dog: "dɑɡ", log: "lɑɡ", moth: "mɑθ", hog: "hɑɡ", fog: "fɑɡ", hop: "hɑp", pet: "pɛt", bin: "bɪn", tin: "tɪn", shack: "ʃæk" };
 const asWord = (w) => `${WORD_IPA[w.id] ? ipa(WORD_IPA[w.id], w.id) : w.id}.`;
 
 /** A word said plainly, as a sentence of its own so it falls at the end. */
@@ -423,7 +423,9 @@ async function buildSet(set, { force, only }) {
 
 /** Letter names: what the voice must never say for a sound. */
 const LETTER_NAMES = ["a", "ay", "b", "bee", "be", "c", "see", "sea", "d", "dee", "e", "ee", "f", "eff", "g", "gee", "h", "aitch", "i", "eye", "k", "kay", "l", "el", "m", "em", "n", "en", "o", "oh", "p", "pee", "pea", "r", "are", "s", "es", "ess", "t", "tee", "tea", "u", "you", "w"];
-/** Spellings speech-to-text may give that sound the same as a word here. */
+/** Spellings speech-to-text may give that sound the same as a word here.
+ *  ("lead" for "led" is the metal; it is also what a clip that said "leed"
+ *  would be written as, so that one clip is the ear's to check.) */
 const SAME_SOUND = { webb: "web", sac: "sack", sacks: "sax", chic: "chick", cheque: "check", czech: "check", son: "sun", inn: "in", matt: "mat", finn: "fin", lead: "led", doug: "dug", doc: "dock", caught: "cot", shaq: "shack" };
 /** The same for Sight Word Sprint's words, which have no second spelling in
  *  the game itself (web/shared/sightwords/words.ts) but do in the language. */
@@ -435,13 +437,14 @@ const UNHEARD_ALONE = ["very"];
 /** Words speech-to-text takes for another when said alone (a short i
  *  before n as "ben" and "ten", "hop" as "harp", "pet" as "pat" or nothing)
  *  and hears as themselves beside another word. Each is asked again with
- *  the clips named here played in a row, and must then be heard as the
- *  phrase: a check, not a pass. */
+ *  the clips named here played in a row, and the first guess must then be
+ *  the phrase: a check, not a pass. The neighbour is "pin" each time, which
+ *  makes no saying with any of them that a recogniser would fill in. */
 const HEARD_BESIDE = {
   "word-bin": { clips: ["word-bin", "word-pin"], phrase: "bin pin" },
-  "word-tin": { clips: ["word-tin", "word-can"], phrase: "tin can" },
-  "word-hop": { clips: ["word-hip", "word-hop"], phrase: "hip hop" },
-  "word-pet": { clips: ["word-pet", "word-cat"], phrase: "pet cat" },
+  "word-tin": { clips: ["word-tin", "word-pin"], phrase: "tin pin" },
+  "word-hop": { clips: ["word-hop", "word-pin"], phrase: "hop pin" },
+  "word-pet": { clips: ["word-pet", "word-pin"], phrase: "pet pin" },
 };
 const VOICELESS = ["f", "s", "sh", "th", "h", "k", "p", "t", "ch"];
 
@@ -478,7 +481,7 @@ async function verify({ only, match }) {
       if (!entry.post.tempo && !(guesses.length > 0 && guesses.every((g) => g === "") && entry.word && UNHEARD_ALONE.includes(word)) && !guesses.some((g) => g === word || same[g] === word)) {
         const beside = HEARD_BESIDE[clip];
         const together = beside ? await heardTogether(clip, beside.clips.map((c) => fileOfClip.get(c))) : [];
-        if (!together.includes(beside?.phrase)) flags.push(`heard as "${said}"${beside ? `, and with its neighbour as "${together[0] ?? ""}"` : ""}`);
+        if (!beside || together[0] !== beside.phrase) flags.push(`heard as "${said}"${beside ? `, and with its neighbour as "${together[0] ?? ""}"` : ""}`);
       }
       if (m.soundMs < 250 || m.soundMs > 1800) flags.push("an odd length for a word");
     } else if (entry.kind === "rime") {

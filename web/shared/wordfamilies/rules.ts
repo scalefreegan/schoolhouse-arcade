@@ -14,7 +14,7 @@
 
 import { RuleError, type AnswerInput, type GameRules, type JudgedAnswer, type PlayConfig, type Settled } from "../play.ts";
 import { MAX_ANSWER_MS, countedMs, startRound, starsFor, stepRound } from "../soundmachine/rules.ts";
-import { LEVELS, ROUND_WORDS, TRAY, familyById, levelById, near, onsetsFor, type FamilyLevel } from "./words.ts";
+import { FAMILY_WORDS, LEVELS, ROUND_FAMILIES, ROUND_WORDS, TRAY, familyById, levelById, near, onsetsFor, type FamilyLevel } from "./words.ts";
 
 // Scoring, stars and the time floor are Sound Machine's, exactly: a round
 // of eight, 100 a right answer and 20 more for each right one before it in
@@ -54,8 +54,9 @@ export function parseAnswer(text: string): { tray: string[]; pick: string } | nu
  * Why this tray could not have been shown for `fact` on this level and
  * skill; null if it could. What makes a question: `fact` is one of the
  * level's words; the tray is as many tiles as the skill shows (TRAY), all
- * different, each one that may stand before the word's ending (onsetsFor:
- * so no two make one sound, and none spells what should not be spelled),
+ * different, each one that may stand before the word's ending on this
+ * level (onsetsFor: so no two make one sound, none spells what should not
+ * be spelled, and ch, sh and th come only with the levels that ask them),
  * the word's own first tile among them. On Easy no other tile sounds like
  * it. On Arcade every tile that does is there: so an easier tray is not
  * taken as Arcade's (more tickets, the other table).
@@ -63,7 +64,7 @@ export function parseAnswer(text: string): { tray: string[]; pick: string } | nu
 export function faultOf(tray: string[], level: FamilyLevel, skill: Skill, fact: string): string | null {
   const word = level.words.find((w) => w.id === fact);
   if (!word) return `"${fact}" is not a word ${level.title} asks.`;
-  const may = onsetsFor(familyById(word.family)!);
+  const may = onsetsFor(familyById(word.family)!, level);
   for (const t of tray) if (!may.includes(t)) return `"${t}" is not a tile shown with -${word.family}.`;
   if (new Set(tray).size !== tray.length) return "A tile comes up once in a tray.";
   if (tray.length !== TRAY[skill]) return `A tray holds ${TRAY[skill]} tiles.`;
@@ -90,7 +91,8 @@ const MAX_TEXT = 24;
  * the question could have been put (faultOf) and judges the pick itself: it
  * is right when it is the first tile of the word that was said (`fact`).
  * Refused: a word the level does not ask, or one word twice; more words
- * than a round has; a tray that could not have been shown; a pick that is
+ * than a round has, or words that are not a round's (two families, up to
+ * four words of one and then of the other); a tray that could not have been shown; a pick that is
  * not one of its tiles; a time that cannot be. A time under MIN_ANSWER_MS is
  * counted as MIN_ANSWER_MS.
  */
@@ -99,6 +101,9 @@ export function settle(config: PlayConfig, inputs: AnswerInput[]): Settled {
   if (!Array.isArray(inputs) || inputs.length > ROUND_WORDS) throw new RuleError("That is not a round of Word Families.");
   const own = new Map(level.words.map((w) => [w.id, w]));
   const asked = new Set<string>();
+  /** The families so far, in the order they came, and how many words of the last. */
+  const families: string[] = [];
+  let run = 0;
   let round = startRound();
   const answers: JudgedAnswer[] = [];
   for (const input of inputs) {
@@ -107,6 +112,13 @@ export function settle(config: PlayConfig, inputs: AnswerInput[]): Settled {
     if (!word) throw new RuleError(`"${String(input?.fact)}" is not a word ${level.title} asks.`);
     if (asked.has(fact)) throw new RuleError(`"${fact}" comes up once in a round.`);
     asked.add(fact);
+    if (families.at(-1) === word.family) run++;
+    else {
+      if (families.includes(word.family) || families.length === ROUND_FAMILIES) throw new RuleError(`A round is ${ROUND_FAMILIES} families, one after the other.`);
+      families.push(word.family);
+      run = 1;
+    }
+    if (run > FAMILY_WORDS) throw new RuleError(`A round has ${FAMILY_WORDS} words of a family.`);
     if (!Number.isFinite(input.ms) || input.ms < 0 || input.ms > MAX_ANSWER_MS) throw new RuleError("An answer's time is out of range.");
     const given = input.given;
     if (typeof given !== "string" || given.length > MAX_TEXT) throw new RuleError("An answer must be the tiles shown and the tile picked.");

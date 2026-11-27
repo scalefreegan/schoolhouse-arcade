@@ -70,17 +70,31 @@ test("a tray's tiles: one sound each and no two alike in a family, k before e an
     assert.equal(may.includes("k"), f.tiles[0] === "e" || f.tiles[0] === "i", f.id);
     assert.ok(may.includes("c") ? !may.includes("k") : may.includes("k") || f.id === "ock", f.id);
     for (const t of may) assert.ok(!BLOCKED.includes(t + f.id), t + f.id);
-    assert.ok(may.length >= 15, f.id);
+    assert.ok(may.length >= 13, f.id);
   }
   assert.ok(!onsetsFor(familyById("ock")!).includes("c") && !onsetsFor(familyById("ick")!).includes("d") && !onsetsFor(familyById("ig")!).includes("n"));
+  // Nor a word said another way than its tiles say: the th of that buzzes, the g of gin is soft.
+  assert.ok(!onsetsFor(familyById("at")!).includes("sh") && !onsetsFor(familyById("at")!).includes("th") && !onsetsFor(familyById("in")!).includes("g"));
+  // ch, sh and th are in a tray only on a level whose words start with them; a level's words always have their own tile.
+  assert.deepEqual(LEVELS.map((l) => l.digraphs), [false, false, false, false, true, true]);
+  for (const l of LEVELS) {
+    for (const g of l.groups) {
+      const may = onsetsFor(g.family, l);
+      if (!l.digraphs) assert.ok(may.every((t) => t.length === 1), `${l.id} ${g.family.id}`);
+      for (const w of g.words) assert.ok(may.includes(w.onset), `${l.id} ${w.id}`);
+      assert.ok(may.length >= 11, `${l.id} ${g.family.id}`);
+    }
+  }
   // What sounds alike goes both ways, and is never a tile with itself or with its own sound.
   for (const [a, b] of NEAR) assert.ok(near(a, b) && near(b, a), `${a} ${b}`);
   assert.ok(near("c", "g") && near("k", "g") && !near("c", "k") && !near("b", "b") && !near("h", "m"));
   // Every word has tiles enough for an Easy tray that sound nothing like its own, and room in Arcade's for every one that does.
-  for (const w of WORDS) {
-    const others = onsetsFor(familyById(w.family)!).filter((t) => t !== w.onset);
-    assert.ok(others.filter((t) => !near(t, w.onset)).length >= TRAY.easy - 1, w.id);
-    assert.ok(others.filter((t) => near(t, w.onset)).length <= TRAY.arcade - 1, w.id);
+  for (const l of LEVELS) {
+    for (const w of l.words) {
+      const others = onsetsFor(familyById(w.family)!, l).filter((t) => t !== w.onset);
+      assert.ok(others.filter((t) => !near(t, w.onset)).length >= TRAY.arcade - 1, `${l.id} ${w.id}`);
+      assert.ok(others.filter((t) => near(t, w.onset)).length <= TRAY.arcade - 1, `${l.id} ${w.id}`);
+    }
   }
 });
 
@@ -162,6 +176,11 @@ test("a fair question: the skill's number of different tiles that may stand befo
   // A tile that would spell what should not be spelled is not one that sounds like it, and may not be shown.
   assert.match(faultOf(["k", "d", "l", "s"], level("ck"), "easy", "kick")!, /"d" is not a tile shown with -ick/);
   assert.equal(faultOf(["p", "b", "k", "l", "s", "th"], level("ck"), "arcade", "pick"), null, "d would sound like p's b, but it is b that sounds like p");
+  // ch, sh and th are not shown on a level that asks no word starting with them.
+  assert.match(faultOf(["s", "sh", "h", "m"], a, "easy", "hat")!, /"sh" is not a tile shown/);
+  assert.equal(faultOf(["s", "b", "c", "m", "h", "r"], a, "arcade", "sat"), null, "nothing a shows sounds like s");
+  assert.match(faultOf(["s", "b", "k", "m", "h", "r"], level("mix"), "arcade", "sip")!, /every tile that sounds like/);
+  assert.equal(faultOf(["s", "sh", "th", "m", "h", "r"], level("mix"), "arcade", "sip"), null);
   // Mix asks the words the earlier levels do not.
   assert.equal(faultOf(["ch", "b", "h", "m"], level("mix"), "easy", "chat"), null);
 });
@@ -180,6 +199,7 @@ test("every question dealt is fair: each word on every level and skill, four see
   }
   // The others are the family's own first tiles while there are any that may stand there.
   const kin = level("a").words.filter((w) => w.family === "at").map((w) => w.onset);
+  for (const l of LEVELS) for (const skill of SKILL_IDS) for (const w of l.words) for (let seed = 0; seed < 12; seed++) for (const t of trayFor(w, skill, l, seeded(seed))) assert.ok(!BLOCKED.includes(t + w.family), t + w.family);
   for (let seed = 0; seed < 20; seed++) assert.ok(trayFor(word("hat"), "easy", level("a"), seeded(seed)).every((t) => kin.includes(t)));
   // The word's tile is not always in the same place.
   const places = new Set(Array.from({ length: 40 }, (_, i) => trayFor(word("hat"), "easy", level("a"), seeded(i)).indexOf("h")));
@@ -246,6 +266,10 @@ test("settle judges the pick against the word's first tile, scores as Sound Mach
     [config, [{ ...one, given: "b|c|h|m=s" }], /not one of the tiles shown/],
     [config, [{ ...one, given: "b|p|h|m=b" }], /no other tile sounds like/],
     [{ ...config, skill: "arcade" }, [one], /holds 6 tiles/],
+    // Not a round's words: a third family, a family come back to, or five of one.
+    [config, [one, { fact: "can", given: "c|f|m|r=c", ms: 2000 }, { fact: "cap", given: "c|m|l|t=c", ms: 2000 }], /2 families, one after the other/],
+    [config, [one, { fact: "can", given: "c|f|m|r=c", ms: 2000 }, { fact: "hat", given: "h|c|m|s=h", ms: 2000 }], /2 families, one after the other/],
+    [config, ["b", "c", "f", "h", "m"].map((t) => ({ fact: `${t}at`, given: `${t}|${t === "r" ? "s" : "r"}|l|w=${t}`, ms: 2000 })), /4 words of a family/],
   ];
   for (const [c, answers, why] of refused) assert.throws(() => settle(c as never, answers as never), why, JSON.stringify(answers));
 });

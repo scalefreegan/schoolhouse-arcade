@@ -45,6 +45,8 @@ export interface FamilyLevel {
   groups: FamilyGroup[];
   /** Every word the level asks. */
   words: FamilyWord[];
+  /** Some of its words start with ch, sh or th: only then are those tiles in its trays. */
+  digraphs: boolean;
 }
 
 /** One family as it is listed below: its ending in tiles, the first tiles of
@@ -80,7 +82,7 @@ export const FAMILIES: Family[] = EVERY.map((l) => l.family);
 function level(id: string, title: string, lists: Listed[], all = false): FamilyLevel {
   const groups = lists.map((l) => ({ family: l.family, words: all ? [...l.plain, ...l.digraph] : l.plain }));
   const words = groups.flatMap((g) => g.words);
-  return { id, title, blurb: `${words[0].id} ${words[1].id}`, groups, words };
+  return { id, title, blurb: `${words[0].id} ${words[1].id}`, groups, words, digraphs: words.some((w) => w.onset.length > 1) };
 }
 
 /**
@@ -130,18 +132,27 @@ export const ONSETS = ["b", "c", "d", "f", "g", "h", "k", "l", "m", "n", "p", "r
 /**
  * What a first tile and an ending must never spell on a child's screen,
  * though the word asked is another: a tile is not offered where it would.
+ * The first line is words nobody wants there. The second is words said
+ * another way than their tiles say, which would teach the tile wrong: the
+ * th of that, than and then buzzes, and the g of gin is soft.
  */
-export const BLOCKED = ["cock", "dick", "nig", "wog", "wop", "fap"];
+export const BLOCKED = [
+  ...["cock", "dick", "nig", "wog", "wop", "fap", "shat", "feck", "fock", "fick", "thot", "mick", "nip"],
+  ...["that", "than", "then", "gin"],
+];
 
 /**
  * The tiles that may stand in a tray for this family. c and k are one
  * sound, so only one of them is ever there, the one that spelling takes: k
  * before e and i (kick), c before a, o and u (cat). So no two tiles in a
- * tray make the same sound, and the word said has one right tile.
+ * tray make the same sound, and the word said has one right tile. On a
+ * level none of whose words starts with ch, sh or th, those tiles are not
+ * shown either: they come with the levels that ask them. With no level,
+ * every tile that may ever stand there.
  */
-export function onsetsFor(family: Family): string[] {
+export function onsetsFor(family: Family, level?: FamilyLevel): string[] {
   const soft = family.tiles[0] === "e" || family.tiles[0] === "i";
-  return ONSETS.filter((t) => (t === "c" ? !soft : t === "k" ? soft : true) && !BLOCKED.includes(t + family.id));
+  return ONSETS.filter((t) => (t === "c" ? !soft : t === "k" ? soft : true) && (t.length === 1 || !level || level.digraphs) && !BLOCKED.includes(t + family.id));
 }
 
 /**

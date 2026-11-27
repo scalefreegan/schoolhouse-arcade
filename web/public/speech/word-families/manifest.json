@@ -616,7 +616,7 @@
     },
     "word-fog": {
       "bytes": 5568,
-      "gainDb": -2.4,
+      "gainDb": -2,
       "kind": "word",
       "ms": 625,
       "post": {
@@ -626,9 +626,9 @@
         "levelDb": -20
       },
       "provider": "azure",
-      "recipe": "d6354ba5a5be8da8546fd9974e1d3b95537859e4237b3930f1e271866841c3e3",
-      "sha256": "277ade9606e20c81bee09b616e7f1cacae542c54549d00ce805f76bb186761d7",
-      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">fog.</voice></speak>",
+      "recipe": "4c62420d994ca60f00780e5d9d770cde49fe43d786d12151bbc80a44708871e2",
+      "sha256": "aef1ca10460a882f00df0d2b2c71f1af88e58c95e834f7310cee97e6668573ed",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\"><phoneme alphabet=\"ipa\" ph=\"fɑɡ\">fog</phoneme>.</voice></speak>",
       "voice": "en-US-SaraNeural"
     },
     "word-fun": {

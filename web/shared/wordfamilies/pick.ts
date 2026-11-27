@@ -45,7 +45,7 @@ export function roundWords(level: FamilyLevel, stats: Record<string, FactStat>, 
 export function trayFor(word: FamilyWord, skill: Skill, level: FamilyLevel, rng: Rng): string[] {
   const family = familyById(word.family)!;
   const kin = new Set(level.words.filter((w) => w.family === word.family).map((w) => w.onset));
-  const others = shuffled(onsetsFor(family).filter((t) => t !== word.onset), rng);
+  const others = shuffled(onsetsFor(family, level).filter((t) => t !== word.onset), rng);
   const byKin = [...others.filter((t) => kin.has(t)), ...others.filter((t) => !kin.has(t))];
   const ordered = skill === "arcade" ? [...byKin.filter((t) => near(t, word.onset)), ...byKin.filter((t) => !near(t, word.onset))] : byKin.filter((t) => !near(t, word.onset));
   return shuffled([word.onset, ...ordered.slice(0, TRAY[skill] - 1)], rng);

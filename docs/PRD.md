@@ -535,7 +535,9 @@ it has k before e and i (kick) and c before a, o and u (cat), as spelling
 does. Most of an Easy tray is the family's own first tiles, so the others
 make real words too (bat, hat, mat) and only the one that was said is
 right. A tile is never offered where it and the ending would spell a word
-that should not be on a child's screen.
+that should not be on a child's screen, or one said another way than its
+tiles say (that, gin). The ch, sh and th tiles are in the trays of the ck
+level and Mix only, whose words start with them.
 
 ### Levels
 
@@ -564,7 +566,9 @@ and which words lean towards the ones missed before, as in the other games.
 Arcade pays two tickets a right answer and has its own high score tables,
 so the server refuses a tray that is not Arcade's: six tiles, with every
 sound-alike that may stand before the ending. It refuses an Easy tray with
-a sound-alike in it, and any tray with a tile that may not stand there.
+a sound-alike in it, any tray with a tile that may not stand there, and
+answers that are not a round's: two families, up to four words of each,
+one family after the other.
 
 ### Scoring
 

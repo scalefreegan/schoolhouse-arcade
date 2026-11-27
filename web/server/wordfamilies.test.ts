@@ -56,14 +56,14 @@ test("a round is judged by the server from the trays posted; each answer is stor
   const tess = await join("Tess");
   const sent = await play(tess, {}, [
     { fact: "bat", given: "b|c|h|m=b", ms: 3000 },
-    { fact: "can", given: "f|c|r|t=f", ms: 4000 },
+    { fact: "cat", given: "f|c|r|t=f", ms: 4000 },
     { fact: "hat", given: "s|c|h|m=h", ms: 200 },
   ]);
   assert.equal(sent.status, 201, sent.body.error);
   assert.deepEqual([sent.body.score, sent.body.right, sent.body.wrong, sent.body.bestCombo, sent.body.finished], [200, 2, 1, 1, false]);
   assert.deepEqual(await query("select game_id, fact, given, given_text, correct, ms from answers order by id"), [
     { game_id: GAME, fact: "bat", given: null, given_text: "b|c|h|m=b", correct: true, ms: 3000 },
-    { game_id: GAME, fact: "can", given: null, given_text: "f|c|r|t=f", correct: false, ms: 4000 },
+    { game_id: GAME, fact: "cat", given: null, given_text: "f|c|r|t=f", correct: false, ms: 4000 },
     { game_id: GAME, fact: "hat", given: null, given_text: "s|c|h|m=h", correct: true, ms: 1000 },
   ]);
 });

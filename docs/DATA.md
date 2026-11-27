@@ -134,8 +134,8 @@ the 68 words no other game says (`word-<word>.mp3`), with a manifest of the
 same form. A clip's name is its own across all four folders. `--verify`
 cannot hold an ending to a word, so it only measures it; four words it
 mishears alone (bin, tin, hop, pet) it asks again beside another clip
-(`HEARD_BESIDE` in `scripts/speech/build.mjs`: "tin can", "hip hop") and
-must then hear the phrase.
+(`HEARD_BESIDE` in `scripts/speech/build.mjs`: each with "pin" after it)
+and its first guess must then be the two words.
 
 ## Setup
 

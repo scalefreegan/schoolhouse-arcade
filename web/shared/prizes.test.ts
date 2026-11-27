@@ -104,5 +104,5 @@ test("Sound Machine's badges are its own: Word Builder is a star on every one of
 });
 
 test("a badge that speaks of levels says whose: every game has them", () => {
-  for (const b of BADGES.filter((x) => /level/i.test(x.how))) assert.match(b.how, /Comet Cards|Sound Machine|Rhyme Time/, b.id);
+  for (const b of BADGES.filter((x) => /level/i.test(x.how))) assert.match(b.how, /Comet Cards|Sound Machine|Rhyme Time|Sight Word Sprint/, b.id);
 });

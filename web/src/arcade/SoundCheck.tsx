@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { WORDS as RHYME_WORDS, sayUrl, type RhymeWord } from "../../shared/rhymetime/words.ts";
+import { WORDS as SIGHT_WORDS, sayUrl as sightUrl, type SightWord } from "../../shared/sightwords/words.ts";
 import { LEVELS, SOUNDS, TILE_SOUND, clipUrl, slowClip, soundClip, wordClip, type Word } from "../../shared/soundmachine/words.ts";
 import { hush, preload, say } from "../speech.ts";
 import { Picture, Sprite } from "../sprites/Sprite.tsx";
@@ -47,6 +48,18 @@ function RhymeRow({ word }: { word: RhymeWord }) {
   );
 }
 
+/** One of Sight Word Sprint's words: written, and one clip said plainly. */
+function SightRow({ word }: { word: SightWord }) {
+  return (
+    <li className="panel flex flex-wrap items-center justify-end gap-2">
+      <span className="sm-letter flex-1 text-base">{word.id}</span>
+      <button type="button" className="btn btn-cyan" aria-label={`Hear ${word.id}`} onClick={() => void say([sightUrl(word)])}>
+        <Sprite id="speaker" palette="ink" size={30} />
+      </button>
+    </li>
+  );
+}
+
 export function SoundCheck({ onBack }: { onBack: () => void }) {
   const { muted, setMuted } = useArcade();
   const [missing, setMissing] = useState<string | null>(null);
@@ -54,7 +67,7 @@ export function SoundCheck({ onBack }: { onBack: () => void }) {
   useEffect(() => {
     // Every clip a button here plays, the slow words too: one that is missing is said so, not left silent.
     const words = LEVELS.flatMap((l) => l.focus);
-    const all = [...SOUNDS.map((s) => clipUrl(soundClip(s.id))), ...words.map((w) => clipUrl(wordClip(w.id))), ...words.map((w) => clipUrl(slowClip(w.id))), ...RHYME_WORDS.filter((w) => !w.shared).map(sayUrl)];
+    const all = [...SOUNDS.map((s) => clipUrl(soundClip(s.id))), ...words.map((w) => clipUrl(wordClip(w.id))), ...words.map((w) => clipUrl(slowClip(w.id))), ...RHYME_WORDS.filter((w) => !w.shared).map(sayUrl), ...SIGHT_WORDS.map(sightUrl)];
     preload(all).catch((e: unknown) => setMissing(e instanceof Error ? e.message : String(e)));
     return hush;
   }, []);
@@ -67,7 +80,7 @@ export function SoundCheck({ onBack }: { onBack: () => void }) {
           Back
         </button>
       </header>
-      <p className="mt-3 mb-0 text-dim">Every sound and word Sound Machine says, and the words only Rhyme Time has (its others are these). A sound should be the pure sound a teacher says (mmm, sss, a clipped k), never the letter's name. One that is wrong is made again with npm run speech:build.</p>
+      <p className="mt-3 mb-0 text-dim">Every sound and word Sound Machine says, the words only Rhyme Time has (its others are these), and Sight Word Sprint's words. A sound should be the pure sound a teacher says (mmm, sss, a clipped k), never the letter's name. One that is wrong is made again with npm run speech:build.</p>
       {muted && (
         <p role="alert" className="panel panel-cyan mt-3 flex flex-wrap items-center gap-4">
           <span className="flex-1">The sound is off, so nothing will play.</span>
@@ -123,6 +136,14 @@ export function SoundCheck({ onBack }: { onBack: () => void }) {
         <ul className="m-0 mt-1 grid list-none gap-x-3 p-0 sm:grid-cols-2">
           {RHYME_WORDS.filter((w) => !w.shared).map((w) => (
             <RhymeRow key={w.id} word={w} />
+          ))}
+        </ul>
+      </section>
+      <section>
+        <h2 className="font-display mt-6 mb-0 text-xs text-dim">Sight Word Sprint's words ({SIGHT_WORDS.length})</h2>
+        <ul className="m-0 mt-1 grid list-none gap-x-3 p-0 sm:grid-cols-2">
+          {SIGHT_WORDS.map((w) => (
+            <SightRow key={w.id} word={w} />
           ))}
         </ul>
       </section>

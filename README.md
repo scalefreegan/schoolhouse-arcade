@@ -34,10 +34,10 @@ magenta and yellow. [`docs/PRD.md`](docs/PRD.md) has the whole design.
       <p>A player is a name and a pixel character: an alien, a dinosaur, a robot, a monster, a wizard, a dragon, a ghost, a rocket, a cat, an owl, a frog or a cupcake, each in six colours. Tickets, badges and unlocked levels belong to the player; the high score tables show everyone.</p>
     </td>
     <td width="50%" valign="top">
-      <img src="docs/screenshots/floor.png" alt="The arcade floor: the Comet Cards and Sound Machine cabinets side by side, and below them the Rhyme Time jukebox and the Prize Counter" width="100%">
-      <br><sub><i>The floor: three cabinets so far, and more on the delivery truck.</i></sub>
+      <img src="docs/screenshots/floor.png" alt="The arcade floor: the Comet Cards and Sound Machine cabinets side by side, and below them the Rhyme Time jukebox and the Sight Word Sprint signpost" width="100%">
+      <br><sub><i>The floor: four cabinets so far, and more on the delivery truck.</i></sub>
       <h3>An arcade floor</h3>
-      <p>Each cabinet drills one idea until recall is fast. The first is <b>Comet Cards</b>: adding and taking away, 0 to 10. The second is <b>Sound Machine</b>: letter sounds and sounding out short words. The third is <b>Rhyme Time</b>: hearing which words rhyme. New cabinets plug into the same players, tickets and badges.</p>
+      <p>Each cabinet drills one idea until recall is fast. The first is <b>Comet Cards</b>: adding and taking away, 0 to 10. The second is <b>Sound Machine</b>: letter sounds and sounding out short words. The third is <b>Rhyme Time</b>: hearing which words rhyme. The fourth is <b>Sight Word Sprint</b>: the commonest words, known on sight. New cabinets plug into the same players, tickets and badges.</p>
     </td>
   </tr>
   <tr>
@@ -80,6 +80,18 @@ magenta and yellow. [`docs/PRD.md`](docs/PRD.md) has the whole design.
       <br><sub><i>Odd one out: pin and thin rhyme, so the wig is the odd one.</i></sub>
       <h3>Heard, not read</h3>
       <p>Over 50 words in four levels, each a picture with a spoken clip. On Easy the wrong pictures sound nothing like the word; on Arcade they start the same or share its vowel. Rhymes an accent can blur (pin and pen) are never asked against each other, and the Mac checks every question was a fair one before it scores the answer.</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="docs/screenshots/sight-word-sprint.png" alt="A Sight Word Sprint round: a dragon running a trail of pines with all five speed pips lit, a speaker button, and four written words, one of them lit green" width="100%">
+      <br><sub><i>Four right in a row: flat out.</i></sub>
+      <h3>Sight Word Sprint</h3>
+      <p>The short, common words the letter sounds do not explain: the, of, said, where. You hear a word and tap it among four. Your own character runs a trail across the top, and every right answer in a row makes it run faster; a miss is a jog again, and takes nothing you have earned. No clock.</p>
+    </td>
+    <td width="50%" valign="top">
+      <h3>Known on sight</h3>
+      <p>Fifty words in five levels, from Meadow to Summit. On Easy the other three words look nothing like the word; on Arcade they are its look-alikes (the, they, there), so only reading the whole word finds it. No two words in the game sound the same, and the Mac checks every question was a fair one before it scores the answer.</p>
     </td>
   </tr>
   <tr>

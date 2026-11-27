@@ -1232,8 +1232,146 @@ select.field {
   .rt-written { font-size: 1.5rem; }
 }
 
+/* ---------- Sight Word Sprint ---------- */
+
+/* The trail: a strip of dusk across the top of the machine. Two rows of
+   pines and the ground slide by behind a runner who stays put; Round.tsx
+   sets how fast they play from the run of right answers. Every strip is
+   drawn twice over and slides half its width, so it never shows a seam. */
+.sw-trail {
+  position: relative;
+  height: 6.5rem;
+  flex: none;
+  overflow: hidden;
+  background: var(--tube);
+  box-shadow: 0 var(--px) 0 0 var(--line);
+}
+.sw-strip {
+  position: absolute;
+  left: 0;
+  width: 200%;
+  display: flex;
+  animation: sw-slide 8s steps(64) infinite;
+}
+.sw-strip > * { flex: 1 0 0; }
+.sw-far { bottom: 1.6rem; animation-duration: 24s; }
+.sw-near { bottom: 0.9rem; animation-duration: 12s; }
+.sw-far > span,
+.sw-near > span { display: flex; justify-content: center; align-items: flex-end; }
+.sw-ground {
+  bottom: 0;
+  height: 1rem;
+  align-items: center;
+  background: var(--panel);
+  box-shadow: 0 calc(var(--px) * -1) 0 0 var(--line);
+  animation-duration: 4s;
+}
+.sw-ground > i { height: var(--px); }
+.sw-ground > i::before {
+  content: "";
+  display: block;
+  width: 40%;
+  height: 100%;
+  background: var(--dim);
+}
+/* A character drawn looking left is turned to face the way it runs. */
+.sw-runner[data-turn="true"] > * { transform: scaleX(-1); }
+.sw-runner {
+  position: absolute;
+  left: 12%;
+  bottom: 0.7rem;
+  animation: hop 0.5s steps(2) infinite;
+}
+/* How fast: one pip for a jog, five flat out. Yellow: it is a reward. */
+.sw-pace {
+  position: absolute;
+  top: calc(var(--px) * 2);
+  right: calc(var(--px) * 2);
+  display: flex;
+  gap: var(--px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sw-pace > li {
+  width: calc(var(--px) * 3);
+  height: calc(var(--px) * 3);
+  background: var(--line);
+}
+.sw-pace > li[data-on="true"] { background: var(--yellow); }
+@keyframes sw-slide {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.sw-board {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
+  gap: calc(var(--px) * 3);
+  padding-top: calc(var(--px) * 3);
+}
+.sw-hear {
+  min-width: calc(var(--px) * 28);
+  min-height: max(64px, calc(var(--px) * 16));
+}
+.sw-hear[data-lit="true"] { box-shadow: 0 0 0 var(--px) var(--fg), 0 0 calc(var(--px) * 6) var(--cyan); }
+.sw-choices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 16rem));
+  gap: calc(var(--px) * 3);
+  width: 100%;
+  justify-content: center;
+}
+/* One written word to pick: the player's to press, so it lights magenta. */
+.sw-choice {
+  --edge: var(--line);
+  min-height: 5.5rem;
+  margin: var(--px);
+  padding: calc(var(--px) * 2);
+  border: 0;
+  background: var(--tube);
+  color: var(--fg);
+  font-size: 2.75rem;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--edge),
+    0 var(--px) 0 0 var(--edge),
+    calc(var(--px) * -1) 0 0 0 var(--edge),
+    var(--px) 0 0 0 var(--edge);
+}
+.sw-choice[data-state=""]:hover,
+.sw-choice[data-state=""]:focus-visible {
+  --edge: var(--magenta);
+  background: var(--raised);
+}
+.sw-choice[data-state="right"] {
+  --edge: var(--good);
+  background: var(--raised);
+  box-shadow:
+    0 calc(var(--px) * -2) 0 0 var(--edge),
+    0 calc(var(--px) * 2) 0 0 var(--edge),
+    calc(var(--px) * -2) 0 0 0 var(--edge),
+    calc(var(--px) * 2) 0 0 0 var(--edge),
+    0 0 calc(var(--px) * 8) color-mix(in srgb, var(--edge) 50%, transparent);
+}
+.sw-choice[data-state="wrong"] {
+  --edge: var(--bad);
+  animation: shake 0.32s steps(1);
+}
+.sw-choice[data-state="out"] { opacity: 0.3; }
+.sw-board .sm-after { min-height: calc(var(--px) * 18); }
+.sw-again { font-size: 1.5rem; }
+@media (max-width: 30rem) {
+  .sw-trail { height: 5.5rem; }
+  .sw-choice { min-height: 4.5rem; font-size: 1.625rem; }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .hop, .blink, .starfield, .card[data-state="wrong"], .lamp[data-state="now"], .sm-belt[data-run="true"], .sm-choice[data-state="wrong"], .rt-choice[data-state="wrong"], .gm-drop { animation: none; }
+  .hop, .blink, .starfield, .card[data-state="wrong"], .lamp[data-state="now"], .sm-belt[data-run="true"], .sm-choice[data-state="wrong"], .rt-choice[data-state="wrong"], .sw-choice[data-state="wrong"], .sw-strip, .sw-runner, .gm-drop { animation: none; }
   .gm-fly { animation: none; opacity: 0; }
   .sm-tile:active:not(:disabled) { transform: none; }
   .pop { animation: none; opacity: 0; }

@@ -186,7 +186,8 @@ macos/                   the Dock app (build-app.sh, the launcher, the server he
   skill (four seeds each), and `faultOf()` takes every one dealt.
 - **Sight Word Sprint's speed is only something to see**: the runner goes
   faster with each right answer in a row (`speedOf()`, from the streak) and
-  jogs again after a miss. Nothing is scored, paid or stored from it, and a
+  jogs again after a miss; each right answer is a jump or a trick, bigger
+  as the run grows (`trickOf()`). Nothing is scored, paid or stored from it, and a
   miss takes away nothing earned. A word is asked by voice alone, so no two
   words in the game sound alike (to and two, there and their), and it will
   not start with the sound off. What looks alike is from the spelling

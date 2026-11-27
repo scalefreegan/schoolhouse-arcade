@@ -440,7 +440,10 @@ arrow, Escape pauses.
 **The more right in a row, the faster the runner goes.** The speed is the
 run of right answers, from a jog (none) up to flat out (four or more), in
 five steps shown as pips; the trees and the ground go by faster at each. A
-miss is a jog again. The speed is only something to see: there is no clock,
+miss is a jog again. Each right answer is also a trick as it lands: a jump
+for the first in a row, then a higher leap, a spin in the air, a backflip,
+and two turns for the fifth; after that spin, flip and double come round
+again. A miss has no trick. The speed is only something to see: there is no clock,
 nothing is scored on time, and a miss takes away no score, star or ticket.
 With reduced motion the trail stands still and the pips alone show the
 speed.

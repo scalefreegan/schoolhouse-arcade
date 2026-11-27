@@ -11,7 +11,7 @@ import { RULES } from "../rules.ts";
 import { SPEECH_DIR as RHYME_DIR } from "../rhymetime/words.ts";
 import { SPEECH_DIR as SOUND_DIR } from "../soundmachine/words.ts";
 import { choicesFor, roundWords } from "./pick.ts";
-import { MAX_ANSWER_MS, MIN_ANSWER_MS, MODES, SKILLS, TOP_SPEED, answerText, faultOf, parseAnswer, pay, settle, sightWordRules, speedOf, type Skill } from "./rules.ts";
+import { MAX_ANSWER_MS, MIN_ANSWER_MS, MODES, SKILLS, TOP_SPEED, TRICKS, answerText, faultOf, parseAnswer, pay, settle, sightWordRules, speedOf, trickOf, type Skill } from "./rules.ts";
 import { PACE, REVEAL_WAIT_MS, advance, revealDone, startSession, waited, type Session } from "./session.ts";
 import { CHOICES, LEVELS, ROUND_WORDS, SPEECH_DIR, WORDS, alike, allClips, levelById, nothingAlike, poolOf, sayUrl, sightClip, wordById } from "./words.ts";
 
@@ -60,6 +60,10 @@ test("the cabinet's drawing and its badges' are there; the runner's speed is the
   assert.ok(art.pine.palettes.far);
   assert.deepEqual([0, 1, 2, 3, 4, 5, 8].map(speedOf), [0, 1, 2, 3, 4, 4, 4]);
   assert.equal(TOP_SPEED, 4);
+  // A trick for each right answer, bigger as the run grows; none for a miss. A round's longest run is eight.
+  assert.deepEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, -1, NaN, Infinity].map(trickOf), [null, "jump", "leap", "spin", "flip", "double", "spin", "flip", "double", "spin", null, null, null]);
+  const css = fs.readFileSync(path.join(here, "../../src/index.css"), "utf8");
+  for (const t of TRICKS) assert.ok(css.includes(`.sw-trick[data-trick="${t}"]`) && css.includes(`@keyframes sw-${t} `), t);
 });
 
 test("each word has one clip of its own, on disk and in the manifest, and nothing else is there; the voice is the other games'", () => {

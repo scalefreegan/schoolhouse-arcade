@@ -87,7 +87,7 @@ magenta and yellow. [`docs/PRD.md`](docs/PRD.md) has the whole design.
       <img src="docs/screenshots/sight-word-sprint.png" alt="A Sight Word Sprint round: a dragon running a trail of pines with all five speed pips lit, a speaker button, and four written words, one of them lit green" width="100%">
       <br><sub><i>Four right in a row: flat out.</i></sub>
       <h3>Sight Word Sprint</h3>
-      <p>The short, common words the letter sounds do not explain: the, of, said, where. You hear a word and tap it among four. Your own character runs a trail across the top, and every right answer in a row makes it run faster; a miss is a jog again, and takes nothing you have earned. No clock.</p>
+      <p>The short, common words the letter sounds do not explain: the, of, said, where. You hear a word and tap it among four. Your own character runs a trail across the top, and every right answer in a row makes it run faster and do a bigger trick (a jump, a leap, a spin, a backflip, two turns); a miss is a jog again, and takes nothing you have earned. No clock.</p>
     </td>
     <td width="50%" valign="top">
       <h3>Known on sight</h3>

@@ -1240,7 +1240,8 @@ select.field {
    drawn twice over and slides half its width, so it never shows a seam. */
 .sw-trail {
   position: relative;
-  height: 6.5rem;
+  /* Room over the runner's head for its highest trick. */
+  height: 7.5rem;
   flex: none;
   overflow: hidden;
   background: var(--tube);
@@ -1275,7 +1276,61 @@ select.field {
   background: var(--dim);
 }
 /* A character drawn looking left is turned to face the way it runs. */
-.sw-runner[data-turn="true"] > * { transform: scaleX(-1); }
+.sw-runner[data-turn="true"] .sw-face { transform: scaleX(-1); }
+.sw-trick,
+.sw-face { display: block; }
+/* A right answer: a jump, and with a longer run a leap, a spin, a backflip,
+   two turns. Once each, in steps; quarter turns keep the pixels square. */
+.sw-trick[data-trick] { animation: 0.9s steps(1) 1 both; }
+.sw-trick[data-trick="jump"] { animation-name: sw-jump; animation-duration: 0.6s; }
+.sw-trick[data-trick="leap"] { animation-name: sw-leap; animation-duration: 0.75s; }
+.sw-trick[data-trick="spin"] { animation-name: sw-spin; }
+.sw-trick[data-trick="flip"] { animation-name: sw-flip; }
+.sw-trick[data-trick="double"] { animation-name: sw-double; animation-duration: 1s; }
+@keyframes sw-jump {
+  0%, 100% { transform: translateY(0); }
+  20%, 80% { transform: translateY(calc(var(--px) * -3)); }
+  40%, 60% { transform: translateY(calc(var(--px) * -5)); }
+}
+@keyframes sw-leap {
+  0%, 100% { transform: translateY(0); }
+  14%, 86% { transform: translateY(calc(var(--px) * -4)); }
+  28%, 72% { transform: translateY(calc(var(--px) * -7)); }
+  42%, 58% { transform: translateY(calc(var(--px) * -8)); }
+}
+@keyframes sw-spin {
+  0% { transform: translateY(0) rotate(0deg); }
+  12% { transform: translateY(calc(var(--px) * -4)) rotate(0deg); }
+  25% { transform: translateY(calc(var(--px) * -7)) rotate(90deg); }
+  42% { transform: translateY(calc(var(--px) * -8)) rotate(180deg); }
+  58% { transform: translateY(calc(var(--px) * -8)) rotate(270deg); }
+  75% { transform: translateY(calc(var(--px) * -7)) rotate(360deg); }
+  88% { transform: translateY(calc(var(--px) * -4)) rotate(360deg); }
+  100% { transform: translateY(0) rotate(360deg); }
+}
+@keyframes sw-flip {
+  0% { transform: translateY(0) rotate(0deg); }
+  12% { transform: translateY(calc(var(--px) * -4)) rotate(0deg); }
+  25% { transform: translateY(calc(var(--px) * -7)) rotate(-90deg); }
+  42% { transform: translateY(calc(var(--px) * -8)) rotate(-180deg); }
+  58% { transform: translateY(calc(var(--px) * -8)) rotate(-270deg); }
+  75% { transform: translateY(calc(var(--px) * -7)) rotate(-360deg); }
+  88% { transform: translateY(calc(var(--px) * -4)) rotate(-360deg); }
+  100% { transform: translateY(0) rotate(-360deg); }
+}
+@keyframes sw-double {
+  0% { transform: translateY(0) rotate(0deg); }
+  8% { transform: translateY(calc(var(--px) * -4)) rotate(0deg); }
+  16% { transform: translateY(calc(var(--px) * -7)) rotate(90deg); }
+  26% { transform: translateY(calc(var(--px) * -8)) rotate(180deg); }
+  36% { transform: translateY(calc(var(--px) * -8)) rotate(270deg); }
+  46% { transform: translateY(calc(var(--px) * -8)) rotate(360deg); }
+  56% { transform: translateY(calc(var(--px) * -8)) rotate(450deg); }
+  66% { transform: translateY(calc(var(--px) * -8)) rotate(540deg); }
+  76% { transform: translateY(calc(var(--px) * -7)) rotate(630deg); }
+  86% { transform: translateY(calc(var(--px) * -4)) rotate(720deg); }
+  100% { transform: translateY(0) rotate(720deg); }
+}
 .sw-runner {
   position: absolute;
   left: 12%;
@@ -1366,7 +1421,7 @@ select.field {
 .sw-board .sm-after { min-height: calc(var(--px) * 18); }
 .sw-again { font-size: 1.5rem; }
 @media (max-width: 30rem) {
-  .sw-trail { height: 5.5rem; }
+  .sw-trail { height: 6.75rem; }
   .sw-choice { min-height: 4.5rem; font-size: 1.625rem; }
 }
 
@@ -1476,7 +1531,7 @@ select.field {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hop, .blink, .starfield, .card[data-state="wrong"], .lamp[data-state="now"], .sm-belt[data-run="true"], .sm-choice[data-state="wrong"], .rt-choice[data-state="wrong"], .sw-choice[data-state="wrong"], .wf-tray .sm-tile[data-state="wrong"], .sw-strip, .sw-runner, .gm-drop { animation: none; }
+  .hop, .blink, .starfield, .card[data-state="wrong"], .lamp[data-state="now"], .sm-belt[data-run="true"], .sm-choice[data-state="wrong"], .rt-choice[data-state="wrong"], .sw-choice[data-state="wrong"], .wf-tray .sm-tile[data-state="wrong"], .sw-strip, .sw-runner, .sw-trick[data-trick], .gm-drop { animation: none; }
   .gm-fly { animation: none; opacity: 0; }
   .sm-tile:active:not(:disabled) { transform: none; }
   .pop { animation: none; opacity: 0; }

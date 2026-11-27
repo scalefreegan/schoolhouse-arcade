@@ -44,6 +44,22 @@ export function speedOf(streak: number): number {
   return Math.max(0, Math.min(TOP_SPEED, Math.floor(streak)));
 }
 
+/**
+ * What the runner does as a right answer lands, from the run of right
+ * answers it makes: a jump for the first, a higher leap for the second, a
+ * spin in the air for the third, a backflip for the fourth, two turns for
+ * the fifth, and then spin, flip and double over again. Nothing for a miss.
+ * Like the speed, only something to see. Ids name the drawing's motion
+ * (index.css), nothing stored.
+ */
+export const TRICKS = ["jump", "leap", "spin", "flip", "double"] as const;
+export type Trick = (typeof TRICKS)[number];
+export function trickOf(streak: number): Trick | null {
+  const n = Math.floor(streak);
+  if (!(n >= 1) || !Number.isFinite(n)) return null;
+  return n <= TRICKS.length ? TRICKS[n - 1] : TRICKS[2 + ((n - TRICKS.length - 1) % 3)];
+}
+
 /** An answer as it is stored: the words shown, in order, then the one picked. */
 export function answerText(choices: string[], pick: string): string {
   return `${choices.join("|")}=${pick}`;

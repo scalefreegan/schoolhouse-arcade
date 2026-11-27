@@ -1,9 +1,11 @@
-// npm run speech:build: every clip Sound Machine, Rhyme Time and Sight Word
-// Sprint can play, spoken by one voice and written with a manifest to
-// web/public/speech/sound-machine/ (Sound Machine's sounds and words, which
-// Rhyme Time says too), web/public/speech/rhyme-time/ (the words only
-// Rhyme Time has) and web/public/speech/sight-word-sprint/ (its sight
-// words). The clips are committed; the app only ever fetches them.
+// npm run speech:build: every clip Sound Machine, Rhyme Time, Sight Word
+// Sprint and Word Families can play, spoken by one voice and written with a
+// manifest to web/public/speech/sound-machine/ (Sound Machine's sounds and
+// words, which Rhyme Time and Word Families say too),
+// web/public/speech/rhyme-time/ (the words only Rhyme Time has),
+// web/public/speech/sight-word-sprint/ (its sight words) and
+// web/public/speech/word-families/ (the endings, and the words no other
+// game says). The clips are committed; the app only ever fetches them.
 // Nothing at run time needs a key or leaves the house.
 //
 //   node scripts/speech/build.mjs              make what is missing or out of date
@@ -40,7 +42,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { SPEECH_DIR as RHYME_DIR, WORDS as RHYME_WORDS, ownClips } from "../../web/shared/rhymetime/words.ts";
 import { SPEECH_DIR as SIGHT_DIR, WORDS as SIGHT_WORDS, allClips as sightClips, sightClip } from "../../web/shared/sightwords/words.ts";
-import { SOUNDS, SPEECH_DIR, WORDS, allClips, slowClip, soundClip, wordClip } from "../../web/shared/soundmachine/words.ts";
+import { SOUNDS, SPEECH_DIR, TILE_SOUND, WORDS, allClips, slowClip, soundClip, wordClip } from "../../web/shared/soundmachine/words.ts";
+import { FAMILIES, SPEECH_DIR as FAMILY_DIR, ownClips as familyClips, ownWords as familyWords, rimeClip } from "../../web/shared/wordfamilies/words.ts";
 import { RATE, finish, measure, pcmOfS16, pcmOfWav, s16Of } from "./audio.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
@@ -133,7 +136,7 @@ const SLOW_FIX = { bed: { tempo: 0.72 }, chip: { rate: -20 }, duck: { tempo: 0.7
 /** Words whose vowel the voice says a little off the one the game teaches,
  *  and so are asked for by their sounds. Its "dog", "log" and "moth" lean
  *  towards "aw"; the short o of "chop", "sock" and the o tile is opener. */
-const WORD_IPA = { dog: "dɑɡ", log: "lɑɡ", moth: "mɑθ" };
+const WORD_IPA = { dog: "dɑɡ", log: "lɑɡ", moth: "mɑθ", hog: "hɑɡ", hop: "hɑp", pet: "pɛt", bin: "bɪn", tin: "tɪn", shack: "ʃæk" };
 const asWord = (w) => `${WORD_IPA[w.id] ? ipa(WORD_IPA[w.id], w.id) : w.id}.`;
 
 /** A word said plainly, as a sentence of its own so it falls at the end. */
@@ -187,11 +190,31 @@ function sightWordRecipes() {
   return out;
 }
 
+/** How much slower an ending is asked for than a word: it is said for a
+ *  child to hold on to ("at"), not in passing. */
+const RIME_RATE = -20;
+
+/** Word Families' own clips. An ending ("at", "ock") is asked for by its
+ *  sounds, Sound Machine's (a short vowel and what follows it), since
+ *  written down some are words said another way and some are no word at
+ *  all. Each word no other game says is said plainly, as theirs are. */
+function wordFamilyRecipes() {
+  const out = {};
+  const ipaOf = new Map(SOUNDS.map((s) => [s.id, s.ipa]));
+  for (const f of FAMILIES) {
+    const ph = f.tiles.map((t) => ipaOf.get(TILE_SOUND[t])).join("");
+    out[rimeClip(f.id)] = { kind: "rime", provider: "azure", voice: VOICE, ssml: speak(rate(RIME_RATE, `${ipa(ph, f.id)}.`)), post: { cut: "all", levelDb: LEVEL.word, ...FADES.all } };
+  }
+  for (const w of familyWords()) out[wordClip(w.id)] = plainWord(w);
+  return out;
+}
+
 /** Each folder of clips: where it is, which clips belong there, and their recipes. */
 const SETS = [
   { name: "Sound Machine", out: path.join(ROOT, "web/public", SPEECH_DIR), clips: allClips, recipes: soundMachineRecipes },
   { name: "Rhyme Time", out: path.join(ROOT, "web/public", RHYME_DIR), clips: ownClips, recipes: rhymeTimeRecipes },
   { name: "Sight Word Sprint", out: path.join(ROOT, "web/public", SIGHT_DIR), clips: sightClips, recipes: sightWordRecipes },
+  { name: "Word Families", out: path.join(ROOT, "web/public", FAMILY_DIR), clips: familyClips, recipes: wordFamilyRecipes },
 ];
 
 // ---------- the outside world ----------
@@ -263,7 +286,17 @@ const decode = (file, hz = RATE) => pcmOfS16(ffmpeg(["-i", file, "-f", "s16le", 
 /** What speech-to-text makes of a clip: its guesses, best first, in lower case; none when it hears no words. */
 async function heard(clip, file) {
   // Half a second of quiet either side: the recogniser does not take a word that starts at once.
-  const wav = ffmpeg(["-i", file, "-af", "adelay=500,apad=pad_dur=0.7", "-ar", "16000", "-ac", "1", "-f", "wav", "pipe:1"]);
+  return heardIn(clip, ffmpeg(["-i", file, "-af", "adelay=500,apad=pad_dur=0.7", "-ar", "16000", "-ac", "1", "-f", "wav", "pipe:1"]));
+}
+
+/** The same of several clips played one after another, a breath between them. */
+async function heardTogether(clip, files) {
+  const each = files.map((_, i) => `[${i}:a]apad=pad_dur=0.12[a${i}]`).join(";");
+  const all = files.map((_, i) => `[a${i}]`).join("");
+  return heardIn(clip, ffmpeg([...files.flatMap((f) => ["-i", f]), "-filter_complex", `${each};${all}concat=n=${files.length}:v=0:a=1,adelay=500,apad=pad_dur=0.7`, "-ar", "16000", "-ac", "1", "-f", "wav", "pipe:1"]));
+}
+
+async function heardIn(clip, wav) {
   const res = await post(`speech-to-text for ${clip}`, `https://${env("AZURE_SPEECH_REGION")}.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1?language=en-US&format=detailed`, {
     "Ocp-Apim-Subscription-Key": env("AZURE_SPEECH_KEY"),
     "Content-Type": "audio/wav; codecs=audio/pcm; samplerate=16000",
@@ -391,7 +424,7 @@ async function buildSet(set, { force, only }) {
 /** Letter names: what the voice must never say for a sound. */
 const LETTER_NAMES = ["a", "ay", "b", "bee", "be", "c", "see", "sea", "d", "dee", "e", "ee", "f", "eff", "g", "gee", "h", "aitch", "i", "eye", "k", "kay", "l", "el", "m", "em", "n", "en", "o", "oh", "p", "pee", "pea", "r", "are", "s", "es", "ess", "t", "tee", "tea", "u", "you", "w"];
 /** Spellings speech-to-text may give that sound the same as a word here. */
-const SAME_SOUND = { webb: "web", sac: "sack", sacks: "sax", chic: "chick", cheque: "check", czech: "check", son: "sun", inn: "in" };
+const SAME_SOUND = { webb: "web", sac: "sack", sacks: "sax", chic: "chick", cheque: "check", czech: "check", son: "sun", inn: "in", matt: "mat", finn: "fin", lead: "led", doug: "dug", doc: "dock", caught: "cot", shaq: "shack" };
 /** The same for Sight Word Sprint's words, which have no second spelling in
  *  the game itself (web/shared/sightwords/words.ts) but do in the language. */
 const SIGHT_SAME_SOUND = { eye: "i", aye: "i", two: "to", too: "to", u: "you", ewe: "you", wee: "we", know: "no", sew: "so", sow: "so", due: "do", dew: "do", sea: "see", c: "see", four: "for", fore: "for", hear: "here", their: "there", "they're": "there", won: "one", wood: "would", "you're": "your", r: "are", wear: "where", ware: "where" };
@@ -399,6 +432,17 @@ const SIGHT_SAME_SOUND = { eye: "i", aye: "i", two: "to", too: "to", u: "you", e
  *  the word: "very" comes back empty by itself and as "very many" with
  *  sight-many played after it. For these, no guess at all is not flagged. */
 const UNHEARD_ALONE = ["very"];
+/** Words speech-to-text takes for another when said alone (a short i
+ *  before n as "ben" and "ten", "hop" as "harp", "pet" as "pat" or nothing)
+ *  and hears as themselves beside another word. Each is asked again with
+ *  the clips named here played in a row, and must then be heard as the
+ *  phrase: a check, not a pass. */
+const HEARD_BESIDE = {
+  "word-bin": { clips: ["word-bin", "word-pin"], phrase: "bin pin" },
+  "word-tin": { clips: ["word-tin", "word-can"], phrase: "tin can" },
+  "word-hop": { clips: ["word-hip", "word-hop"], phrase: "hip hop" },
+  "word-pet": { clips: ["word-pet", "word-cat"], phrase: "pet cat" },
+};
 const VOICELESS = ["f", "s", "sh", "th", "h", "k", "p", "t", "ch"];
 
 /**
@@ -417,6 +461,7 @@ async function verify({ only, match }) {
     const { clips } = readManifest(set);
     return set.clips().map((clip) => ({ set, clip, entry: clips[clip] }));
   });
+  const fileOfClip = new Map(every.map(({ set, clip }) => [clip, fileOf(set, clip)]));
   for (const { set, clip, entry } of every) {
     if (only && !only.includes(clip)) continue;
     if (match && !clip.includes(match)) continue;
@@ -430,8 +475,16 @@ async function verify({ only, match }) {
       // A clip that is the word's own sound slowed (`tempo`) has the sounds of
       // the plain clip, which is judged on its own line; speech-to-text takes
       // a long short vowel for another word ("bed" as "bad"), so it is not asked.
-      if (!entry.post.tempo && !(guesses.length > 0 && guesses.every((g) => g === "") && entry.word && UNHEARD_ALONE.includes(word)) && !guesses.some((g) => g === word || same[g] === word)) flags.push(`heard as "${said}"`);
+      if (!entry.post.tempo && !(guesses.length > 0 && guesses.every((g) => g === "") && entry.word && UNHEARD_ALONE.includes(word)) && !guesses.some((g) => g === word || same[g] === word)) {
+        const beside = HEARD_BESIDE[clip];
+        const together = beside ? await heardTogether(clip, beside.clips.map((c) => fileOfClip.get(c))) : [];
+        if (!together.includes(beside?.phrase)) flags.push(`heard as "${said}"${beside ? `, and with its neighbour as "${together[0] ?? ""}"` : ""}`);
+      }
       if (m.soundMs < 250 || m.soundMs > 1800) flags.push("an odd length for a word");
+    } else if (entry.kind === "rime") {
+      // An ending is not a word speech-to-text can be held to ("ig", "ock"): only that something of a word's length is there, with a voice in it.
+      if (m.soundMs < 200 || m.soundMs > 1500) flags.push("an odd length for an ending");
+      if (m.voicedMs < 80) flags.push("an ending with no voice in it");
     } else {
       const s = held.get(clip);
       if (LETTER_NAMES.includes(said) && said !== "") flags.push(`heard as "${said}", which could be a letter's name`);

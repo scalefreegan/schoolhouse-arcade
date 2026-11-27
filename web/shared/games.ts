@@ -48,6 +48,14 @@ export const GAMES: GameInfo[] = [
     sprite: "trail",
     status: "live",
   },
+  {
+    id: "word-families",
+    title: "Word Families",
+    pitch: "Keep the ending, change the first sound",
+    teaches: "Word families: cat, bat, hat",
+    sprite: "house",
+    status: "live",
+  },
 ];
 
 export function gameById(id: string): GameInfo | undefined {

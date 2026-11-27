@@ -4,6 +4,7 @@ import { CometCards } from "./comet/CometCards.tsx";
 import { RhymeTime } from "./rhymetime/RhymeTime.tsx";
 import { SightWordSprint } from "./sightwords/SightWordSprint.tsx";
 import { SoundMachine } from "./soundmachine/SoundMachine.tsx";
+import { WordFamilies } from "./wordfamilies/WordFamilies.tsx";
 
 // The screen for each live cabinet, keyed by the game's id in
 // shared/games.ts. A game gets the player and a way back to the floor;
@@ -20,4 +21,5 @@ export const GAME_SCREENS: Record<string, ComponentType<GameProps>> = {
   "sound-machine": SoundMachine,
   "rhyme-time": RhymeTime,
   "sight-word-sprint": SightWordSprint,
+  "word-families": WordFamilies,
 };

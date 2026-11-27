@@ -11,7 +11,7 @@ uses, which is why an id never changes once live. Mirrors Lean Into It's `docs/D
 | Sound Machine's spoken clips (one mp3 a sound, two a word: plain and slow) and their manifest | `web/public/speech/sound-machine/` | yes (generated: `npm run speech:build`) |
 | Players; every play and every answer in it; stars per level; tickets, badges, prizes and hand-overs; the grown-up PIN's hash | Postgres `schoolhouse_arcade` | no |
 | `DATABASE_URL`, local overrides | `.env.local` | no |
-| Which player this device is, whether sound is off, the set-up each player used last | the browser's localStorage (`arcade.player`, `arcade.muted`, `arcade.comet.setup.<player>`, `arcade.sound-machine.setup.<player>`, `arcade.rhyme-time.setup.<player>`, `arcade.sight-word-sprint.setup.<player>`) | no, and not in the database |
+| Which player this device is, whether sound is off, the set-up each player used last | the browser's localStorage (`arcade.player`, `arcade.muted`, `arcade.comet.setup.<player>`, `arcade.sound-machine.setup.<player>`, `arcade.rhyme-time.setup.<player>`, `arcade.sight-word-sprint.setup.<player>`, `arcade.word-families.setup.<player>`) | no, and not in the database |
 | `npm run db:backup`'s dumps of the database, the newest 14, readable only by you | `backups/` (`SCHOOLHOUSE_ARCADE_BACKUPS_DIR` moves it) | no (`backups/` is ignored) |
 | The Mac app's server log, and the daily backup's | `~/Library/Logs/SchoolhouseArcade.log` (`.old`: the run before), `SchoolhouseArcadeBackup.log` | no |
 
@@ -51,6 +51,9 @@ Sight Word Sprint is the same again: `the|you|is|my=you` is the four words
 in the order shown, `=`, and the word picked; `fact` is the word that was
 said (`I` keeps its capital). How fast the runner was going is not stored:
 it is the run of right answers, counted again from these rows.
+Word Families is the same: `b|c|h|m=c` is the tray of tiles in the order
+shown, `=`, and the tile picked; `fact` is the word that was said (`cat`),
+whose ending the screen showed. The house on its screen is not stored.
 Each row has one or neither (a card that timed out), never both; the
 column added is nullable and no row from before was touched.
 
@@ -123,6 +126,16 @@ Sight Word Sprint's fifty words have one plain clip each,
 `web/public/speech/sight-word-sprint/sight-<word>.mp3`, with a manifest of
 the same form whose entries also name the word (`word`), which is what
 `--verify` listens for. A clip's name is its own across all three folders.
+
+Word Families says a word Sound Machine or Rhyme Time has with that game's
+clip. Its own are in `web/public/speech/word-families/`: the eighteen
+endings (`rime-<ending>.mp3`, kind `rime`, asked for by their sounds) and
+the 68 words no other game says (`word-<word>.mp3`), with a manifest of the
+same form. A clip's name is its own across all four folders. `--verify`
+cannot hold an ending to a word, so it only measures it; four words it
+mishears alone (bin, tin, hop, pet) it asks again beside another clip
+(`HEARD_BESIDE` in `scripts/speech/build.mjs`: "tin can", "hip hop") and
+must then hear the phrase.
 
 ## Setup
 

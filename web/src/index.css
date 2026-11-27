@@ -1370,8 +1370,113 @@ select.field {
   .sw-choice { min-height: 4.5rem; font-size: 1.625rem; }
 }
 
+/* ---------- Word Families ---------- */
+
+.wf-board {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
+  gap: calc(var(--px) * 3);
+  padding-top: calc(var(--px) * 2);
+  letter-spacing: 0;
+}
+/* The family's house: a room for each of its four words, filled as they are answered. */
+.wf-house {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--px) * 3);
+}
+.wf-rooms {
+  display: flex;
+  gap: calc(var(--px) * 2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.wf-rooms > li {
+  --edge: var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 6.5rem;
+  height: 3.25rem;
+  background: var(--tube);
+  color: var(--fg);
+  font-size: 1.75rem;
+  box-shadow:
+    0 calc(var(--px) * -1) 0 0 var(--edge),
+    0 var(--px) 0 0 var(--edge),
+    calc(var(--px) * -1) 0 0 0 var(--edge),
+    var(--px) 0 0 0 var(--edge);
+}
+/* A word built right is a thing won (yellow); one that was shown is only there to read. */
+.wf-rooms > li[data-state="built"] {
+  --edge: var(--yellow);
+  background: var(--raised);
+}
+.wf-rooms > li[data-state="shown"] { background: var(--raised); }
+.wf-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--px) * 6);
+}
+.wf-word {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--px) * 3);
+}
+.wf-word .sm-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+}
+/* The ending: the game's part of the word (cyan), there before the answer. */
+.wf-rime {
+  display: flex;
+  align-items: center;
+  height: 8rem;
+  padding: 0 calc(var(--px) * 2);
+  color: var(--cyan);
+  font-size: 6rem;
+}
+.wf-rime[data-lit="true"] {
+  background: var(--cyan);
+  color: var(--tube);
+}
+.wf-tray .sm-tile[data-state="right"] {
+  --lip: var(--good);
+  color: var(--good);
+}
+.wf-tray .sm-tile[data-state="wrong"] {
+  --lip: var(--bad);
+  color: var(--bad);
+  animation: shake 0.32s steps(1);
+}
+.wf-tray .sm-tile[data-state="out"] { opacity: 0.3; }
+.wf-tray .sm-tile:not([data-state=""]) { cursor: default; }
+.wf-board .sm-after { min-height: calc(var(--px) * 18); }
+@media (max-width: 40rem) {
+  .wf-house > svg { display: none; }
+  .wf-rooms > li {
+    width: 4.75rem;
+    height: 2.75rem;
+    font-size: 1.375rem;
+  }
+  .wf-row { gap: calc(var(--px) * 3); }
+  .wf-rime {
+    height: 5.5rem;
+    font-size: 4rem;
+  }
+  .wf-tray { max-width: 18rem; }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .hop, .blink, .starfield, .card[data-state="wrong"], .lamp[data-state="now"], .sm-belt[data-run="true"], .sm-choice[data-state="wrong"], .rt-choice[data-state="wrong"], .sw-choice[data-state="wrong"], .sw-strip, .sw-runner, .gm-drop { animation: none; }
+  .hop, .blink, .starfield, .card[data-state="wrong"], .lamp[data-state="now"], .sm-belt[data-run="true"], .sm-choice[data-state="wrong"], .rt-choice[data-state="wrong"], .sw-choice[data-state="wrong"], .wf-tray .sm-tile[data-state="wrong"], .sw-strip, .sw-runner, .gm-drop { animation: none; }
   .gm-fly { animation: none; opacity: 0; }
   .sm-tile:active:not(:disabled) { transform: none; }
   .pop { animation: none; opacity: 0; }

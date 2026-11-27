@@ -34,10 +34,10 @@ magenta and yellow. [`docs/PRD.md`](docs/PRD.md) has the whole design.
       <p>A player is a name and a pixel character: an alien, a dinosaur, a robot, a monster, a wizard, a dragon, a ghost, a rocket, a cat, an owl, a frog or a cupcake, each in six colours. Tickets, badges and unlocked levels belong to the player; the high score tables show everyone.</p>
     </td>
     <td width="50%" valign="top">
-      <img src="docs/screenshots/floor.png" alt="The arcade floor: the Comet Cards and Sound Machine cabinets side by side, and below them the Rhyme Time jukebox and the Sight Word Sprint signpost" width="100%">
-      <br><sub><i>The floor: four cabinets so far, and more on the delivery truck.</i></sub>
+      <img src="docs/screenshots/floor.png" alt="The arcade floor: the Comet Cards and Sound Machine cabinets side by side, and below them the Rhyme Time jukebox and the Sight Word Sprint signpost; the Word Families house is further down" width="100%">
+      <br><sub><i>The floor: five cabinets so far, and more on the delivery truck.</i></sub>
       <h3>An arcade floor</h3>
-      <p>Each cabinet drills one idea until recall is fast. The first is <b>Comet Cards</b>: adding and taking away, 0 to 10. The second is <b>Sound Machine</b>: letter sounds and sounding out short words. The third is <b>Rhyme Time</b>: hearing which words rhyme. The fourth is <b>Sight Word Sprint</b>: the commonest words, known on sight. New cabinets plug into the same players, tickets and badges.</p>
+      <p>Each cabinet drills one idea until recall is fast. The first is <b>Comet Cards</b>: adding and taking away, 0 to 10. The second is <b>Sound Machine</b>: letter sounds and sounding out short words. The third is <b>Rhyme Time</b>: hearing which words rhyme. The fourth is <b>Sight Word Sprint</b>: the commonest words, known on sight. The fifth is <b>Word Families</b>: one ending, many words. New cabinets plug into the same players, tickets and badges.</p>
     </td>
   </tr>
   <tr>
@@ -92,6 +92,18 @@ magenta and yellow. [`docs/PRD.md`](docs/PRD.md) has the whole design.
     <td width="50%" valign="top">
       <h3>Known on sight</h3>
       <p>Fifty words in five levels, from Meadow to Summit. On Easy the other three words look nothing like the word; on Arcade they are its look-alikes (the, they, there), so only reading the whole word finds it. No two words in the game sound the same, and the Mac checks every question was a fair one before it scores the answer.</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="docs/screenshots/word-families.png" alt="A Word Families round: a small house with four rooms holding pat, mat and cat, a speaker button, a green box with the letter c before the ending at, and a tray of four tiles" width="100%">
+      <br><sub><i>The -at family, three rooms in.</i></sub>
+      <h3>Word Families</h3>
+      <p>One ending makes many words: cat, bat, hat, mat. The ending stays on the screen, a word is said, and you add the tile it starts with. The answer is sounded out the way a teacher does it (c, at, cat) and the word moves into the family's house. Four words of one family, then four of another. No clock.</p>
+    </td>
+    <td width="50%" valign="top">
+      <h3>Eighteen endings</h3>
+      <p>110 words in six levels: the short a endings first (-at, -an, -ap), then i, o, e and u, then -ack, -eck, -ick and -ock, then everything with ch, sh and th in front. Easy is four tiles that sound nothing like the answer; Arcade is six, with every sound-alike in the tray (b beside p and d). The Mac checks every tray was a fair one before it scores the answer.</p>
     </td>
   </tr>
   <tr>

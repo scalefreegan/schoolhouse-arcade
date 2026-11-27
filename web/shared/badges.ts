@@ -11,6 +11,7 @@ import { LEVELS } from "./comet/facts.ts";
 import { MAX_STARS } from "./play.ts";
 import { LEVELS as RHYME_LEVELS } from "./rhymetime/words.ts";
 import { LEVELS as SIGHT_LEVELS } from "./sightwords/words.ts";
+import { LEVELS as FAMILY_LEVELS } from "./wordfamilies/words.ts";
 import { LEVELS as SOUND_LEVELS } from "./soundmachine/words.ts";
 
 /** What a player has done, across every game. */
@@ -56,6 +57,8 @@ const rhymeStars = (f: BadgeFacts, level: string): number => f.stars[RHYME]?.[le
 
 const SIGHT = "sight-word-sprint";
 const sightStars = (f: BadgeFacts, level: string): number => f.stars[SIGHT]?.[level] ?? 0;
+const FAMILY = "word-families";
+const familyStars = (f: BadgeFacts, level: string): number => f.stars[FAMILY]?.[level] ?? 0;
 
 const MEDALS = ["lime", "cyan", "rose", "violet", "gold"];
 
@@ -99,6 +102,9 @@ export const BADGES: Badge[] = [
   // Sight Word Sprint's, as Rhyme Time's: a first star anywhere in it, and every level at three.
   { id: "sight-blazer", title: "Trail Blazer", how: "Get a star in Sight Word Sprint", tickets: 25, sprite: "shoe", palette: "default", earned: (f) => SIGHT_LEVELS.some((l) => sightStars(f, l.id) >= 1) },
   { id: "sight-champion", title: "Trail Champion", how: "3 stars on every Sight Word Sprint level", tickets: 300, sprite: "trail", palette: "gold", earned: (f) => SIGHT_LEVELS.every((l) => sightStars(f, l.id) >= MAX_STARS) },
+  // Word Families', the same: a first star anywhere in it, and every level at three.
+  { id: "family-door", title: "Open Door", how: "Get a star in Word Families", tickets: 25, sprite: "door", palette: "default", earned: (f) => FAMILY_LEVELS.some((l) => familyStars(f, l.id) >= 1) },
+  { id: "family-champion", title: "Family Champion", how: "3 stars on every Word Families level", tickets: 300, sprite: "house", palette: "gold", earned: (f) => FAMILY_LEVELS.every((l) => familyStars(f, l.id) >= MAX_STARS) },
 ];
 
 export function badgeById(id: string): Badge | undefined {

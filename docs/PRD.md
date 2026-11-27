@@ -11,6 +11,8 @@ words (build a word, read one, or split one into its sounds), with nothing
 timed, and the third is **Rhyme Time**, hearing which words rhyme, from
 pictures and voices alone. The fourth is **Sight Word Sprint**, knowing the
 commonest words on sight (the, said, where): hear one, tap it among four.
+The fifth is **Word Families**, seeing that one ending makes many words
+(cat, bat, hat): the ending stays, and the first sound is added.
 
 The name nods to the Saturday-morning idea that a lesson can be something
 you want to sit through. Everything in the app (names, characters, art,
@@ -42,15 +44,16 @@ all answers below are final for v1):
 | **Cabinet** | One game on the arcade floor. Listed in `web/shared/games.ts` |
 | **Player** | A row picked on the "Who is playing?" screen: a name, an avatar and its colour. No logins |
 | **Avatar** | The pixel character a player is, in one of its colours (`web/shared/avatars.ts`). The first colour is the character's own look |
-| **Fact** | What a game asks: one sum, written `7+5` or `10-2`, in Comet Cards; one word, `chick`, in Sound Machine and Rhyme Time (there, the word a question is about); one sight word, `said`, in Sight Word Sprint. The unit everything is counted in |
+| **Fact** | What a game asks: one sum, written `7+5` or `10-2`, in Comet Cards; one word, `chick`, in Sound Machine and Rhyme Time (there, the word a question is about); one sight word, `said`, in Sight Word Sprint; one word of a family, `bat`, in Word Families. The unit everything is counted in |
 | **Sound** | One spoken sound (a phoneme): the k of cat, kick and duck is one sound |
 | **Tile** | The letter or letters that write one sound: `c`, `a`, `ch`, `ck`. A digraph is one tile |
 | **Card** | A fact shown to be answered |
 | **Level** | A set of facts (add within 5, …). Levels unlock in order |
-| **Mode** | How a round is played: in Comet Cards how it is timed (Blitz, Sprint, Survival, Practice); in Sound Machine which game (Build it, Read it, Split it); in Rhyme Time Find it or Odd one out; Sight Word Sprint has one, Hear it |
+| **Mode** | How a round is played: in Comet Cards how it is timed (Blitz, Sprint, Survival, Practice); in Sound Machine which game (Build it, Read it, Split it); in Rhyme Time Find it or Odd one out; Sight Word Sprint has one, Hear it; Word Families has one, Build it |
+| **Word family** | In Word Families, the words that share an ending as it is spelled: cat, bat and hat are the family `at`. The ending is shown; the first sound is the answer |
 | **Rhyme family** | In Rhyme Time, words whose vowel and what follows it sound the same: cat, hat, chat and bat are the family `a-t`. Kept as data, never guessed from spelling |
 | **Gem** | In Split it, one sound of a word split right. Shown during the round and on its results only; never stored |
-| **Skill** | How hard a round is: in Comet Cards Easy (four choices) or Arcade (number pad); in Sound Machine and Rhyme Time how many pictures or tiles there are, and how alike; in Sight Word Sprint whether the other words look like the word |
+| **Skill** | How hard a round is: in Comet Cards Easy (four choices) or Arcade (number pad); in Sound Machine and Rhyme Time how many pictures or tiles there are, and how alike; in Sight Word Sprint whether the other words look like the word; in Word Families how many tiles are in the tray, and whether any sound like the answer |
 | **Sight word** | A short, very common word a reader has to know at a glance, most of them not explained by the letter sounds: the, of, said, where |
 | **Play** | One finished round: a player, a level, a mode, a skill, and every answer in it |
 | **Combo** | Right answers in a row. Raises the points per card |
@@ -498,6 +501,91 @@ without them. Like Sound Machine it will not start, or go on, with the
 sound switched off. The results list the words missed, each to hear again.
 *Grown-ups → Sound check* lists the fifty words last.
 
+## Word Families
+
+A street of houses, one for each ending. Decided 2026-11-27: the ending
+stays put (-at), a word is said, and the player adds the first sound from a
+tray of tiles: cat, bat, hat, mat. Four words of one family in a row, then
+four of another, so what stays the same and what changes is plain to see.
+No clock anywhere.
+
+### One game
+
+| Game (mode id) | The player | The answer |
+|---|---|---|
+| **Build it** (`build`) | sees an empty box and the ending written after it, hears the word, and taps the tile it starts with | the tray as shown and the tile picked (`b\|c\|h\|m=c`) |
+
+One tap is the answer; one try a word. The speaker button says the word
+again as often as wanted. The answer is then sounded out the way a teacher
+does it: the first sound, the ending, the word ("c", "at", "cat"), each lit
+as it is said. After a right answer the next word comes by itself when that
+has been said. A wrong one shows the right tile in the box and lit in the
+tray, the one tried in red, and waits for the arrow, which lights when the
+word has been sounded out. Nothing earned is ever taken away.
+
+**The house** across the top has four rooms, one for each word of the
+family being built. A word answered goes into the next room, its ending in
+the game's cyan; one built right has a yellow frame. When the fifth word
+comes the house is the second family's, and empty again. It is for the
+round only: nothing is stored from it.
+
+A tile makes one sound, Sound Machine's: the vowels are short, c is hard,
+th is the quiet one. The tray never holds two tiles of one sound (c and k):
+it has k before e and i (kick) and c before a, o and u (cat), as spelling
+does. Most of an Easy tray is the family's own first tiles, so the others
+make real words too (bat, hat, mat) and only the one that was said is
+right. A tile is never offered where it and the ending would spell a word
+that should not be on a child's screen.
+
+### Levels
+
+Every word is a first sound and an ending of a short vowel and one
+consonant sound. Eighteen families, 110 words.
+
+| Level | Its families |
+|---|---|
+| 1 a (`a`) | **-at** bat cat fat hat mat pat rat sat · **-an** can fan man pan ran tan · **-ap** cap map nap tap lap gap |
+| 2 i (`i`) | **-ig** big dig fig pig wig · **-in** bin fin pin tin win · **-ip** dip hip lip rip sip tip |
+| 3 o (`o`) | **-op** hop mop pop top cop · **-ot** cot dot hot pot got lot not · **-og** dog log fog hog |
+| 4 e u (`e-u`) | **-et** net pet wet bet get let met set · **-en** hen pen ten men den · **-ed** bed red fed led · **-ug** bug hug mug rug tug dug · **-un** bun fun run sun |
+| 5 ck (`ck`) | **-ack** back pack sack rack tack shack · **-eck** neck deck peck check · **-ick** kick lick pick sick thick chick · **-ock** rock sock lock dock shock |
+| 6 Mix (`mix`) | every family, with the words that start with ch, sh or th: chat, chin thin shin, chip ship, chop shop, shot, shed |
+
+A round is two of the level's families, four words of each. Which families
+and which words lean towards the ones missed before, as in the other games.
+
+### Skills
+
+| Skill | The tray |
+|---|---|
+| **Easy** | 4 tiles. None sounds like the first sound of the word |
+| **Arcade** | 6 tiles. Every tile whose sound is taken for the word's first sound is there: b with p and d, d with t, g with c or k, m with n, f with th, s with sh and th, sh with ch, r with w and l |
+
+Arcade pays two tickets a right answer and has its own high score tables,
+so the server refuses a tray that is not Arcade's: six tiles, with every
+sound-alike that may stand before the ending. It refuses an Easy tray with
+a sound-alike in it, and any tray with a tile that may not stand there.
+
+### Scoring
+
+Sound Machine's, exactly: 100 a right answer and 20 more for each right one
+before it in a row; stars at 5, 7 and 8 right of 8. A word's time is counted
+as at least one second and each answer stays up (1.3 seconds right, at
+least 1.4 wrong) before the next can come, so the server's round clock
+holds.
+
+### Speech
+
+A word Sound Machine or Rhyme Time already says is said with that game's
+clip (42 of the 110). The other 68, and the eighteen endings
+(`rime-<ending>.mp3`), are made by `npm run speech:build` into
+`web/public/speech/word-families/`. A first sound is Sound Machine's clip of
+it. A level's word clips are fetched before a round starts, and a round
+does not start without them; like the other sound games it will not start,
+or go on, with the sound switched off. The results list the words missed,
+each to hear again. *Grown-ups → Sound check* lists the endings and the 68
+words last.
+
 ## Tickets, badges, prizes
 
 **Tickets per play.** One per right answer on Easy, two on Arcade. Practice
@@ -530,6 +618,8 @@ already deserves it the next time they play.
 | Rhyme Champion | three stars on every Rhyme Time level | 300 |
 | Trail Blazer | a star in Sight Word Sprint | 25 |
 | Trail Champion | three stars on every Sight Word Sprint level | 300 |
+| Open Door | a star in Word Families | 25 |
+| Family Champion | three stars on every Word Families level | 300 |
 
 Arcade Ace and Comet Champion mean Comet Cards' levels, as they always
 have; the counting badges (First Game, the Clubs, the streaks) count every

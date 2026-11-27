@@ -64,9 +64,9 @@ export function poolOf(level: SightLevel): SightWord[] {
 
 const low = (w: SightWord) => w.id.toLowerCase();
 
-/** Same length, and the same letter in every place but one: me and we, were and here. */
+/** Same length (two letters or more: I and a are not alike), and the same letter in every place but one: me and we, were and here. */
 function oneLetterApart(a: string, b: string): boolean {
-  if (a.length !== b.length) return false;
+  if (a.length !== b.length || a.length < 2) return false;
   let differ = 0;
   for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) differ++;
   return differ === 1;

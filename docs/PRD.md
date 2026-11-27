@@ -476,9 +476,10 @@ lesson.
 
 The answer posted carries the question (`the|you|is|my=you`: the four
 words as shown, then the pick), and the server refuses a question that
-breaks its skill's rule, so an Easy round is never taken as Arcade's: on
-Arcade, if any word that could be shown looks like the word, one shown
-must.
+breaks its skill's rule, so an easier round is never taken as Arcade's: on
+Arcade as many of the other words must look like the word as there are
+such words to show, up to all three. (A word nothing looks like, such as
+you or because, is the same question on both skills.)
 
 ### Scoring and stars
 

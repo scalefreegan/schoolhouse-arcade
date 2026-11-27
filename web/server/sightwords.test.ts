@@ -82,7 +82,7 @@ test("a question that could not have been put, or a pick that is not one of its 
     [{}, [{ fact: "the", given: 3, ms: 2000 }], /words shown and the word picked/],
     [{ mode: "find" }, [{ fact: "the", given: "the|you|is|my=the", ms: 2000 }], /no game/],
     // An Easy round sent as Arcade's (double tickets, the Arcade table).
-    [{ skill: "arcade" }, round("meadow", "easy"), /looks like the word/],
+    [{ skill: "arcade" }, round("meadow", "easy"), /look like the word/],
   ];
   for (const [config, answers, why] of cases) {
     const sent = await play(pip, config, answers);

@@ -43,6 +43,7 @@ test("what looks alike: the same first letter, the same last two, or one letter 
   const no = [["the", "you"], ["said", "for"], ["my", "go"], ["of", "was"]];
   for (const [a, b] of no) assert.ok(!alike(word(a), word(b)), `${a} ${b}`);
   assert.ok(!alike(word("the"), word("the")));
+  assert.ok(!alike(word("I"), word("a")), "two one-letter words are not one letter apart");
   assert.ok(nothingAlike(word("the"), word("you")));
   assert.ok(!nothingAlike(word("the"), word("we")), "they end alike");
   assert.ok(!nothingAlike(word("the"), word("to")));
@@ -117,8 +118,11 @@ test("a fair question: four different words the level shows, the word said among
   assert.match(faultOf(["the", "to", "is", "my"], m, "easy", "the")!, /look nothing like/);
   assert.match(faultOf(["the", "we", "is", "my"], m, "easy", "the")!, /look nothing like/);
   // Arcade: "to" looks like "the", so a question without a look-alike is Easy's, not Arcade's.
-  assert.match(faultOf(["the", "you", "is", "my"], m, "arcade", "the")!, /looks like the word/);
+  assert.match(faultOf(["the", "you", "is", "my"], m, "arcade", "the")!, /look like the word/);
   assert.equal(faultOf(["the", "to", "is", "my"], m, "arcade", "the"), null);
+  // Every look-alike there is, up to three: one where there are four is not enough.
+  assert.match(faultOf(["no", "so", "the", "you"], level("woods"), "arcade", "no")!, /as many as can/);
+  assert.equal(faultOf(["no", "so", "go", "do"], level("woods"), "arcade", "no"), null);
   // A word nothing looks like: any other words will do on Arcade.
   assert.equal(faultOf(["you", "the", "is", "my"], m, "arcade", "you"), null);
   // A word of an earlier level may be shown, never asked.
@@ -194,7 +198,7 @@ test("settle judges the pick against the word said, scores as Sound Machine does
     [config, [{ ...one, given: "the" }], /not four words and a pick/],
     [config, [{ ...one, given: "the|you|is|my=go" }], /not one of the words shown/],
     [config, [{ ...one, given: "the|to|is|my=the" }], /look nothing like/],
-    [{ ...config, skill: "arcade" }, [one], /looks like the word/],
+    [{ ...config, skill: "arcade" }, [one], /look like the word/],
   ];
   for (const [c, answers, why] of refused) assert.throws(() => settle(c as never, answers as never), why, JSON.stringify(answers));
 });

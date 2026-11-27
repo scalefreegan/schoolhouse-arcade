@@ -200,8 +200,8 @@ export function RoundScreen({ level, skill, stats, player, onDone, onQuit }: { l
   const rate = running ? RATES[speed] : 0;
   const trail = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    for (const el of trail.current?.querySelectorAll("[data-moves]") ?? []) for (const a of el.getAnimations?.() ?? []) a.playbackRate = rate;
-  }, [rate]);
+    for (const el of trail.current?.querySelectorAll("[data-moves]") ?? []) for (const a of el.getAnimations?.() ?? []) if (a.playbackRate !== rate) a.playbackRate = rate;
+  }); // after every draw: an animation made anew (reduced motion switched off) takes the speed at the next one
 
   // ---------- drawing ----------
 

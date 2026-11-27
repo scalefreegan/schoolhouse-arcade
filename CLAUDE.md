@@ -184,7 +184,8 @@ macos/                   the Dock app (build-app.sh, the launcher, the server he
   words in the game sound alike (to and two, there and their), and it will
   not start with the sound off. What looks alike is from the spelling
   (`alike()`); the server refuses an Easy question with a look-alike and an
-  Arcade one without, where the level has one (`faultOf()`), and a test
+  Arcade one with fewer look-alikes than it could show, up to three
+  (`faultOf()`), and a test
   deals every word on every level and skill.
 - **Letters to be read are lower case in `--font-letters`** (`.sm-letter`):
   the display face has no true small letters.

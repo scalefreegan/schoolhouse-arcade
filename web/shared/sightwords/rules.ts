@@ -65,10 +65,10 @@ export function parseAnswer(text: string): { choices: string[]; pick: string } |
  * skill; null if they could. What makes a question: four different words,
  * each the level's or an earlier level's, `fact` (one of the level's own)
  * among them. On Easy the three others look nothing like it. On Arcade the
- * question has to tempt where it can: if any word it could show looks like
- * `fact`, at least one shown does. So an Easy question is not taken as
- * Arcade's (more tickets, the other table) where the level could have made
- * it harder.
+ * question has to tempt as much as it can: as many of the others look like
+ * `fact` as there are such words to show, up to all three. So an easier
+ * question is not taken as Arcade's (more tickets, the other table) where
+ * the level could have made it harder.
  */
 export function faultOf(choices: string[], level: SightLevel, skill: Skill, fact: string): string | null {
   const word = level.words.find((w) => w.id === fact);
@@ -80,7 +80,7 @@ export function faultOf(choices: string[], level: SightLevel, skill: Skill, fact
   if (!choices.includes(fact)) return "The word said is not among the words shown.";
   const wrong = choices.filter((id) => id !== fact).map((id) => wordById(id)!);
   if (skill === "easy" && wrong.some((w) => !nothingAlike(w, word))) return "On Easy the other words look nothing like the word.";
-  if (skill === "arcade" && pool.some((w) => alike(w, word)) && !wrong.some((w) => alike(w, word))) return "On Arcade one of the other words looks like the word.";
+  if (skill === "arcade" && wrong.filter((w) => alike(w, word)).length < Math.min(CHOICES - 1, pool.filter((w) => alike(w, word)).length)) return "On Arcade the other words look like the word, as many as can.";
   return null;
 }
 

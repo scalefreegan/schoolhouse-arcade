@@ -430,7 +430,7 @@ async function verify({ only, match }) {
       // A clip that is the word's own sound slowed (`tempo`) has the sounds of
       // the plain clip, which is judged on its own line; speech-to-text takes
       // a long short vowel for another word ("bed" as "bad"), so it is not asked.
-      if (!entry.post.tempo && !(guesses.every((g) => g === "") && entry.word && UNHEARD_ALONE.includes(word)) && !guesses.some((g) => g === word || same[g] === word)) flags.push(`heard as "${said}"`);
+      if (!entry.post.tempo && !(guesses.length > 0 && guesses.every((g) => g === "") && entry.word && UNHEARD_ALONE.includes(word)) && !guesses.some((g) => g === word || same[g] === word)) flags.push(`heard as "${said}"`);
       if (m.soundMs < 250 || m.soundMs > 1800) flags.push("an odd length for a word");
     } else {
       const s = held.get(clip);

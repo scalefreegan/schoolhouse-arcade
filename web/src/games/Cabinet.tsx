@@ -179,14 +179,18 @@ export function Cabinet({
       setStage({ at: "saving", ...begun, answers, error: null });
       let next: Stage;
       try {
-        const reply = await within(postPlay({ playerId: player.id, gameId: game.id, roundId: begun.roundId, clock: begun.clock, ...begun.config, answers }), SAVE_MS, "The arcade's computer is taking too long to answer. Try again.");
+        const sent = postPlay({ playerId: player.id, gameId: game.id, roundId: begun.roundId, clock: begun.clock, ...begun.config, answers });
+        // Whenever the round is saved, the player's progress is read again:
+        // also when the answer comes after the wait was given up, or after
+        // the player gave up, so that set-up shows a level it opened.
+        void sent.then(load, () => undefined);
+        const reply = await within(sent, SAVE_MS, "The arcade's computer is taking too long to answer. Try again.");
         next = { at: "results", config: begun.config, answers, reply };
       } catch (e) {
         next = { at: "saving", ...begun, answers, error: e instanceof Error ? e.message : String(e) };
       }
       // Only if this round is still the one being saved (not given up on).
       setStage((s) => (s.at === "saving" && s.roundId === begun.roundId ? next : s));
-      if (next.at === "results") void load();
     },
     [player.id, game.id, load],
   );

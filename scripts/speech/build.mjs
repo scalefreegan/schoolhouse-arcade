@@ -1,8 +1,9 @@
-// npm run speech:build: every clip Sound Machine and Rhyme Time can play,
-// spoken by one voice and written with a manifest to
+// npm run speech:build: every clip Sound Machine, Rhyme Time and Sight Word
+// Sprint can play, spoken by one voice and written with a manifest to
 // web/public/speech/sound-machine/ (Sound Machine's sounds and words, which
-// Rhyme Time says too) and web/public/speech/rhyme-time/ (the words only
-// Rhyme Time has). The clips are committed; the app only ever fetches them.
+// Rhyme Time says too), web/public/speech/rhyme-time/ (the words only
+// Rhyme Time has) and web/public/speech/sight-word-sprint/ (its sight
+// words). The clips are committed; the app only ever fetches them.
 // Nothing at run time needs a key or leaves the house.
 //
 //   node scripts/speech/build.mjs              make what is missing or out of date
@@ -38,6 +39,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { SPEECH_DIR as RHYME_DIR, WORDS as RHYME_WORDS, ownClips } from "../../web/shared/rhymetime/words.ts";
+import { SPEECH_DIR as SIGHT_DIR, WORDS as SIGHT_WORDS, allClips as sightClips, sightClip } from "../../web/shared/sightwords/words.ts";
 import { SOUNDS, SPEECH_DIR, WORDS, allClips, slowClip, soundClip, wordClip } from "../../web/shared/soundmachine/words.ts";
 import { RATE, finish, measure, pcmOfS16, pcmOfWav, s16Of } from "./audio.mjs";
 
@@ -169,10 +171,27 @@ function rhymeTimeRecipes() {
   return out;
 }
 
+/** Sight words the voice is asked for by their sounds, because it does not say
+ *  them alone the way a teacher does (none so far: each is checked by --verify). */
+const SIGHT_IPA = {};
+
+/** Sight Word Sprint's clips: each word said plainly, a sentence of its own.
+ *  `word` is what speech-to-text should hear in it (--verify): the clip's
+ *  name does not end in the word the way Sound Machine's do. */
+function sightWordRecipes() {
+  const out = {};
+  for (const w of SIGHT_WORDS) {
+    const said = SIGHT_IPA[w.id] ? ipa(SIGHT_IPA[w.id], w.id) : w.id;
+    out[sightClip(w.id)] = { kind: "word", word: w.id.toLowerCase(), provider: "azure", voice: VOICE, ssml: speak(`${said}.`), post: { cut: "all", levelDb: LEVEL.word, ...FADES.all } };
+  }
+  return out;
+}
+
 /** Each folder of clips: where it is, which clips belong there, and their recipes. */
 const SETS = [
   { name: "Sound Machine", out: path.join(ROOT, "web/public", SPEECH_DIR), clips: allClips, recipes: soundMachineRecipes },
   { name: "Rhyme Time", out: path.join(ROOT, "web/public", RHYME_DIR), clips: ownClips, recipes: rhymeTimeRecipes },
+  { name: "Sight Word Sprint", out: path.join(ROOT, "web/public", SIGHT_DIR), clips: sightClips, recipes: sightWordRecipes },
 ];
 
 // ---------- the outside world ----------
@@ -373,6 +392,13 @@ async function buildSet(set, { force, only }) {
 const LETTER_NAMES = ["a", "ay", "b", "bee", "be", "c", "see", "sea", "d", "dee", "e", "ee", "f", "eff", "g", "gee", "h", "aitch", "i", "eye", "k", "kay", "l", "el", "m", "em", "n", "en", "o", "oh", "p", "pee", "pea", "r", "are", "s", "es", "ess", "t", "tee", "tea", "u", "you", "w"];
 /** Spellings speech-to-text may give that sound the same as a word here. */
 const SAME_SOUND = { webb: "web", sac: "sack", sacks: "sax", chic: "chick", cheque: "check", czech: "check", son: "sun", inn: "in" };
+/** The same for Sight Word Sprint's words, which have no second spelling in
+ *  the game itself (web/shared/sightwords/words.ts) but do in the language. */
+const SIGHT_SAME_SOUND = { eye: "i", aye: "i", two: "to", too: "to", u: "you", ewe: "you", wee: "we", know: "no", sew: "so", sow: "so", due: "do", dew: "do", sea: "see", c: "see", four: "for", fore: "for", hear: "here", their: "there", "they're": "there", won: "one", wood: "would", "you're": "your", r: "are", wear: "where", ware: "where" };
+/** Words speech-to-text makes nothing of when said alone, though the clip is
+ *  the word: "very" comes back empty by itself and as "very many" with
+ *  sight-many played after it. For these, no guess at all is not flagged. */
+const UNHEARD_ALONE = ["very"];
 const VOICELESS = ["f", "s", "sh", "th", "h", "k", "p", "t", "ch"];
 
 /**
@@ -399,11 +425,12 @@ async function verify({ only, match }) {
     const said = guesses[0] ?? "";
     const flags = [];
     if (entry.kind === "word") {
-      const word = clip.slice(5).replace(/-slow$/, "");
+      const word = entry.word ?? clip.slice(5).replace(/-slow$/, "");
+      const same = entry.word ? SIGHT_SAME_SOUND : SAME_SOUND;
       // A clip that is the word's own sound slowed (`tempo`) has the sounds of
       // the plain clip, which is judged on its own line; speech-to-text takes
       // a long short vowel for another word ("bed" as "bad"), so it is not asked.
-      if (!entry.post.tempo && !guesses.some((g) => g === word || SAME_SOUND[g] === word)) flags.push(`heard as "${said}"`);
+      if (!entry.post.tempo && !(guesses.every((g) => g === "") && entry.word && UNHEARD_ALONE.includes(word)) && !guesses.some((g) => g === word || same[g] === word)) flags.push(`heard as "${said}"`);
       if (m.soundMs < 250 || m.soundMs > 1800) flags.push("an odd length for a word");
     } else {
       const s = held.get(clip);

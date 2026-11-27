@@ -40,6 +40,14 @@ export const GAMES: GameInfo[] = [
     sprite: "jukebox",
     status: "live",
   },
+  {
+    id: "sight-word-sprint",
+    title: "Sight Word Sprint",
+    pitch: "Hear the word, tap it, and run faster",
+    teaches: "Words to know on sight: the, said, where",
+    sprite: "trail",
+    status: "live",
+  },
 ];
 
 export function gameById(id: string): GameInfo | undefined {

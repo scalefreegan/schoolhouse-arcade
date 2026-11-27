@@ -11,7 +11,7 @@ uses, which is why an id never changes once live. Mirrors Lean Into It's `docs/D
 | Sound Machine's spoken clips (one mp3 a sound, two a word: plain and slow) and their manifest | `web/public/speech/sound-machine/` | yes (generated: `npm run speech:build`) |
 | Players; every play and every answer in it; stars per level; tickets, badges, prizes and hand-overs; the grown-up PIN's hash | Postgres `schoolhouse_arcade` | no |
 | `DATABASE_URL`, local overrides | `.env.local` | no |
-| Which player this device is, whether sound is off, the set-up each player used last | the browser's localStorage (`arcade.player`, `arcade.muted`, `arcade.comet.setup.<player>`, `arcade.sound-machine.setup.<player>`, `arcade.rhyme-time.setup.<player>`) | no, and not in the database |
+| Which player this device is, whether sound is off, the set-up each player used last | the browser's localStorage (`arcade.player`, `arcade.muted`, `arcade.comet.setup.<player>`, `arcade.sound-machine.setup.<player>`, `arcade.rhyme-time.setup.<player>`, `arcade.sight-word-sprint.setup.<player>`) | no, and not in the database |
 | `npm run db:backup`'s dumps of the database, the newest 14, readable only by you | `backups/` (`SCHOOLHOUSE_ARCADE_BACKUPS_DIR` moves it) | no (`backups/` is ignored) |
 | The Mac app's server log, and the daily backup's | `~/Library/Logs/SchoolhouseArcade.log` (`.old`: the run before), `SchoolhouseArcadeBackup.log` | no |
 
@@ -47,6 +47,10 @@ rhyme with, `>`, the pictures in the order shown, `=`, the pick); Odd one
 out is `cat|hat|pin=pin`. `fact` is the word the question was about (in
 Odd one out, one of the pair), so which words come next leans on it as it
 does in the other games.
+Sight Word Sprint is the same again: `the|you|is|my=you` is the four words
+in the order shown, `=`, and the word picked; `fact` is the word that was
+said (`I` keeps its capital). How fast the runner was going is not stored:
+it is the run of right answers, counted again from these rows.
 Each row has one or neither (a card that timed out), never both; the
 column added is nullable and no row from before was touched.
 
@@ -114,6 +118,11 @@ sixteen words have one plain clip each,
 `web/public/speech/rhyme-time/word-<word>.mp3`, with a `manifest.json` of
 the same form, made and checked by the same commands (`--only word-van`
 finds a clip in either folder).
+
+Sight Word Sprint's fifty words have one plain clip each,
+`web/public/speech/sight-word-sprint/sight-<word>.mp3`, with a manifest of
+the same form whose entries also name the word (`word`), which is what
+`--verify` listens for. A clip's name is its own across all three folders.
 
 ## Setup
 

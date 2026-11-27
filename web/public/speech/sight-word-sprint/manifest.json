@@ -1,0 +1,906 @@
+{
+  "voice": "en-US-SaraNeural",
+  "format": "mp3, 24 kHz, mono, 64 kbit/s",
+  "clips": {
+    "sight-a": {
+      "bytes": 4032,
+      "gainDb": 0.6,
+      "kind": "word",
+      "ms": 445,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "39635876dc8c797ebe51350a946552821d6df2e79b5a4d89df689de238fc165e",
+      "sha256": "6c17fdb405307c9f00e07c8b38650444acd71257148cdb3b45ec8deb739f9f58",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">a.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "a"
+    },
+    "sight-again": {
+      "bytes": 5568,
+      "gainDb": -0.8,
+      "kind": "word",
+      "ms": 635,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "2ecfc33a3be53767bdb4a9e325b57f002afb43c4717528c01f6c57dc88348e86",
+      "sha256": "77095adbdd52bb6e85c26edb7bde72535d28397a7258bace41e41bf9329e2149",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">again.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "again"
+    },
+    "sight-and": {
+      "bytes": 4992,
+      "gainDb": -2.8,
+      "kind": "word",
+      "ms": 565,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "4c72e3567361040286104ab1fb170a67525780965e39f4cfdc6675093570e891",
+      "sha256": "468aca6121c4cb75c42b1d2efb9f776352baa26253418f4c83768f5b0c843454",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">and.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "and"
+    },
+    "sight-any": {
+      "bytes": 4608,
+      "gainDb": -1.9,
+      "kind": "word",
+      "ms": 525,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "7bae05e213f9a11966ffa0b14ba3aad4484d864658b193b9a89e482fc2e1bc35",
+      "sha256": "82aac1c32f1e78dc65680749d60d8e2856cc3f226a4bbdba5923f60ccd44bdf6",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">any.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "any"
+    },
+    "sight-are": {
+      "bytes": 4608,
+      "gainDb": -2.8,
+      "kind": "word",
+      "ms": 505,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "231f428f072488fedbe680570b3cbaaf23ae2d68e813f336b5ce1cfbe4379f15",
+      "sha256": "0826a74184a056d842c1f65810466378ed150d07001a8cd06ec708fc67f00e52",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">are.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "are"
+    },
+    "sight-because": {
+      "bytes": 5952,
+      "gainDb": 0.2,
+      "kind": "word",
+      "ms": 695,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "b8f893a7567ce4a63e96e36b11fe53a54c3c2a0c6f7fead251c848b3fe87cb3d",
+      "sha256": "8a14de29346843e53995439caa2016e43abd839ea696ae7e1246c25c9138972e",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">because.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "because"
+    },
+    "sight-come": {
+      "bytes": 4608,
+      "gainDb": -1.4,
+      "kind": "word",
+      "ms": 525,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "aa5a242d7ed86252fb596241b4064043cb12b95db22d80a5b9f9e5849aecbf14",
+      "sha256": "98877e351934dff842b308b8f559c9ea4d7b76c8873e36166e390fe73e369576",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">come.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "come"
+    },
+    "sight-could": {
+      "bytes": 4608,
+      "gainDb": -0.8,
+      "kind": "word",
+      "ms": 515,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "ee83713626778912d10d87223c3776862143c5ccfbea2edf0a2e4175c3ed663d",
+      "sha256": "8b8eb113ce2c38967136ebec01637b7a160c6e80fa6ff332c549e74b24645a30",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">could.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "could"
+    },
+    "sight-do": {
+      "bytes": 4032,
+      "gainDb": -0.4,
+      "kind": "word",
+      "ms": 455,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "fed2052c8ac1efe5497e749a332f638e1955d31dd84f61ef3145f3ecf0d4c1fc",
+      "sha256": "6a0c59484a9551dc273270dc8628d13134357d2be6c3f1262e0d365ff9bba6b8",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">do.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "do"
+    },
+    "sight-does": {
+      "bytes": 5184,
+      "gainDb": -0.9,
+      "kind": "word",
+      "ms": 595,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "b1c9055a7767859f165f3e78fa52172b4a254b771ddec2cdbe8b6af0c1b3766d",
+      "sha256": "fb4d1795b1f17c0b7f88eeff23924477a1d2f50ae217a4ed1e2abb093252b289",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">does.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "does"
+    },
+    "sight-for": {
+      "bytes": 5184,
+      "gainDb": -5.2,
+      "kind": "word",
+      "ms": 585,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "df3b63761825bbdfaa6900b15e9950edb24675ae984b335762513f1176b1b621",
+      "sha256": "97f32731dcdc1200460ddf895e79f47d86baee764e7ba08594c19375bc7fd358",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">for.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "for"
+    },
+    "sight-from": {
+      "bytes": 6144,
+      "gainDb": -3.8,
+      "kind": "word",
+      "ms": 715,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "e358520662365da687e05a0dd0f76883fe1e860bc86405fdb0391d430702adda",
+      "sha256": "d0e2e91a9dd872ff4870c6c0d8a345b1d4c416ad295f382672cad1cc0fb314b3",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">from.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "from"
+    },
+    "sight-go": {
+      "bytes": 4224,
+      "gainDb": 0.7,
+      "kind": "word",
+      "ms": 465,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "eb99cd434c2bf8681a2806f87d06c28ce3d762e8b3b8c07b542d10be4bcb4849",
+      "sha256": "4198e283af3f2f520898bfcf3cffbd3bd57f989d5b900b66a05469bf86d408ab",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">go.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "go"
+    },
+    "sight-have": {
+      "bytes": 4800,
+      "gainDb": 0.1,
+      "kind": "word",
+      "ms": 545,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "9c393e7b24b4ae5d238a889528e77944326c47de278c46ab271ac061fffeb98b",
+      "sha256": "6c30649360856a9435c69a0eebb1fee57b49df2a49bd7ebec4eb7e9aa2809270",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">have.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "have"
+    },
+    "sight-he": {
+      "bytes": 4608,
+      "gainDb": -3,
+      "kind": "word",
+      "ms": 505,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "2909ed1570120d274fc167a39a3c414145df8f29e4ee1b5cb075c6b94878b305",
+      "sha256": "407064e338910263b51b908f70fb72131a8ea7b6a6ce844701fcaa31748ce720",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">he.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "he"
+    },
+    "sight-here": {
+      "bytes": 4800,
+      "gainDb": -2.5,
+      "kind": "word",
+      "ms": 545,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "2e27b3019e32ada747cde13d7c512b05e1e9da259843d9d7d48916f49ec053d6",
+      "sha256": "0c89601bb42ed35346421320561fdfc3346ca1c4c4265ec9b74f60114e95fdfe",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">here.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "here"
+    },
+    "sight-i": {
+      "bytes": 4608,
+      "gainDb": 1,
+      "kind": "word",
+      "ms": 525,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "5abd350506156bd65de043ff9714b1476b12851a2bb8555b9b081280b2b94712",
+      "sha256": "1b02dac93966240c5963f8e3168cfea9b24b568f347721f2c5af9884d9e6c93f",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">I.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "i"
+    },
+    "sight-is": {
+      "bytes": 5376,
+      "gainDb": -0.9,
+      "kind": "word",
+      "ms": 605,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "8d22c6a35f031b87682dc16c8577f56716e59083532febed4472d88d7ce577fa",
+      "sha256": "7f3577332b0c71cb15e4223bc9c1e4628f009a24de1981776831da2a2e64fbad",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">is.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "is"
+    },
+    "sight-like": {
+      "bytes": 5184,
+      "gainDb": -3.5,
+      "kind": "word",
+      "ms": 595,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "0ae69e7107a34e52425f0913368ffba6c2800e5aae506cf4ab0151d18cba5e2f",
+      "sha256": "aa7442f37da381c09b26eb182d4495182a7c460590fde57bff9c93858a9db031",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">like.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "like"
+    },
+    "sight-look": {
+      "bytes": 5568,
+      "gainDb": -5.5,
+      "kind": "word",
+      "ms": 625,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "355a4a8695693b84144676b804b4c8457fe62335e0628602a13dfa107a9fd010",
+      "sha256": "f664ade79878e20159f75bc583862fb1bda6cb8b2f7a5d6850bebfa4fc01e9d5",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">look.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "look"
+    },
+    "sight-many": {
+      "bytes": 5376,
+      "gainDb": -1.4,
+      "kind": "word",
+      "ms": 605,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "7e3257abb422dc7f308b4caca7f47ed62cc6e2c5bd1e96e6850ff0e8c31e147c",
+      "sha256": "0ffd9fa3f96e296b009ab42a6b4aa4a5dabce6e12a7c6dc53e68dbe3206a2371",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">many.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "many"
+    },
+    "sight-me": {
+      "bytes": 4224,
+      "gainDb": -1.7,
+      "kind": "word",
+      "ms": 475,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "9cf7b08c5b945a963095935e3c61b6a1c0387a75d504fa27e72805bb71e74cc9",
+      "sha256": "8f8ee52709a40a9b2e858b6ddb56b9cae0d09bfb7f346a7a41eed5a06d63f749",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">me.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "me"
+    },
+    "sight-my": {
+      "bytes": 4992,
+      "gainDb": -0.9,
+      "kind": "word",
+      "ms": 565,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "8bc82c68f95452e63ef6a91411a51d6268fa7981a2df380682feee2ba828700d",
+      "sha256": "d64abddc2a57bba203572c59e1a4b7fc2bad002221313503809eadd303eb40e9",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">my.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "my"
+    },
+    "sight-no": {
+      "bytes": 4608,
+      "gainDb": -2.6,
+      "kind": "word",
+      "ms": 515,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "6acfdd259fd4a9493170c36eeca908b95afe77dc706e305c8608b5e9b8ef8db9",
+      "sha256": "7243cabeabd3be01314478d040d60e65b1f519ba5fa2dc682dc1f8268f582e8c",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">no.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "no"
+    },
+    "sight-of": {
+      "bytes": 4608,
+      "gainDb": -1.3,
+      "kind": "word",
+      "ms": 515,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "a9cf7b9e0953c3d6d01569dd9f8edab63289318be7ecd31d47d2781ec62171ee",
+      "sha256": "f25890cdb672e473fd604fb94be3e189a3433d7bc687206ca6687240055e0bcd",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">of.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "of"
+    },
+    "sight-one": {
+      "bytes": 4992,
+      "gainDb": -2.1,
+      "kind": "word",
+      "ms": 555,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "f0b819725ef390c53b5b591a60f905ace5c9c8c9887f6e2167cf24f60455cbf3",
+      "sha256": "259b49d591b13ca2f888de27872a6e78c4d7c3fb21c9e44e743712f0c3d4f736",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">one.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "one"
+    },
+    "sight-people": {
+      "bytes": 5376,
+      "gainDb": -1.2,
+      "kind": "word",
+      "ms": 615,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "0e995da621241e4eeea6e46a8be535b96730a54b17514247bbc0966cd68add55",
+      "sha256": "6f0cf5b9f8c60816697e813e399a377e78df0f9b3c21826270991582e46414ae",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">people.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "people"
+    },
+    "sight-put": {
+      "bytes": 4992,
+      "gainDb": -2.1,
+      "kind": "word",
+      "ms": 555,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "9a74848c2de1594009da6221e3978fea1db16e3a3f8ae1af7e09b13bcd3f73fc",
+      "sha256": "3eb5de6c415b4801e49d01c1d2bbb69f7ad75eb8759323a269596e58fad2ea37",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">put.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "put"
+    },
+    "sight-said": {
+      "bytes": 5376,
+      "gainDb": 0.5,
+      "kind": "word",
+      "ms": 605,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "37a8d6c1f8395ee9ba06070a09ff685f26c7cad1e74cf4bd6a88821fd45de18d",
+      "sha256": "9db3b6a617378ee5898e904ab27728edc6afc95679c632ea6dde387ff22b99f8",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">said.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "said"
+    },
+    "sight-see": {
+      "bytes": 4800,
+      "gainDb": 1.3,
+      "kind": "word",
+      "ms": 545,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "bfe2c086e51ebb2788e683433701faa1b479becb3bbdd6cdbf881bfa3c3b49e2",
+      "sha256": "9da6336b0a54bf3672391a932351758e20d4ada9da17e7c376793a66184966bc",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">see.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "see"
+    },
+    "sight-she": {
+      "bytes": 4800,
+      "gainDb": 0.1,
+      "kind": "word",
+      "ms": 545,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "fb5c949176680719a6efbe5b5e4b34ec50f4cfca38e438e34b39d728ced0280c",
+      "sha256": "98f290e79fc19267a9e7e7ce95c6fbedda15d1744d52805c9a0fc030d9b24e13",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">she.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "she"
+    },
+    "sight-so": {
+      "bytes": 5184,
+      "gainDb": -0.4,
+      "kind": "word",
+      "ms": 595,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "ff692fd3cff7bc5598f0828a728fe7eaa6399c893bd322b2a24efcd37ebd88f0",
+      "sha256": "5cbefea9dfdb5c7f561cfd71d76dd6d99f8354c721fbb9052a7b757cff28a50f",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">so.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "so"
+    },
+    "sight-some": {
+      "bytes": 5376,
+      "gainDb": -1.2,
+      "kind": "word",
+      "ms": 615,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "99164af8c84b6f32870109fadee6ed3e89bc4f056d5cd561cd622f680181a6db",
+      "sha256": "c944d63eef8fdb2126752b67dc94d2a1cdbc45db972ee8444f480b585958544f",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">some.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "some"
+    },
+    "sight-the": {
+      "bytes": 4032,
+      "gainDb": 1.4,
+      "kind": "word",
+      "ms": 455,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "4d431a46ad3694d8d193d422f5cb202b7407c0aed75e3683d7fed7cfcd3eeebf",
+      "sha256": "166cbd0e200284483bf999e1ccd7a9e1774d1609d07e22ac1cad95d913533cd9",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">the.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "the"
+    },
+    "sight-there": {
+      "bytes": 4800,
+      "gainDb": -3.5,
+      "kind": "word",
+      "ms": 535,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "c309d0fe5e26feef6234d4873a058adef3ae50bc04544197677d437000751f1a",
+      "sha256": "40f15301645d9f8ed5e1df9c26d4e5e4f6ef309d3b1fc76ab45f1938b5404dce",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">there.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "there"
+    },
+    "sight-they": {
+      "bytes": 4224,
+      "gainDb": 0.8,
+      "kind": "word",
+      "ms": 475,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "85c754ef3b90e18e0d9df79d0beec013ef9814d7975bad59469aa6a257bb1c11",
+      "sha256": "a473feacb92896d99adea52697ccbfa2409148187aab2eb4c235c107e430aaf2",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">they.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "they"
+    },
+    "sight-to": {
+      "bytes": 3840,
+      "gainDb": 2.4,
+      "kind": "word",
+      "ms": 415,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "b9fa0afab16510ebdad468a756a3f39e453f420fb93f93b45cc6c3962cc3c0da",
+      "sha256": "80a74577a80ca93d3e84990bb3e52c108d33e7481140c3fba70a684f7b93189e",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">to.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "to"
+    },
+    "sight-very": {
+      "bytes": 5952,
+      "gainDb": -2.4,
+      "kind": "word",
+      "ms": 685,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "73a018c47307756f86c0d006eebb88d6bb88fc2663e717bc70ba5e256ad0177d",
+      "sha256": "fe01c42af1cba878249566b94fc91da7c37bc6d3373e31682fbff22037a26674",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">very.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "very"
+    },
+    "sight-want": {
+      "bytes": 5760,
+      "gainDb": -5.8,
+      "kind": "word",
+      "ms": 655,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "e786a462a21b2e511fabc6c1c69d3f11924f13fea086c6002310e7c1b3fbb318",
+      "sha256": "09413c2a1578da5367bbb00666c08bb9d6e55b3539280aea937afbd9969c59fa",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">want.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "want"
+    },
+    "sight-was": {
+      "bytes": 5568,
+      "gainDb": -1.1,
+      "kind": "word",
+      "ms": 635,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "f87d89a46c617648de73dc97744fdc9f8ea4a4bb5c0a9a3697816e701a4d6bb4",
+      "sha256": "cabe135380687c0e011c9a5d3239b4a1dafe51154147b77bda61d1c19e6249a4",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">was.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "was"
+    },
+    "sight-we": {
+      "bytes": 4224,
+      "gainDb": -0.4,
+      "kind": "word",
+      "ms": 475,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "e552864139d2d4aea070747853704b543621310371a313f955ac0653280c6a2d",
+      "sha256": "17ef8e821fcebaba8013bd9d2c44862b7872d8498d0d7ef0688170df80d7e899",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">we.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "we"
+    },
+    "sight-were": {
+      "bytes": 4800,
+      "gainDb": -4.6,
+      "kind": "word",
+      "ms": 545,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "f17456c70e226619f91d6f13360973102339d2046e98d7bf21048a12a87e53dd",
+      "sha256": "7eab0f498b2d3efab157b4a136b5da0f39144eddcb0ac498f0c162e55d133860",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">were.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "were"
+    },
+    "sight-what": {
+      "bytes": 5376,
+      "gainDb": -3.6,
+      "kind": "word",
+      "ms": 605,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "3b3fbeccec7725712eb6c49b530a122e108bd122eb46ba2afbe611a0787def6d",
+      "sha256": "12f610940232da5bf0722a94ecb2e8335ff0b26d8bce550e6215d1ac8bc1a32c",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">what.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "what"
+    },
+    "sight-when": {
+      "bytes": 4800,
+      "gainDb": -1.8,
+      "kind": "word",
+      "ms": 545,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "2a7e87200a705eb693666dfbe1e8610594a5ef9bcddf4887399ce26cc6c6cc42",
+      "sha256": "23c8c0e31143e5af5b7698467256d071d4254b9380c0293d5b5d1d73d5aa36a5",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">when.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "when"
+    },
+    "sight-where": {
+      "bytes": 4992,
+      "gainDb": -4,
+      "kind": "word",
+      "ms": 565,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "dccc6f2523f9adf6849db0725e6360a0fe8a1c55b5cc0c05a2dde73ce98cfd04",
+      "sha256": "9572732720f092b3a3b055f42f35967a7d7da4e1820770d78bba9943271621e8",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">where.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "where"
+    },
+    "sight-who": {
+      "bytes": 4608,
+      "gainDb": -0.5,
+      "kind": "word",
+      "ms": 515,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "07455f773caf8b079d5eba0266b5575849337e8664f3493125cadbc697ec77c7",
+      "sha256": "11dc9dccdde9e099558b7a72e4bce40d0eeba89f6f58331f42d9e05f6a66dc87",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">who.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "who"
+    },
+    "sight-with": {
+      "bytes": 4800,
+      "gainDb": -3.4,
+      "kind": "word",
+      "ms": 535,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "36e73dba14b77d136c093a3aae4f76a12e1e24626c2d1e2d0e459c08522ab51c",
+      "sha256": "0f56f738f7c0935d5ef88cfea1b63f816a2a6f02a25d2b40e945d6e1a58df8a7",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">with.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "with"
+    },
+    "sight-would": {
+      "bytes": 4992,
+      "gainDb": -2.2,
+      "kind": "word",
+      "ms": 575,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "1dcd4273394b3a7be0967f10faa03890d325b0f00e7dbc929d5c563ee6efef54",
+      "sha256": "bb401ae5ecc0c926c78447993bbf481940d80b9ca3e2e18e5dff74b4f7890c40",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">would.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "would"
+    },
+    "sight-you": {
+      "bytes": 4416,
+      "gainDb": -2.7,
+      "kind": "word",
+      "ms": 495,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "a678d1a93550090aeebcc5336675837d8b766e17dd7ac0114875ecbbc8a0c932",
+      "sha256": "f653d32fe1d4ea887950debec2aac2b385a9a75acce8d4e6f1186ee4b0b0af07",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">you.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "you"
+    },
+    "sight-your": {
+      "bytes": 4608,
+      "gainDb": -5.5,
+      "kind": "word",
+      "ms": 525,
+      "post": {
+        "cut": "all",
+        "fadeInMs": 5,
+        "fadeOutMs": 20,
+        "levelDb": -20
+      },
+      "provider": "azure",
+      "recipe": "c940250d204625ba250325b790d0f27eabe2c1d25cb13002985271ba6b1c03ec",
+      "sha256": "0c66f0b7f0b0b2014acb82e63e794e7011467c9bd4345ae5e6baf5958f2105c6",
+      "ssml": "<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"en-US\"><voice name=\"en-US-SaraNeural\">your.</voice></speak>",
+      "voice": "en-US-SaraNeural",
+      "word": "your"
+    }
+  }
+}

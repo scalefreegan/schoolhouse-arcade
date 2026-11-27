@@ -2349,6 +2349,81 @@ export const ART = {
       default: { s: "#ffc9a0", d: "#d98a6a" },
     },
   },
+  // Sight Word Sprint's cabinet on the floor: a signpost where the trail
+  // forks. In gold it is the Trail Champion badge.
+  trail: {
+    rows: [
+      "................",
+      ".......bb.......",
+      "..yyyyyyyyyy....",
+      "..ykkykkykkyy...",
+      "..yyyyyyyyyyyy..",
+      "..ykkkykkykyy...",
+      "..yyyyyyyyyy....",
+      ".......bb.......",
+      "....cccccccc....",
+      "...cckkckkkcc...",
+      "....cccccccc....",
+      ".......bb.......",
+      ".......bb.......",
+      ".......bb.......",
+      "..g.g.gbbg.g.g..",
+      ".gggggggggggggg.",
+    ],
+    palettes: {
+      default: { y: "#ffd23f", k: INK, b: "#a8703a", c: "#2ff3e0", g: "#3fbf5a" },
+      gold: { y: "#ffe066", k: "#4a2f06", b: "#b87a0c", c: "#fff3b0", g: "#c98a1a" },
+    },
+  },
+  // The Trail Blazer badge: a running shoe.
+  shoe: {
+    rows: [
+      "................",
+      "................",
+      "................",
+      "....mmm.........",
+      "...mmmmm........",
+      "...mmmmmw.......",
+      "...mmmmwmw......",
+      "..mmmmmmwmm.....",
+      "..mmmymmmmmmm...",
+      "..mmyymmmmmmmmm.",
+      "..myymmmmmmmmmm.",
+      "..wwwwwwwwwwwww.",
+      ".sssssssssssssss",
+      ".s.ss.ss.ss.ss..",
+      "................",
+      "................",
+    ],
+    palettes: {
+      default: { m: "#ff8a3c", w: WHITE, y: "#ffd23f", s: "#7f8fb8" },
+    },
+  },
+  // A pine beside the trail. `far` is one a long way off, in the dusk.
+  pine: {
+    rows: [
+      ".......gg.......",
+      "......gggg......",
+      "......gdgg......",
+      ".....gggggg.....",
+      "....ggdggggg....",
+      ".....gggdgg.....",
+      "....gggggggg....",
+      "...ggdgggggdg...",
+      "....gggggggg....",
+      "...gggggdgggg...",
+      "..ggdgggggggdg..",
+      ".gggggggdgggggg.",
+      ".......bb.......",
+      ".......bb.......",
+      ".......bb.......",
+      "................",
+    ],
+    palettes: {
+      default: { g: "#2f9a5a", d: "#1f6e44", b: "#a8703a" },
+      far: { g: "#3b2b7c", d: "#2a1e5c", b: "#2a1e5c" },
+    },
+  },
   // --- prize shelf and badge sprites (end) ---
 } satisfies Record<string, SpriteArt>;
 

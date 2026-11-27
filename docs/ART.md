@@ -89,6 +89,17 @@ and a web, …). The same rule on green and red holds: the cap is blue and the
 map's path and X are brown. `jukebox` is its cabinet on the floor (and, in
 `gold`, the Rhyme Champion badge), and `ear` the Good Ear badge.
 
+## Sight Word Sprint's drawings
+
+The game shows words, not pictures, so it has only four drawings. `trail`
+(a signpost at a fork) is its cabinet on the floor and, in `gold`, the
+Trail Champion badge; `shoe` is the Trail Blazer badge. `pine` is the tree
+beside the trail, with a `far` palette in the dusk's purples for the row
+behind. The runner is the player's own character: one drawn looking left
+(the dragon) is turned in the round's screen to face the way it runs
+(`LOOKS_LEFT` in `web/src/games/sightwords/Round.tsx`); a new character
+drawn looking left goes in that list.
+
 ## Replacing a drawing with made art
 
 The rest of the app only knows a sprite's id, so art made elsewhere (ArtCraft,

@@ -9,7 +9,8 @@ is **Comet Cards**, addition and subtraction flashcards against the clock,
 and the second is **Sound Machine**, letter sounds and sounding out short
 words (build a word, read one, or split one into its sounds), with nothing
 timed, and the third is **Rhyme Time**, hearing which words rhyme, from
-pictures and voices alone.
+pictures and voices alone. The fourth is **Sight Word Sprint**, knowing the
+commonest words on sight (the, said, where): hear one, tap it among four.
 
 The name nods to the Saturday-morning idea that a lesson can be something
 you want to sit through. Everything in the app (names, characters, art,
@@ -41,15 +42,16 @@ all answers below are final for v1):
 | **Cabinet** | One game on the arcade floor. Listed in `web/shared/games.ts` |
 | **Player** | A row picked on the "Who is playing?" screen: a name, an avatar and its colour. No logins |
 | **Avatar** | The pixel character a player is, in one of its colours (`web/shared/avatars.ts`). The first colour is the character's own look |
-| **Fact** | What a game asks: one sum, written `7+5` or `10-2`, in Comet Cards; one word, `chick`, in Sound Machine and Rhyme Time (there, the word a question is about). The unit everything is counted in |
+| **Fact** | What a game asks: one sum, written `7+5` or `10-2`, in Comet Cards; one word, `chick`, in Sound Machine and Rhyme Time (there, the word a question is about); one sight word, `said`, in Sight Word Sprint. The unit everything is counted in |
 | **Sound** | One spoken sound (a phoneme): the k of cat, kick and duck is one sound |
 | **Tile** | The letter or letters that write one sound: `c`, `a`, `ch`, `ck`. A digraph is one tile |
 | **Card** | A fact shown to be answered |
 | **Level** | A set of facts (add within 5, …). Levels unlock in order |
-| **Mode** | How a round is played: in Comet Cards how it is timed (Blitz, Sprint, Survival, Practice); in Sound Machine which game (Build it, Read it, Split it); in Rhyme Time Find it or Odd one out |
+| **Mode** | How a round is played: in Comet Cards how it is timed (Blitz, Sprint, Survival, Practice); in Sound Machine which game (Build it, Read it, Split it); in Rhyme Time Find it or Odd one out; Sight Word Sprint has one, Hear it |
 | **Rhyme family** | In Rhyme Time, words whose vowel and what follows it sound the same: cat, hat, chat and bat are the family `a-t`. Kept as data, never guessed from spelling |
 | **Gem** | In Split it, one sound of a word split right. Shown during the round and on its results only; never stored |
-| **Skill** | How hard a round is: in Comet Cards Easy (four choices) or Arcade (number pad); in Sound Machine and Rhyme Time how many pictures or tiles there are, and how alike |
+| **Skill** | How hard a round is: in Comet Cards Easy (four choices) or Arcade (number pad); in Sound Machine and Rhyme Time how many pictures or tiles there are, and how alike; in Sight Word Sprint whether the other words look like the word |
+| **Sight word** | A short, very common word a reader has to know at a glance, most of them not explained by the letter sounds: the, of, said, where |
 | **Play** | One finished round: a player, a level, a mode, a skill, and every answer in it |
 | **Combo** | Right answers in a row. Raises the points per card |
 | **Star** | A level's mastery mark, 0 to 3 |
@@ -416,6 +418,85 @@ words are fetched before it starts, and a round does not start without them
 or go on, with the sound switched off. *Grown-ups → Sound check* lists Rhyme
 Time's own words after Sound Machine's.
 
+## Sight Word Sprint
+
+The fourth cabinet: the short, common words that the letter sounds do not
+explain, known on sight. It pairs with Sound Machine, which teaches the
+words that *can* be sounded out. A word is said; four words are written;
+one tap on the word heard is the answer. A runner (the player's own
+character) runs a trail across the top of the screen.
+
+### One game, and the trail
+
+There is one game, **Hear it** (`hear`). The word is said when it comes up
+and again whenever the speaker is pressed. One try: a right answer lights
+green and the next word comes by itself; a wrong one shows the right word,
+says it, and waits for the arrow. Keys: 1 to 4 pick a word, Enter is the
+arrow, Escape pauses.
+
+**The more right in a row, the faster the runner goes.** The speed is the
+run of right answers, from a jog (none) up to flat out (four or more), in
+five steps shown as pips; the trees and the ground go by faster at each. A
+miss is a jog again. The speed is only something to see: there is no clock,
+nothing is scored on time, and a miss takes away no score, star or ticket.
+With reduced motion the trail stands still and the pips alone show the
+speed.
+
+### Words and levels
+
+Fifty words in five levels of ten, a trail in five stretches. A round asks
+eight of its level's ten, leaning towards the ones the player has missed.
+A star on a level opens the next.
+
+| Level | Words |
+|---|---|
+| Meadow (`meadow`) | the I a to is you and we my go |
+| Woods (`woods`) | of was are he she me no so do see |
+| Creek (`creek`) | said have they with what for here come some like |
+| Hills (`hills`) | where there were when who want look one does from |
+| Summit (`summit`) | could would because people your very again any many put |
+
+A word's id is its spelling. No two words in the game sound alike (to has
+no two beside it, there no their, no no know): the word is asked by voice
+alone. The other three words in a question come from the level and the
+levels before it.
+
+### Skills
+
+Two words **look alike** when they start with the same letter (the, they,
+there), end in the same two (where, there, here), or are one letter apart
+(me, we). This is from the spelling on purpose: here the spelling is the
+lesson.
+
+- **Easy**: the three other words look nothing like the word (not alike,
+  and not ending in the same letter either).
+- **Arcade**: the other words are the ones that look like it, as many as
+  there are, up to all three. Two tickets a right answer instead of one,
+  and its own high score table.
+
+The answer posted carries the question (`the|you|is|my=you`: the four
+words as shown, then the pick), and the server refuses a question that
+breaks its skill's rule, so an Easy round is never taken as Arcade's: on
+Arcade, if any word that could be shown looks like the word, one shown
+must.
+
+### Scoring and stars
+
+As Sound Machine: 100 for a right answer and 20 more for each right one
+before it in a row; one, two and three stars at 5, 7 and 8 right of 8. A
+word's time is counted as at least one second and each answer stays up
+(1.2 seconds right, at least 1.4 wrong) before the next can come, so the
+server's round clock holds.
+
+### Speech
+
+Each word has one plain clip, made by `npm run speech:build` into
+`web/public/speech/sight-word-sprint/` (`sight-<word>.mp3`). A level's
+ten clips are fetched before a round starts, and a round does not start
+without them. Like Sound Machine it will not start, or go on, with the
+sound switched off. The results list the words missed, each to hear again.
+*Grown-ups → Sound check* lists the fifty words last.
+
 ## Tickets, badges, prizes
 
 **Tickets per play.** One per right answer on Easy, two on Arcade. Practice
@@ -446,6 +527,8 @@ already deserves it the next time they play.
 | Sound Champion | three stars on every Sound Machine level | 300 |
 | Good Ear | a star in Rhyme Time | 25 |
 | Rhyme Champion | three stars on every Rhyme Time level | 300 |
+| Trail Blazer | a star in Sight Word Sprint | 25 |
+| Trail Champion | three stars on every Sight Word Sprint level | 300 |
 
 Arcade Ace and Comet Champion mean Comet Cards' levels, as they always
 have; the counting badges (First Game, the Clubs, the streaks) count every

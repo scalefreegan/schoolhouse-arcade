@@ -464,7 +464,7 @@ test("a grown-up can open a level early: it shows as open and a play on it is ac
   const opened = await request<{ levels: { gameId: string; level: string; open: boolean }[] }>(grownup, "POST", "/levels", { playerId: em, gameId: "comet-cards", level: "sub-10" }, withPin());
   assert.equal(opened.status, 201);
   // Each game's levels are its own: opening one of Comet Cards' opens nothing in Sound Machine or Rhyme Time.
-  assert.deepEqual(opened.body.levels.filter((l) => l.open).map((l) => `${l.gameId}/${l.level}`), ["comet-cards/add-5", "comet-cards/sub-10", "sound-machine/cvc", "rhyme-time/a-i"]);
+  assert.deepEqual(opened.body.levels.filter((l) => l.open).map((l) => `${l.gameId}/${l.level}`), ["comet-cards/add-5", "comet-cards/sub-10", "sound-machine/cvc", "rhyme-time/a-i", "sight-word-sprint/meadow"]);
   assert.equal((await request(grownup, "POST", "/levels", { playerId: em, gameId: "sound-machine", level: "sub-10" }, withPin())).status, 404, "a level of another game");
   const sound = await request<{ levels: { gameId: string; level: string; open: boolean }[] }>(grownup, "POST", "/levels", { playerId: em, gameId: "sound-machine", level: "ck" }, withPin());
   assert.deepEqual(sound.body.levels.filter((l) => l.open && l.gameId === "sound-machine").map((l) => l.level), ["cvc", "ck"]);

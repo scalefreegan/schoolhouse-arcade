@@ -17,6 +17,7 @@ web/shared/wire.ts       request and reply types shared by server and client
 web/shared/play.ts       what every game shares: a play, an answer (a number or text), GameRules, Settled, openLevels()
 web/shared/deal.ts       what every game's dealing shares: a seeded Rng, FactStat, a draw weighted by misses
 web/shared/roundid.ts    newRoundId(): the id a round keeps through every try at saving it
+web/shared/within.ts     within(): a limit on a wait (getting a round ready, starting it, saving it)
 web/shared/rules.ts      each live game's rules, by game id (the server scores with these)
 web/shared/tickets.ts    what a play pays: the arcade's bonuses, the reasons on a ledger row
 web/shared/badges.ts     every badge and the pure test for whether it is earned

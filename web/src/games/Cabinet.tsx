@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState, type ReactNode } from "react";
 import type { FactStat } from "../../shared/deal.ts";
 import { playable, type AnswerInput, type GameRules, type PlayConfig } from "../../shared/play.ts";
 import { newRoundId } from "../../shared/roundid.ts";
+import { within } from "../../shared/within.ts";
 import type { PlayReply, ProgressReply } from "../../shared/wire.ts";
 import { ApiError, getProgress, postPlay, startRound } from "../api/client.ts";
 import type { GameProps } from "./index.ts";
@@ -46,25 +47,11 @@ function remembered(game: CabinetGame, playerId: string): PlayConfig {
  *  can try again: the game's own fetching (its sounds), and the server's answer. */
 const PREPARE_MS = 20_000;
 const START_MS = 10_000;
+/** How long the server may take over a finished round before the player is
+ *  told and can send it again. */
+const SAVE_MS = 10_000;
 /** How long "Ready" may be up before it offers a way back. */
 const BACK_AFTER_MS = 3_000;
-
-/** `work`, or a failure with `message` if it has not finished in `ms`. */
-function within<T>(work: Promise<T>, ms: number, message: string): Promise<T> {
-  return new Promise<T>((ok, fail) => {
-    const timer = window.setTimeout(() => fail(new Error(message)), ms);
-    work.then(
-      (v) => {
-        window.clearTimeout(timer);
-        ok(v);
-      },
-      (e: unknown) => {
-        window.clearTimeout(timer);
-        fail(e instanceof Error ? e : new Error(String(e)));
-      },
-    );
-  });
-}
 
 /** A round is being made ready. If that goes on, a way back appears: nothing
  *  here waits for ever, but a child should not have to wait it out. */
@@ -183,17 +170,27 @@ export function Cabinet({
   // Send a round with the set-up it was played on: not the remembered one,
   // which may name a level that is locked here. `roundId` is the round's
   // own, made once when it started: a round sent again after a lost reply is
-  // stored and paid only once.
+  // stored and paid only once. The wait has a limit, as starting one has: a
+  // server that never answers ends here with Try again, and the same round
+  // id goes with every try, so a first try that did arrive is the play the
+  // next one gets back.
   const save = useCallback(
     async (begun: Begun, answers: AnswerInput[]) => {
       setStage({ at: "saving", ...begun, answers, error: null });
+      let next: Stage;
       try {
-        const reply = await postPlay({ playerId: player.id, gameId: game.id, roundId: begun.roundId, clock: begun.clock, ...begun.config, answers });
-        setStage({ at: "results", config: begun.config, answers, reply });
-        void load();
+        const sent = postPlay({ playerId: player.id, gameId: game.id, roundId: begun.roundId, clock: begun.clock, ...begun.config, answers });
+        // Whenever the round is saved, the player's progress is read again:
+        // also when the answer comes after the wait was given up, or after
+        // the player gave up, so that set-up shows a level it opened.
+        void sent.then(load, () => undefined);
+        const reply = await within(sent, SAVE_MS, "The arcade's computer is taking too long to answer. Try again.");
+        next = { at: "results", config: begun.config, answers, reply };
       } catch (e) {
-        setStage({ at: "saving", ...begun, answers, error: e instanceof ApiError ? e.message : String(e) });
+        next = { at: "saving", ...begun, answers, error: e instanceof Error ? e.message : String(e) };
       }
+      // Only if this round is still the one being saved (not given up on).
+      setStage((s) => (s.at === "saving" && s.roundId === begun.roundId ? next : s));
     },
     [player.id, game.id, load],
   );

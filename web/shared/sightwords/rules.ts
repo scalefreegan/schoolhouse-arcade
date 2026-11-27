@@ -56,7 +56,7 @@ export const TRICKS = ["jump", "leap", "spin", "flip", "double"] as const;
 export type Trick = (typeof TRICKS)[number];
 export function trickOf(streak: number): Trick | null {
   const n = Math.floor(streak);
-  if (!(n >= 1)) return null;
+  if (!(n >= 1) || !Number.isFinite(n)) return null;
   return n <= TRICKS.length ? TRICKS[n - 1] : TRICKS[2 + ((n - TRICKS.length - 1) % 3)];
 }
 

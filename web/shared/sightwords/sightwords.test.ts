@@ -61,7 +61,7 @@ test("the cabinet's drawing and its badges' are there; the runner's speed is the
   assert.deepEqual([0, 1, 2, 3, 4, 5, 8].map(speedOf), [0, 1, 2, 3, 4, 4, 4]);
   assert.equal(TOP_SPEED, 4);
   // A trick for each right answer, bigger as the run grows; none for a miss. A round's longest run is eight.
-  assert.deepEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, -1, NaN].map(trickOf), [null, "jump", "leap", "spin", "flip", "double", "spin", "flip", "double", "spin", null, null]);
+  assert.deepEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, -1, NaN, Infinity].map(trickOf), [null, "jump", "leap", "spin", "flip", "double", "spin", "flip", "double", "spin", null, null, null]);
   const css = fs.readFileSync(path.join(here, "../../src/index.css"), "utf8");
   for (const t of TRICKS) assert.ok(css.includes(`.sw-trick[data-trick="${t}"]`) && css.includes(`@keyframes sw-${t} `), t);
 });

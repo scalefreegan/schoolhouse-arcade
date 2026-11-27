@@ -12,7 +12,7 @@ import { RULES } from "../rules.ts";
 import { SPEECH_DIR as SOUND_DIR, WORDS as SOUND_WORDS, LEVELS as SOUND_LEVELS, wordClip } from "../soundmachine/words.ts";
 import { pairKey, questionFor, roundPlan } from "./pick.ts";
 import { MAX_ANSWER_MS, MIN_ANSWER_MS, MODES, PICTURES, SKILLS, answerText, faultOf, pairOf, parseAnswer, pay, rhymeTimeRules, rightOf, settle, type Mode, type Question, type Skill } from "./rules.ts";
-import { PACE, READ_DELAY_MS, REVEAL_WAIT_MS, TAP_WAIT_MS, advance, readQuestion, ready, revealDone, startSession, waited, type Session } from "./session.ts";
+import { PACE, READ_DELAY_MS, REVEAL_WAIT_MS, TAP_WAIT_MS, advance, cutUnheard, readQuestion, ready, revealDone, startSession, waited, type Session } from "./session.ts";
 import { DOUBTFUL, LEVELS, LOOKALIKES, ROUND_QUESTIONS, SPEECH_DIR, WORDS, anchorsOf, doubtful, levelById, lookalike, nothingAlike, ownClips, partnersOf, rhymeOf, rhymes, sayUrl, tempting, wordById } from "./words.ts";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -440,6 +440,17 @@ test("a question is said once, after the screen settles and after a picture pres
   for (const moved of [{ seq: 5, phase: "paused" as const }, { seq: 5, phase: "right" as const }, { seq: 5, phase: "ask" as const }, { seq: 4, phase: "done" as const }])
     assert.equal(readQuestion({ ...tapped, ...moved, speaking: true, now: 1100 }), "drop", JSON.stringify(moved));
   assert.ok(TAP_WAIT_MS <= 3000 && TAP_WAIT_MS > READ_DELAY_MS);
+});
+
+test("a picture pressed after the question was sent to be said, before any of it sounded, counts as pressed early: the question is said after it", () => {
+  assert.equal(cutUnheard({ readAt: 1200, tappedAt: null }), false, "nothing pressed");
+  assert.equal(cutUnheard({ readAt: 1200, tappedAt: 1060 }), false, "pressed before the reading was sent: readQuestion already waited for it");
+  assert.equal(cutUnheard({ readAt: 1200, tappedAt: 1230 }), true, "pressed in the gap before the first word");
+  assert.equal(cutUnheard({ readAt: 1200, tappedAt: 1200 }), true);
+  // And then the question waits for the pressed word and is read again, as for any early press.
+  const at = { askSeq: 4, seq: 4, phase: "ask" as const, askedAt: 1000, tappedAt: 1230 };
+  assert.equal(readQuestion({ ...at, speaking: true, now: 1300 }), "wait");
+  assert.equal(readQuestion({ ...at, speaking: false, now: 1900 }), "read");
 });
 
 test("what follows an answer waits for its rhyme to be said, but never without a limit", () => {

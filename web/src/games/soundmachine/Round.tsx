@@ -30,10 +30,6 @@ const QUICK = 0.02;
 const BREATH = 0.5;
 /** Split: how long a right word's gems take to fly to the tray once it has been said (ms). */
 const FLY_MS = 500;
-/** Build and Read, a right word: how long past its own saying the next word
- *  still waits for a hear button's speech to end (ms). Longer than any clip;
- *  a limit all the same, since a clip on a stopped audio context never ends. */
-const HEAR_WAIT_MS = 4_000;
 
 export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { level: SoundLevel; mode: Mode; skill: Skill; stats: Record<string, FactStat>; onDone: (answers: AnswerInput[]) => void; onQuit: () => void }) {
   const [s, send] = useReducer(advance, null, () => startSession(level, mode, skill, stats, seed()));
@@ -96,22 +92,22 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
           // fly once the reveal has begun and nothing at all is being said:
           // not when the reveal's own say() settles, which, if a hear button
           // cut it short, is long after (silence) or in the middle of what
-          // the button said (pings over the slow word). But never later than
-          // GEM_WAIT_MS after that settles: a stopped audio context never
-          // ends a clip, and the round must not wait on it for good. The next
-          // word comes once they have landed and the session will take it.
+          // the button said (pings over the slow word). A hear button
+          // pressed again and again is heard out each time. A stopped audio
+          // context never ends a clip, but speaking() stops counting one
+          // when it was due to end, so the round does not wait on it for
+          // good. The next word comes once they have landed and the session
+          // will take it.
           const word = s.word;
           const seq = s.seq;
           const n = word?.tiles.length ?? 0;
           let begun = !word;
-          let settledAt: number | null = word ? null : performance.now();
           let landed = 0;
           later(() => {
             if (!word) return;
             // Settled with no clip said (the sound off, or none would come): begun all the same.
             const settle = () => {
               begun = true;
-              settledAt = performance.now();
             };
             // Paused before the reveal began: nothing is said behind the box.
             if (boxUp.current) return settle();
@@ -135,7 +131,7 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
                   // short before its first clip's onEach came.
                   const talking = speaking();
                   if (talking) begun = true;
-                  if (!landed && gemsMayFly({ begun, speaking: talking, settledAt, now: performance.now() })) {
+                  if (!landed && gemsMayFly({ begun, speaking: talking })) {
                     // A clip that would not come is left out: its gem lands all the same.
                     setLitAt({ seq, tile: null });
                     setGemAt({ seq, dropped: n, flown: true });
@@ -150,8 +146,8 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
         }
         // The word again, sound by sound and then whole, at its own pace.
         const word = s.word;
-        let saidAt: number | null = word ? null : performance.now();
-        const said = () => (saidAt = performance.now());
+        let done = !word;
+        const said = () => (done = true);
         later(() => {
           if (!word || boxUp.current) said();
           else void soundOut(word, SLOW, true).then(said, said);
@@ -160,12 +156,13 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
         // and the machine waits until it has finished saying it; ask until
         // both. And until nothing else is being said: a hear button pressed
         // late in the reveal is heard out (the next word's hush would cut
-        // it), but not for longer than HEAR_WAIT_MS.
+        // it). speaking() has the limit: a clip that never ends is not
+        // counted past the time it was due to.
         later(
           () =>
             timers.push(
               window.setInterval(() => {
-                if (saidAt !== null && (!speaking() || performance.now() - saidAt >= HEAR_WAIT_MS)) next();
+                if (done && !speaking()) next();
               }, 100),
             ),
           PACE.right,
@@ -223,7 +220,14 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
   const byKeys = useRef(false);
   const onKey = useEffectEvent((ev: KeyboardEvent) => {
     // A held key repeating is not a new press (holding Enter on the box's button must not pull the lever underneath).
-    if (ev.repeat || ev.metaKey || ev.ctrlKey || ev.altKey) return;
+    // Nor is it a press of whatever has focus: Enter held would press a button last tapped or clicked
+    // again on every repeat (in Split, a gap cut and joined and cut). Only a button reached by Tab
+    // keeps its own repeats, as a button does anywhere.
+    if (ev.repeat) {
+      if (ev.key === "Enter" && !(byKeys.current && ev.target instanceof HTMLButtonElement && !ev.target.disabled)) ev.preventDefault();
+      return;
+    }
+    if (ev.metaKey || ev.ctrlKey || ev.altKey) return;
     // While the sound-off box is up the round is not there to play: its keys are the box's own.
     if (muted) return;
     if (ev.key === "Tab") byKeys.current = true;

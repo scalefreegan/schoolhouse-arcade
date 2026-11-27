@@ -28,24 +28,15 @@ export type Phase = "start" | "ask" | "right" | "wrong" | "paused" | "done";
 export const PACE = { right: 1_700, wrong: 1_400, done: 900 } as const;
 
 /**
- * Split, after a right answer: how long past the moment the reveal's own
- * say() settled the gems still wait for speech to stop (ms). A clip on an
- * audio context that was suspended or closed never ends, so "nothing is
- * being said" may never come; the gems fly at this limit all the same, and
- * the next word's hush() stops whatever is left.
+ * Whether Split's gems may fly to the tray, with their pings: the reveal has
+ * begun and nothing is being said. However many times a hear button was
+ * pressed late in the reveal, each is heard out first. `speaking` is the
+ * screen's speaking() (web/src/speech.ts), which has its own limit: a clip
+ * on an audio context that was suspended or closed never ends, and is not
+ * counted as speech past the time it was due to.
  */
-export const GEM_WAIT_MS = 1_500;
-
-/**
- * Whether Split's gems may fly to the tray: the reveal has begun, and either
- * nothing is being said or the reveal settled GEM_WAIT_MS ago. `settledAt`
- * is when the reveal's say() settled (null until it has); times are ms on
- * one clock.
- */
-export function gemsMayFly(o: { begun: boolean; speaking: boolean; settledAt: number | null; now: number }): boolean {
-  if (!o.begun) return false;
-  if (!o.speaking) return true;
-  return o.settledAt !== null && o.now - o.settledAt >= GEM_WAIT_MS;
+export function gemsMayFly(o: { begun: boolean; speaking: boolean }): boolean {
+  return o.begun && !o.speaking;
 }
 
 export interface Session {

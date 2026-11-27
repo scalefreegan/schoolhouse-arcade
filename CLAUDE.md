@@ -168,7 +168,7 @@ macos/                   the Dock app (build-app.sh, the launcher, the server he
   rule of its skill (`faultOf()`): Easy's wrong pictures share no sound in
   the same place, and Arcade's include a near miss whenever the level has
   one, so an Easy round is never taken as Arcade's. A test deals a question
-  for every word and each of its rhyme partners on every level, mode and
+  for every word a question can be about and each of its rhyme partners on every level, mode and
   skill (four seeds each), and `faultOf()` takes every one dealt.
 - **Letters to be read are lower case in `--font-letters`** (`.sm-letter`):
   the display face has no true small letters.

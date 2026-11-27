@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { WORDS as RHYME_WORDS, sayUrl, type RhymeWord } from "../../shared/rhymetime/words.ts";
 import { WORDS as SIGHT_WORDS, sayUrl as sightUrl, type SightWord } from "../../shared/sightwords/words.ts";
 import { LEVELS, SOUNDS, TILE_SOUND, clipUrl, slowClip, soundClip, wordClip, type Word } from "../../shared/soundmachine/words.ts";
+import { FAMILIES, ownWords as familyWords, rimeUrl, sayUrl as familyUrl } from "../../shared/wordfamilies/words.ts";
 import { hush, preload, say } from "../speech.ts";
 import { Picture, Sprite } from "../sprites/Sprite.tsx";
 import { useArcade } from "../state.tsx";
@@ -60,6 +61,21 @@ function SightRow({ word }: { word: SightWord }) {
   );
 }
 
+/** One of Word Families' clips: an ending or a word, written, and said. */
+function FamilyRow({ text, url }: { text: string; url: string }) {
+  return (
+    <li className="panel flex flex-wrap items-center justify-end gap-2">
+      <span className="sm-letter flex-1 text-base">{text}</span>
+      <button type="button" className="btn btn-cyan" aria-label={`Hear ${text}`} onClick={() => void say([url])}>
+        <Sprite id="speaker" palette="ink" size={30} />
+      </button>
+    </li>
+  );
+}
+
+/** The words only Word Families says: its others are Sound Machine's and Rhyme Time's, above. */
+const FAMILY_WORDS = familyWords();
+
 export function SoundCheck({ onBack }: { onBack: () => void }) {
   const { muted, setMuted } = useArcade();
   const [missing, setMissing] = useState<string | null>(null);
@@ -67,7 +83,7 @@ export function SoundCheck({ onBack }: { onBack: () => void }) {
   useEffect(() => {
     // Every clip a button here plays, the slow words too: one that is missing is said so, not left silent.
     const words = LEVELS.flatMap((l) => l.focus);
-    const all = [...SOUNDS.map((s) => clipUrl(soundClip(s.id))), ...words.map((w) => clipUrl(wordClip(w.id))), ...words.map((w) => clipUrl(slowClip(w.id))), ...RHYME_WORDS.filter((w) => !w.shared).map(sayUrl), ...SIGHT_WORDS.map(sightUrl)];
+    const all = [...SOUNDS.map((s) => clipUrl(soundClip(s.id))), ...words.map((w) => clipUrl(wordClip(w.id))), ...words.map((w) => clipUrl(slowClip(w.id))), ...RHYME_WORDS.filter((w) => !w.shared).map(sayUrl), ...SIGHT_WORDS.map(sightUrl), ...FAMILIES.map(rimeUrl), ...FAMILY_WORDS.map(familyUrl)];
     preload(all).catch((e: unknown) => setMissing(e instanceof Error ? e.message : String(e)));
     return hush;
   }, []);
@@ -80,7 +96,7 @@ export function SoundCheck({ onBack }: { onBack: () => void }) {
           Back
         </button>
       </header>
-      <p className="mt-3 mb-0 text-dim">Every sound and word Sound Machine says, the words only Rhyme Time has (its others are these), and Sight Word Sprint's words. A sound should be the pure sound a teacher says (mmm, sss, a clipped k), never the letter's name. One that is wrong is made again with npm run speech:build.</p>
+      <p className="mt-3 mb-0 text-dim">Every sound and word Sound Machine says, the words only Rhyme Time has (its others are these), Sight Word Sprint's words, and Word Families' endings and the words only it has. A sound should be the pure sound a teacher says (mmm, sss, a clipped k), never the letter's name. One that is wrong is made again with npm run speech:build.</p>
       {muted && (
         <p role="alert" className="panel panel-cyan mt-3 flex flex-wrap items-center gap-4">
           <span className="flex-1">The sound is off, so nothing will play.</span>
@@ -144,6 +160,21 @@ export function SoundCheck({ onBack }: { onBack: () => void }) {
         <ul className="m-0 mt-1 grid list-none gap-x-3 p-0 sm:grid-cols-2">
           {SIGHT_WORDS.map((w) => (
             <SightRow key={w.id} word={w} />
+          ))}
+        </ul>
+      </section>
+      <section>
+        <h2 className="font-display mt-6 mb-0 text-xs text-dim">Word Families' endings ({FAMILIES.length})</h2>
+        <p className="mt-1 mb-0 text-dim">An ending should be said short and whole, the way it sounds inside its words: "at" as in cat, "ock" as in sock.</p>
+        <ul className="m-0 mt-1 grid list-none gap-x-3 p-0 sm:grid-cols-2">
+          {FAMILIES.map((f) => (
+            <FamilyRow key={f.id} text={`-${f.id}`} url={rimeUrl(f)} />
+          ))}
+        </ul>
+        <h2 className="font-display mt-6 mb-0 text-xs text-dim">Words only Word Families has ({FAMILY_WORDS.length})</h2>
+        <ul className="m-0 mt-1 grid list-none gap-x-3 p-0 sm:grid-cols-2">
+          {FAMILY_WORDS.map((w) => (
+            <FamilyRow key={w.id} text={w.id} url={familyUrl(w)} />
           ))}
         </ul>
       </section>

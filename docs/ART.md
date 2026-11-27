@@ -100,6 +100,12 @@ behind. The runner is the player's own character: one drawn looking left
 (`LOOKS_LEFT` in `web/src/games/sightwords/Round.tsx`); a new character
 drawn looking left goes in that list.
 
+## Word Families' drawings
+
+Two. `house` is its cabinet on the floor, the small house beside the
+family's rooms in a round and, in `gold`, the Family Champion badge; `door`
+is the Open Door badge. The words are written, never drawn.
+
 ## Replacing a drawing with made art
 
 The rest of the app only knows a sprite's id, so art made elsewhere (ArtCraft,

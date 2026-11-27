@@ -38,6 +38,10 @@ web/shared/sightwords/words.ts  Sight Word Sprint: every word and its level, wha
 web/shared/sightwords/rules.ts  its one game (hear), an answer as text, faultOf() (a fair question), speedOf() (the runner), and settle()
 web/shared/sightwords/pick.ts   a round's eight words and each question's four
 web/shared/sightwords/session.ts a round as events: next, pick, pause (the screen's reducer); PACE, REVEAL_WAIT_MS
+web/shared/wordfamilies/words.ts  Word Families: the endings (families), every word and its level, the tiles a tray may hold (onsetsFor(), near(), BLOCKED), clip urls
+web/shared/wordfamilies/rules.ts  its one game (build), an answer as text, faultOf() (a fair tray), and settle()
+web/shared/wordfamilies/pick.ts   a round's two families and eight words, and each word's tray
+web/shared/wordfamilies/session.ts a round as events: next, pick, pause (the screen's reducer); PACE, REVEAL_WAIT_MS
 web/server/api.ts        wrap() and the route table (ROUTES)
 web/server/origin.ts     who may call the API: this Mac or the home network, from the app
 web/server/tailnet.ts    ARCADE_TAILNET_HOST: the Mac's Tailscale name, the one name beyond those
@@ -61,12 +65,13 @@ web/src/games/comet/     Comet Cards: CometCards (what it hands Cabinet), Round
 web/src/games/soundmachine/  Sound Machine: SoundMachine (what it hands Cabinet), Round, Gems (Split's tray and tally)
 web/src/games/rhymetime/     Rhyme Time: RhymeTime (what it hands Cabinet), Round (and Written: a word with its ending lit)
 web/src/games/sightwords/    Sight Word Sprint: SightWordSprint (what it hands Cabinet), Round (the words and the trail)
+web/src/games/wordfamilies/  Word Families: WordFamilies (what it hands Cabinet), Round (the house, the word and the tray)
 web/src/games/NeedsSound.tsx the notice and the in-round box for a game that will not play with the sound off
 web/src/sprites/art.ts   every drawing, as rows of characters and palettes
 web/src/sprites/Sprite.tsx  <Sprite> and <AvatarSprite>
 web/src/sound.ts         every beep, synthesised, and the one audio context (woken on a tap, remade if it will not wake)
 web/src/speech.ts        spoken clips: preload(), say(), hush(), speaking(); plays through sound.ts's context
-web/public/speech/       sound-machine/, rhyme-time/ and sight-word-sprint/: the clips and a manifest each (generated, committed)
+web/public/speech/       sound-machine/, rhyme-time/, sight-word-sprint/ and word-families/: the clips and a manifest each (generated, committed)
 scripts/speech/          npm run speech:build: makes the clips (Azure text-to-speech; needs a key in the environment)
 web/src/index.css        the tokens and the pixel-box classes (.panel, .btn, .pick, .field)
 scripts/db/schema.ts     the whole schema (Drizzle)
@@ -140,7 +145,7 @@ macos/                   the Dock app (build-app.sh, the launcher, the server he
   (`scripts/db/config.mjs` refuses to start without a `DATABASE_URL`).
 - Never change a game id, a level id, a mode or skill id, a badge id, an
   avatar id or a colour id once live: rows are keyed on them. In Sound
-  Machine, Rhyme Time and Sight Word Sprint a word's id
+  Machine, Rhyme Time, Sight Word Sprint and Word Families a word's id
   (its spelling) and a tile are stored on answers and never change either,
   and a sound's id names its clip.
 - **An answer is a number or text**, never both: `answers.given` for Comet
@@ -149,9 +154,10 @@ macos/                   the Dock app (build-app.sh, the launcher, the server he
   Rhyme Time (the question and the pick, `cat>hat|pin|dog=hat` or
   `cat|hat|pin=pin`: the server checks the question was fair, then judges
   the pick) and for Sight Word Sprint (the four words shown and the pick,
-  `the|you|is|my=you`, checked the same way). A game's `settle()` refuses the other kind. Split's gems are counted from the
+  `the|you|is|my=you`, checked the same way) and for Word Families (the
+  tray of tiles shown and the pick, `b|c|h|m=c`, checked the same way). A game's `settle()` refuses the other kind. Split's gems are counted from the
   answers for the round's screens and never stored.
-- **Sound Machine, Rhyme Time and Sight Word Sprint have no clock the player sees**, and nothing in them is
+- **Sound Machine, Rhyme Time, Sight Word Sprint and Word Families have no clock the player sees**, and nothing in them is
   scored on time. A word's time is still counted (at least `MIN_ANSWER_MS`)
   and each answer stays up for its `PACE` before the session lets the next
   word come, so the server's round clock holds as it does for Comet Cards;
@@ -161,6 +167,7 @@ macos/                   the Dock app (build-app.sh, the launcher, the server he
   `web/shared/soundmachine/words.ts` and Rhyme Time's own words in
   `web/shared/rhymetime/words.ts` (its others are Sound Machine's clips),
   and Sight Word Sprint's in `web/shared/sightwords/words.ts`,
+  and Word Families' endings and own words in `web/shared/wordfamilies/words.ts`,
   and records each recipe in the manifest. The key lives only in the environment; the app at run time
   fetches static files and calls nowhere. Read never says the whole word
   before the answer, plain or slow. Sound Machine and Rhyme Time will not
@@ -187,6 +194,17 @@ macos/                   the Dock app (build-app.sh, the launcher, the server he
   Arcade one with fewer look-alikes than it could show, up to three
   (`faultOf()`), and a test
   deals every word on every level and skill.
+- **Word Families shows the ending and asks the first sound**: a word is
+  said, and one tap on a tile is the answer. A tile makes one sound (Sound
+  Machine's), and a tray never has two of one sound: k before e and i, c
+  elsewhere (`onsetsFor()`), and never a tile that with the ending would
+  spell a word in `BLOCKED`; ch, sh and th are in a tray only on a level
+  that asks words starting with them. The server refuses an Easy tray with a tile
+  that sounds like the answer (`near()`) and an Arcade tray without every
+  one that does (`faultOf()`), and answers that are not two families of up
+  to four words, one after the other (`settle()`); a test deals every word on every level and
+  skill. It will not start with the sound off. A word another game says is
+  said with that game's clip; only its endings and own words are made for it.
 - **Letters to be read are lower case in `--font-letters`** (`.sm-letter`):
   the display face has no true small letters.
 - Each table is read and written by one module under `scripts/db/`, whose
@@ -219,7 +237,7 @@ npm test                    # node --test: shared rules, routes, database (PGlit
 npm run typecheck && npm run lint
 npm run db:generate -- --name <what_changed>   # after editing scripts/db/schema.ts; commit the SQL
 npm run pin:reset           # forget the grown-up PIN
-npm run speech:build        # make the missing clips of Sound Machine, Rhyme Time and Sight Word Sprint (AZURE_SPEECH_KEY and _REGION in the environment; ffmpeg)
+npm run speech:build        # make the missing clips of Sound Machine, Rhyme Time, Sight Word Sprint and Word Families (AZURE_SPEECH_KEY and _REGION in the environment; ffmpeg)
 npm run speech:check        # every clip is there (no key, no network)
 ```
 `ARCADE_LOCAL_ONLY=1 npm run dev` keeps the server to this machine.

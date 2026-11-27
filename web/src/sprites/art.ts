@@ -2400,6 +2400,53 @@ export const ART = {
     },
   },
   // A pine beside the trail. `far` is one a long way off, in the dusk.
+  house: {
+    rows: [
+      "................",
+      ".......rr.......",
+      "......rrrr..bb..",
+      ".....rrrrrr.bb..",
+      "....rrrrrrrrbb..",
+      "...rrrrrrrrrrr..",
+      "..rrrrrrrrrrrrr.",
+      ".rrrrrrrrrrrrrrr",
+      "..wwwwwwwwwwww..",
+      "..wyywwwwwwyyw..",
+      "..wyywwwwwwyyw..",
+      "..wwwwwddwwwww..",
+      "..wwwwwddwwwww..",
+      "..wwwwwdkwwwww..",
+      "..wwwwwddwwwww..",
+      ".gggggggggggggg.",
+    ],
+    palettes: {
+      default: { r: "#ff5a7a", b: "#a8703a", w: "#f2e6c8", y: "#2ff3e0", d: "#a8703a", k: INK, g: "#3fbf5a" },
+      gold: { r: "#ffd23f", b: "#b87a0c", w: "#fff3b0", y: "#ffffff", d: "#b87a0c", k: "#4a2f06", g: "#c98a1a" },
+    },
+  },
+  door: {
+    rows: [
+      "................",
+      "...kkkkkkkkkk...",
+      "...kddddddddk...",
+      "...kdyyddyydk...",
+      "...kdyyddyydk...",
+      "...kddddddddk...",
+      "...kddddddddk...",
+      "...kddddddyyk...",
+      "...kddddddyyk...",
+      "...kddddddddk...",
+      "...kdbbddbbdk...",
+      "...kdbbddbbdk...",
+      "...kdbbddbbdk...",
+      "...kddddddddk...",
+      "...kkkkkkkkkk...",
+      "..gggggggggggg..",
+    ],
+    palettes: {
+      default: { k: "#6b4420", d: "#c8823c", y: "#ffd23f", b: "#a8642c", g: "#3fbf5a" },
+    },
+  },
   pine: {
     rows: [
       ".......gg.......",

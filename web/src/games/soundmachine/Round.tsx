@@ -30,6 +30,10 @@ const QUICK = 0.02;
 const BREATH = 0.5;
 /** Split: how long a right word's gems take to fly to the tray once it has been said (ms). */
 const FLY_MS = 500;
+/** Build and Read, a right word: how long past its own saying the next word
+ *  still waits for a hear button's speech to end (ms). Longer than any clip;
+ *  a limit all the same, since a clip on a stopped audio context never ends. */
+const HEAR_WAIT_MS = 4_000;
 
 export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { level: SoundLevel; mode: Mode; skill: Skill; stats: Record<string, FactStat>; onDone: (answers: AnswerInput[]) => void; onQuit: () => void }) {
   const [s, send] = useReducer(advance, null, () => startSession(level, mode, skill, stats, seed()));
@@ -50,8 +54,21 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
 
   const next = () => send({ type: "next", now: performance.now(), seed: seed() });
 
-  /** Say the word's sounds in order, lighting each, then (if asked) the whole word. */
-  const soundOut = (word: Word, gap: number, whole: boolean) => say([...soundsOf(word), ...(whole ? [wholeOf(word)] : [])], { gap, onEach: (i) => setLit(i < word.tiles.length ? i : null) }).then(() => setLit(null));
+  /** Say the word's sounds in order, lighting each, then (if asked) the whole
+   *  word. The light goes out when this stops being said, by its end or by
+   *  being cut short, and so never puts out the light of what cut it. */
+  const soundOut = (word: Word, gap: number, whole: boolean) => say([...soundsOf(word), ...(whole ? [wholeOf(word)] : [])], { gap, onEach: (i) => setLit(i < word.tiles.length ? i : null), onStop: () => setLit(null) });
+
+  // The pause box (and the sound-off box, which pauses) stops the voice at
+  // once, whatever is on the machine: a word waiting changes phase and is
+  // hushed below, but an answer on show keeps its phase, and its reveal went
+  // on talking behind the box. `boxUp` is for what a reveal does later: it
+  // says nothing new, and lands no gems, while the box is open.
+  const boxUp = useRef(false);
+  useEffect(() => {
+    boxUp.current = s.wantPause;
+    if (s.wantPause) hush();
+  }, [s.wantPause]);
 
   // What follows each change of phase: a sound now, the next thing later.
   const follow = useEffectEvent(() => {
@@ -96,6 +113,8 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
               begun = true;
               settledAt = performance.now();
             };
+            // Paused before the reveal began: nothing is said behind the box.
+            if (boxUp.current) return settle();
             void say([...soundsOf(word), wholeOf(word)], {
               gap: SLOW,
               onEach: (i) => {
@@ -103,12 +122,15 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
                 setLitAt({ seq, tile: i < n ? i : null });
                 if (i < n) setGemAt({ seq, dropped: i + 1, flown: false });
               },
+              onStop: () => setLitAt({ seq, tile: null }),
             }).then(settle, settle);
           }, 320);
           later(
             () =>
               timers.push(
                 window.setInterval(() => {
+                  // Nothing lands (and nothing pings) behind the pause box.
+                  if (boxUp.current) return;
                   // Speech heard is the reveal begun, even if a hear button cut it
                   // short before its first clip's onEach came.
                   const talking = speaking();
@@ -128,11 +150,26 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
         }
         // The word again, sound by sound and then whole, at its own pace.
         const word = s.word;
-        let said = !word;
-        later(() => word && void soundOut(word, SLOW, true).then(() => (said = true)), 320);
+        let saidAt: number | null = word ? null : performance.now();
+        const said = () => (saidAt = performance.now());
+        later(() => {
+          if (!word || boxUp.current) said();
+          else void soundOut(word, SLOW, true).then(said, said);
+        }, 320);
         // The session lets the next word come once this one has had its time,
-        // and the machine waits until it has finished saying it; ask until both.
-        later(() => timers.push(window.setInterval(() => said && next(), 100)), PACE.right);
+        // and the machine waits until it has finished saying it; ask until
+        // both. And until nothing else is being said: a hear button pressed
+        // late in the reveal is heard out (the next word's hush would cut
+        // it), but not for longer than HEAR_WAIT_MS.
+        later(
+          () =>
+            timers.push(
+              window.setInterval(() => {
+                if (saidAt !== null && (!speaking() || performance.now() - saidAt >= HEAR_WAIT_MS)) next();
+              }, 100),
+            ),
+          PACE.right,
+        );
         break;
       }
       case "wrong": {
@@ -142,7 +179,10 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
         const word = s.word;
         const seq = s.seq;
         let said = !word;
-        later(() => word && void soundOut(word, SLOW, true).then(() => (said = true)), 380);
+        later(() => {
+          if (!word || boxUp.current) said = true;
+          else void soundOut(word, SLOW, true).then(() => (said = true));
+        }, 380);
         later(
           () =>
             timers.push(
@@ -195,7 +235,10 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
     if (ev.key === "Enter" && byKeys.current && ev.target instanceof HTMLButtonElement && !ev.target.disabled) return;
     if (ev.key === "Escape") send({ type: "toggle", now: performance.now() });
     else if (ev.key === "Enter" && s.phase === "wrong" && mayGo && !s.wantPause) next();
-    else if (ev.key === "Enter" && s.phase === "ask" && mode !== "read") send({ type: "go", now: performance.now() });
+    // Only when the lever will work. When it will not, the key is left alone:
+    // swallowed, Enter on a button that has focus without a Tab (the pause
+    // button) did nothing at all.
+    else if (ev.key === "Enter" && (mode === "build" ? s.phase === "ask" && full(s) : cutEnough(s))) send({ type: "go", now: performance.now() });
     else return;
     ev.preventDefault();
   });
@@ -391,7 +434,7 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
           <div className="sm-read" data-word={word.id}>
             <div className="sm-word" role="group" aria-label="The word, one sound at a time">
               {word.tiles.map((tile, i) => (
-                <button key={i} type="button" className="sm-sound" data-lit={lit === i} data-state={state} aria-label={`Hear the sound ${tile}`} onClick={() => void say([clipUrl(tileClip(tile))], { onEach: () => setLit(i) }).then(() => setLit(null))}>
+                <button key={i} type="button" className="sm-sound" data-lit={lit === i} data-state={state} aria-label={`Hear the sound ${tile}`} onClick={() => void say([clipUrl(tileClip(tile))], { onEach: () => setLit(i), onStop: () => setLit(null) })}>
                   <span className="sm-letter">{tile}</span>
                   <Sprite id="speaker" size={24} />
                 </button>
@@ -406,7 +449,7 @@ export function RoundScreen({ level, mode, skill, stats, onDone, onQuit }: { lev
                   // slow: that is the answer.
                   const n = word.tiles.length;
                   if (judged) void soundOut(word, SLOW, true);
-                  else void say([...soundsOf(word), ...soundsOf(word)], { gap: (i) => (i < n - 1 ? SLOW : i === n - 1 ? BREATH : QUICK), onEach: (i) => setLit(i % n) }).then(() => setLit(null));
+                  else void say([...soundsOf(word), ...soundsOf(word)], { gap: (i) => (i < n - 1 ? SLOW : i === n - 1 ? BREATH : QUICK), onEach: (i) => setLit(i % n), onStop: () => setLit(null) });
                 }}
               >
                 <Sprite id="blend" size={40} />

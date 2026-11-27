@@ -157,7 +157,7 @@ macos/                   the Dock app (build-app.sh, the launcher, the server he
   fetches static files and calls nowhere. Read never says the whole word
   before the answer, plain or slow. Sound Machine and Rhyme Time will not
   start with the sound off, by any way into a round. A new word hushes the
-  last one's speech. No clip is waited on without a limit, and only a Build
+  last one's speech, and so does the pause box, in any phase. No clip is waited on without a limit, and only a Build
   round's word clips and a Rhyme Time round's words can stop a round from
   starting.
 - **Rhyme Time writes no word before the answer**: pictures and voices

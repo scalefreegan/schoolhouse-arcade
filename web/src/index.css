@@ -63,6 +63,11 @@ html {
   /* A double tap is two answers, not a zoom. */
   touch-action: manipulation;
   -webkit-text-size-adjust: 100%;
+  /* A pull down at the top of the page is not a reload: a six-year-old's
+     swipe would restart the round. The browser takes this from the root
+     element (the same on body, below, no longer reaches the page's own
+     scroll in Chrome). */
+  overscroll-behavior: none;
 }
 
 body {
